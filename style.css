@@ -1,0 +1,131 @@
+:root {
+  --ui-font: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  --pixel-font: "Courier New", ui-monospace, monospace;
+  --panel-bg: rgba(18, 20, 26, 0.55);
+  --panel-border: rgba(255, 255, 255, 0.14);
+  --text: #f4f4f0;
+  --text-dim: #c9cbc4;
+  --accent: #7cc95a;
+  --accent-dark: #3f7f2c;
+  --slot-size: 56px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #a9d3f5;
+  color: var(--text);
+  font-family: var(--ui-font);
+  user-select: none;
+}
+
+.game-root,
+.game-root canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 0 0.35em;
+  margin: 0 0.1em;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  font-family: var(--pixel-font);
+  font-size: 0.85em;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+}
+
+.crosshair::before,
+.crosshair::after {
+  content: "";
+  position: absolute;
+  background: #fff;
+}
+
+.crosshair::before {
+  top: 10px;
+  left: 0;
+  width: 22px;
+  height: 2px;
+}
+
+.crosshair::after {
+  top: 0;
+  left: 10px;
+  width: 2px;
+  height: 22px;
+}
+
+.hud-panel {
+  position: absolute;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(4px);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.hud-top-left {
+  top: 12px;
+  left: 12px;
+  max-width: calc(100vw - 24px);
+}
+
+.fps {
+  font-family: var(--pixel-font);
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffe98a;
+}
+
+.help {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+
+@media (max-width: 560px) {
+  :root {
+    --slot-size: 46px;
+  }
+
+  .help {
+    display: none;
+  }
+}

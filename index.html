@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minecraft Web Demo</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="styles/hotbar.css">
+  <link rel="stylesheet" href="styles/menu.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="game-root" class="game-root"></div>
+
+  <div id="hud" class="hud">
+    <div class="crosshair" aria-hidden="true"></div>
+    <div class="hud-panel hud-top-left">
+      <div id="fps" class="fps">FPS: --</div>
+      <div class="help">
+        <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mover</span>
+        <span><kbd>Espaço</kbd> pular</span>
+        <span><kbd>Mouse</kbd> olhar</span>
+        <span><kbd>Esq.</kbd> quebrar · <kbd>Dir.</kbd> colocar</span>
+        <span><kbd>1</kbd>–<kbd>5</kbd> / roda: bloco</span>
+        <span><kbd>Esc</kbd> menu</span>
+      </div>
+    </div>
+    <div class="hotbar-area">
+      <div id="selected-block" class="selected-block">Grass</div>
+      <div id="hotbar" class="hotbar"></div>
+    </div>
+  </div>
+
+  <div id="start-screen" class="overlay">
+    <div class="menu-panel">
+      <h1 class="menu-title">Minecraft Web Demo</h1>
+      <p class="menu-subtitle">Uma pequena demonstração voxel no navegador</p>
+      <button id="play-button" class="play-button" type="button" disabled>Play</button>
+      <p id="start-status" class="menu-status">Carregando…</p>
+      <ul class="menu-controls">
+        <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mover</li>
+        <li><kbd>Espaço</kbd> pular</li>
+        <li><kbd>Clique esq.</kbd> quebrar bloco</li>
+        <li><kbd>Clique dir.</kbd> colocar bloco</li>
+        <li><kbd>1</kbd>–<kbd>5</kbd> escolher bloco</li>
+        <li><kbd>Esc</kbd> voltar ao menu</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>
