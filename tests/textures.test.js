@@ -43,6 +43,13 @@ test('furos das folhas mantêm cor de folha para não escurecer o filtro', () =>
   }
 });
 
+test('areia é amarelada e neve é quase branca', () => {
+  const [sandR, sandG, sandB] = averageColor(paintTile(Tile.SAND));
+  const [snowR, snowG, snowB] = averageColor(paintTile(Tile.SNOW));
+  assert.ok(sandR > sandB + 40 && sandG > sandB + 25);
+  assert.ok(Math.min(snowR, snowG, snowB) > 215);
+});
+
 test('tiles são determinísticos e visualmente distintos', () => {
   assert.deepEqual(paintTile(Tile.DIRT), paintTile(Tile.DIRT));
   const [grassR, grassG] = averageColor(paintTile(Tile.GRASS_TOP));

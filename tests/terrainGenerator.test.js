@@ -3,21 +3,25 @@ import assert from 'node:assert/strict';
 import { createRandom } from '../src/core/random.js';
 import { createNoise2D } from '../src/core/noise.js';
 import { BlockType } from '../src/world/blockTypes.js';
-import { TERRAIN_SETTINGS, columnBlockAt, fillColumn, surfaceHeight } from '../src/world/terrainGenerator.js';
+import { columnBlockAt, fillColumn, surfaceHeight } from '../src/world/terrainGenerator.js';
 import { createEmptyWorld } from './helpers.js';
 
-test('columnBlockAt empilha grama, terra e pedra', () => {
+const GRASSLAND = Object.freeze({ top: BlockType.GRASS, filler: BlockType.DIRT, fillerDepth: 3 });
+
+test('columnBlockAt empilha topo, camada de preenchimento e pedra', () => {
   const surface = 20;
-  assert.equal(columnBlockAt(21, surface), BlockType.AIR);
-  assert.equal(columnBlockAt(20, surface), BlockType.GRASS);
-  assert.equal(columnBlockAt(19, surface), BlockType.DIRT);
-  assert.equal(columnBlockAt(20 - TERRAIN_SETTINGS.dirtDepth, surface), BlockType.DIRT);
-  assert.equal(columnBlockAt(20 - TERRAIN_SETTINGS.dirtDepth - 1, surface), BlockType.STONE);
+  assert.equal(columnBlockAt(21, surface, GRASSLAND), BlockType.AIR);
+  assert.equal(columnBlockAt(20, surface, GRASSLAND), BlockType.GRASS);
+  assert.equal(columnBlockAt(19, surface, GRASSLAND), BlockType.DIRT);
+  assert.equal(columnBlockAt(17, surface, GRASSLAND), BlockType.DIRT);
+  assert.equal(columnBlockAt(16, surface, GRASSLAND), BlockType.STONE);
 });
 
-test('columnBlockAt gera picos rochosos acima da linha de rocha', () => {
-  const surface = TERRAIN_SETTINGS.rockLine + 2;
-  assert.equal(columnBlockAt(surface, surface), BlockType.STONE);
+test('columnBlockAt respeita outras camadas de superfície', () => {
+  const desert = { top: BlockType.SAND, filler: BlockType.SAND, fillerDepth: 3 };
+  assert.equal(columnBlockAt(20, 20, desert), BlockType.SAND);
+  assert.equal(columnBlockAt(18, 20, desert), BlockType.SAND);
+  assert.equal(columnBlockAt(10, 20, desert), BlockType.STONE);
 });
 
 test('surfaceHeight respeita os limites e varia pelo terreno', () => {
@@ -34,7 +38,7 @@ test('surfaceHeight respeita os limites e varia pelo terreno', () => {
 
 test('fillColumn preenche a coluna até a superfície', () => {
   const world = createEmptyWorld({ height: 32 });
-  fillColumn(world, 5, 7, 20);
+  fillColumn(world, 5, 7, 20, GRASSLAND);
   assert.equal(world.findSurfaceY(5, 7), 20);
   assert.equal(world.getBlock(5, 20, 7), BlockType.GRASS);
   assert.equal(world.getBlock(5, 0, 7), BlockType.STONE);

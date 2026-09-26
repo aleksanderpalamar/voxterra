@@ -5,8 +5,7 @@ import { TREE_SETTINGS, placeTree, treeInCell, treesInArea } from '../src/world/
 import { createEmptyWorld } from './helpers.js';
 
 const flatTerrain = (height, fertile = true) => ({
-  surfaceHeightAt: () => height,
-  isFertile: () => fertile,
+  plantableGround: () => (fertile ? height : null),
 });
 
 test('placeTree cria tronco de madeira e copa de folhas', () => {

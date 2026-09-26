@@ -25,3 +25,7 @@ test('teclas numéricas selecionam slots válidos da hotbar', () => {
   assert.equal(hotbarSlotFromKey('Digit0', 5), null);
   assert.equal(hotbarSlotFromKey('KeyW', 5), null);
 });
+
+test('F3 é a tecla do painel de depuração', () => {
+  assert.equal(KeyBinding.DEBUG, 'F3');
+});

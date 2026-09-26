@@ -19,6 +19,7 @@ No build step, no bundler and no runtime dependencies besides [Three.js](https:/
 ### Features
 
 - **Infinite procedural world**: rolling hills, rocky peaks and trees generated chunk by chunk from a seed (Perlin noise with fractal octaves).
+- **Biomes**: temperature and humidity maps shape eight land biomes (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest and Mountains), with sand dunes, snowfields, snowy peaks and irregular borders between them.
 - **Chunk streaming**: chunks are generated around the player and unloaded when they fall behind.
 - **Web Workers**: terrain generation and meshing run off the main thread, so new terrain appears without stutters.
 - **Voxel rendering**: face-culled chunk meshes, per-vertex ambient occlusion, see-through leaves and textures painted by code (no image assets).
@@ -53,6 +54,7 @@ To start a new world from a specific seed, open `http://localhost:8000/?seed=123
 | Left click | Break block |
 | Right click | Place block |
 | `1`–`5` or mouse wheel | Choose block |
+| `F3` | Toggle the debug panel (position, chunk, biome and climate) |
 | `Esc` | Pause and open the menu |
 
 ### Saving
@@ -114,6 +116,7 @@ Sem etapa de build, sem bundler e sem dependências além do [Three.js](https://
 ### Funcionalidades
 
 - **Mundo procedural infinito**: colinas, picos rochosos e árvores gerados chunk a chunk a partir de uma seed (ruído Perlin com oitavas fractais).
+- **Biomas**: mapas de temperatura e umidade formam oito biomas terrestres (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest e Mountains), com dunas de areia, campos de neve, picos nevados e fronteiras irregulares entre eles.
 - **Streaming de chunks**: os chunks são gerados em volta do jogador e descarregados quando ficam para trás.
 - **Web Workers**: a geração do terreno e a montagem das malhas rodam fora da thread principal, então o terreno novo aparece sem engasgos.
 - **Renderização voxel**: malhas por chunk só com as faces visíveis, oclusão ambiente por vértice, folhas vazadas e texturas pintadas por código (sem imagens).
@@ -146,6 +149,7 @@ Para começar um mundo novo a partir de uma seed específica, abra `http://local
 | Clique esquerdo | Quebrar bloco |
 | Clique direito | Colocar bloco |
 | `1`–`5` ou roda do mouse | Escolher bloco |
+| `F3` | Mostrar ou ocultar o painel de depuração (posição, chunk, bioma e clima) |
 | `Esc` | Pausar e abrir o menu |
 
 ### Salvamento

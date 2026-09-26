@@ -104,6 +104,16 @@ kbd {
   max-width: calc(100vw - 24px);
 }
 
+.debug-panel {
+  top: 12px;
+  right: 12px;
+  font-family: var(--pixel-font);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+  white-space: pre;
+}
+
 .fps {
   font-family: var(--pixel-font);
   font-size: 15px;

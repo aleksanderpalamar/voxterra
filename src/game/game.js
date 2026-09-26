@@ -1,7 +1,7 @@
 import { GameState } from './gameState.js';
 import { LockState } from '../input/pointerLock.js';
 import { MouseButton } from '../input/mouseInput.js';
-import { IDLE_INTENT, hotbarSlotFromKey, readMovementIntent } from '../input/keyBindings.js';
+import { IDLE_INTENT, KeyBinding, hotbarSlotFromKey, readMovementIntent } from '../input/keyBindings.js';
 import { breakBlock, placeBlock } from '../interaction/blockInteraction.js';
 import { blockName } from '../world/blockTypes.js';
 import { MenuMode } from '../ui/startScreen.js';
@@ -35,6 +35,7 @@ export class Game {
     this.hotbarView = dependencies.hotbarView;
     this.startScreen = dependencies.startScreen;
     this.fpsCounter = dependencies.fpsCounter;
+    this.debugOverlay = dependencies.debugOverlay;
     this.autosave = dependencies.autosave;
     this.menuMode = dependencies.menuMode;
     this.storageMode = dependencies.storageMode;
@@ -121,6 +122,10 @@ export class Game {
 
   handleKey(code) {
     if (this.state !== GameState.PLAYING) return;
+    if (code === KeyBinding.DEBUG) {
+      this.debugOverlay.toggle();
+      return;
+    }
     const slot = hotbarSlotFromKey(code, this.hotbar.size);
     if (slot === null) return;
     this.hotbar.select(slot);
@@ -163,6 +168,7 @@ export class Game {
     this.refreshTarget();
     this.view.update(dt, this.player, this.targeting.current);
     this.view.render();
+    this.debugOverlay.update(this.player.position);
     this.reportFps(elapsed);
   }
 

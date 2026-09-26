@@ -26,3 +26,10 @@ test('lookup reutiliza o mesmo retângulo para o mesmo tile', () => {
   const lookup = createTileUvLookup();
   assert.equal(lookup(BlockType.DIRT, FaceDirection.TOP), lookup(BlockType.DIRT, FaceDirection.LEFT));
 });
+
+test('areia e neve usam o mesmo tile em todas as faces', () => {
+  [FaceDirection.TOP, FaceDirection.BOTTOM, FaceDirection.LEFT].forEach((direction) => {
+    assert.equal(tileFor(BlockType.SAND, direction), Tile.SAND);
+    assert.equal(tileFor(BlockType.SNOW, direction), Tile.SNOW);
+  });
+});

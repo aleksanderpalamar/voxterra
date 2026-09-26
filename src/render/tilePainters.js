@@ -25,6 +25,11 @@ const Palette = Object.freeze({
   LEAVES: [58, 126, 46],
   LEAVES_DARK: [34, 86, 30],
   LEAVES_LIGHT: [88, 156, 62],
+  SAND: [222, 206, 150],
+  SAND_DARK: [196, 176, 120],
+  SAND_LIGHT: [238, 226, 180],
+  SNOW: [242, 246, 250],
+  SNOW_SHADE: [220, 230, 242],
 });
 
 function shade(color, factor) {
@@ -104,6 +109,22 @@ function leavesPainter(random) {
   };
 }
 
+function sandPainter(random) {
+  return () => {
+    const roll = random();
+    if (roll < 0.14) return jitter(Palette.SAND_DARK, random, 0.04);
+    if (roll < 0.24) return jitter(Palette.SAND_LIGHT, random, 0.03);
+    return jitter(Palette.SAND, random, 0.04);
+  };
+}
+
+function snowPainter(random) {
+  return () => {
+    if (random() < 0.16) return jitter(Palette.SNOW_SHADE, random, 0.02);
+    return jitter(Palette.SNOW, random, 0.015);
+  };
+}
+
 const TILE_PAINTERS = Object.freeze({
   [Tile.GRASS_TOP]: grassTopPainter,
   [Tile.GRASS_SIDE]: grassSidePainter,
@@ -112,6 +133,8 @@ const TILE_PAINTERS = Object.freeze({
   [Tile.WOOD_SIDE]: barkPainter,
   [Tile.WOOD_TOP]: woodTopPainter,
   [Tile.LEAVES]: leavesPainter,
+  [Tile.SAND]: sandPainter,
+  [Tile.SNOW]: snowPainter,
 });
 
 export function paintTile(tile, seed = DEFAULT_TEXTURE_SEED) {

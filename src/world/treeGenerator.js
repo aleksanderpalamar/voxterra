@@ -35,8 +35,8 @@ export function treeInCell(seed, cellX, cellZ, terrain, settings = TREE_SETTINGS
   const random = createRandom(hashCoordinates(seed, cellX, cellZ));
   const candidate = rollCandidate(random, cellX * settings.cellSize, cellZ * settings.cellSize, settings);
   if (candidate.roll > settings.chance) return null;
-  const groundY = terrain.surfaceHeightAt(candidate.x, candidate.z);
-  if (!terrain.isFertile(groundY)) return null;
+  const groundY = terrain.plantableGround(candidate.x, candidate.z);
+  if (groundY === null) return null;
   return { x: candidate.x, z: candidate.z, groundY, trunkHeight: candidate.trunkHeight };
 }
 

@@ -9,8 +9,6 @@ export const TERRAIN_SETTINGS = Object.freeze({
   mountainScale: 0.008,
   mountainAmplitude: 140,
   mountainOffset: 173.31,
-  dirtDepth: 3,
-  rockLine: 35,
 });
 
 export function sampleSurfaceHeight(noise, x, z, settings = TERRAIN_SETTINGS) {
@@ -26,16 +24,15 @@ export function surfaceHeight(noise, x, z, maxHeight, settings = TERRAIN_SETTING
   return Math.min(Math.max(height, 1), maxHeight);
 }
 
-export function columnBlockAt(y, surfaceY, settings = TERRAIN_SETTINGS) {
+export function columnBlockAt(y, surfaceY, surface) {
   if (y > surfaceY) return BlockType.AIR;
-  if (surfaceY >= settings.rockLine) return BlockType.STONE;
-  if (y === surfaceY) return BlockType.GRASS;
-  if (y >= surfaceY - settings.dirtDepth) return BlockType.DIRT;
+  if (y === surfaceY) return surface.top;
+  if (y >= surfaceY - surface.fillerDepth) return surface.filler;
   return BlockType.STONE;
 }
 
-export function fillColumn(target, x, z, surfaceY, settings = TERRAIN_SETTINGS) {
+export function fillColumn(target, x, z, surfaceY, surface) {
   for (let y = 0; y <= surfaceY; y++) {
-    target.setBlock(x, y, z, columnBlockAt(y, surfaceY, settings));
+    target.setBlock(x, y, z, columnBlockAt(y, surfaceY, surface));
   }
 }

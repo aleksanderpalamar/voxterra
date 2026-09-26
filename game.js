@@ -1,4 +1,5 @@
 import { ChunkedWorld } from './src/world/chunkedWorld.js';
+import { ChunkGenerator } from './src/world/chunkGenerator.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from './src/world/chunkLayout.js';
 import { ChunkStreamer, STREAMING_SETTINGS } from './src/world/chunkStreamer.js';
 import { PLACEABLE_BLOCKS } from './src/world/blockTypes.js';
@@ -20,6 +21,8 @@ import { createBlockIconFactory } from './src/hud/blockIcons.js';
 import { HotbarView } from './src/hud/hotbarView.js';
 import { HudView } from './src/hud/hudView.js';
 import { FpsCounter } from './src/hud/fpsCounter.js';
+import { DebugPanel } from './src/hud/debugPanel.js';
+import { DebugOverlay } from './src/hud/debugOverlay.js';
 import { MenuMode, StartScreen } from './src/ui/startScreen.js';
 import { Game } from './src/game/game.js';
 import { startGameLoop } from './src/game/gameLoop.js';
@@ -104,12 +107,14 @@ function createInput(canvas) {
   return { pointerLock, keyboard: new Keyboard(window), mouse: new MouseInput(document, isLocked) };
 }
 
-function createHud(tiles, hotbar) {
+function createHud(tiles, hotbar, seed) {
   const createIcon = createBlockIconFactory(document, tiles, TILE_SIZE);
+  const inspector = new ChunkGenerator(seed, WORLD_HEIGHT);
   return {
     hud: new HudView({ fps: requireElement('fps'), selectedBlock: requireElement('selected-block') }),
     hotbarView: new HotbarView(requireElement('hotbar'), document, hotbar.items, createIcon),
     fpsCounter: new FpsCounter(),
+    debugOverlay: new DebugOverlay(new DebugPanel(requireElement('debug-panel')), (x, z) => inspector.columnAt(x, z)),
   };
 }
 
@@ -145,7 +150,7 @@ async function buildGame(context, startScreen) {
     onError: reportError,
     targeting: new BlockTargeting(createTargetQuery(world)),
     ...createInput(context.canvas),
-    ...createHud(tiles, hotbar),
+    ...createHud(tiles, hotbar, seed),
   });
   game.start();
   startGameLoop(window, (elapsed) => game.frame(elapsed));

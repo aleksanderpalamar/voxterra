@@ -4,6 +4,7 @@ export const KeyBinding = Object.freeze({
   LEFT: 'KeyA',
   RIGHT: 'KeyD',
   JUMP: 'Space',
+  DEBUG: 'F3',
 });
 
 export const IDLE_INTENT = Object.freeze({ forward: 0, strafe: 0, jump: false });

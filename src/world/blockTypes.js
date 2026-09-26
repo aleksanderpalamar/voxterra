@@ -5,6 +5,8 @@ export const BlockType = Object.freeze({
   STONE: 3,
   WOOD: 4,
   LEAVES: 5,
+  SAND: 6,
+  SNOW: 7,
 });
 
 const BLOCK_NAMES = Object.freeze({
@@ -14,6 +16,8 @@ const BLOCK_NAMES = Object.freeze({
   [BlockType.STONE]: 'Stone',
   [BlockType.WOOD]: 'Wood',
   [BlockType.LEAVES]: 'Leaves',
+  [BlockType.SAND]: 'Sand',
+  [BlockType.SNOW]: 'Snow',
 });
 
 export const PLACEABLE_BLOCKS = Object.freeze([

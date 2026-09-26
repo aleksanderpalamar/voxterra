@@ -1,4 +1,4 @@
-const BLOCKED_DEFAULT_KEYS = new Set(['Space', 'ArrowUp', 'ArrowDown']);
+const BLOCKED_DEFAULT_KEYS = new Set(['Space', 'ArrowUp', 'ArrowDown', 'F3']);
 
 export class Keyboard {
   constructor(target) {

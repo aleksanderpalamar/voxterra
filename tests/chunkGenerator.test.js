@@ -90,3 +90,36 @@ test('árvores respeitam o espaçamento das células', () => {
     assert.ok(offsetX >= TREE_SETTINGS.margin && offsetX <= TREE_SETTINGS.cellSize - 1 - TREE_SETTINGS.margin);
   });
 });
+
+test('columnAt descreve altura, clima, bioma e camadas de superfície', () => {
+  const generator = new ChunkGenerator(12);
+  const column = generator.columnAt(40, -25);
+  assert.equal(column.surfaceY, generator.surfaceHeightAt(40, -25));
+  assert.ok(column.climate.temperature >= -1 && column.climate.temperature <= 1);
+  assert.equal(typeof column.biome, 'string');
+  assert.equal(typeof column.surface.top, 'number');
+});
+
+test('o bloco do topo de cada coluna gerada segue o bioma', () => {
+  const generator = new ChunkGenerator(31);
+  const world = loadChunks(generator, grid(-3, 3));
+  let checked = 0;
+  for (let z = -48; z < 64; z += 5) {
+    for (let x = -48; x < 64; x += 5) {
+      const column = generator.columnAt(x, z);
+      const top = world.getBlock(x, column.surfaceY, z);
+      if (top === BlockType.WOOD || top === BlockType.DIRT) continue;
+      assert.equal(top, column.surface.top, `coluna ${x},${z} (${column.biome})`);
+      checked += 1;
+    }
+  }
+  assert.ok(checked > 400);
+});
+
+test('árvores só nascem onde o terreno permite plantar', () => {
+  const generator = new ChunkGenerator(31);
+  const area = { minX: -200, minZ: -200, maxX: 200, maxZ: 200 };
+  const trees = treesInArea(generator.seed, area, generator);
+  assert.ok(trees.length > 0);
+  trees.forEach((tree) => assert.equal(generator.columnAt(tree.x, tree.z).surface.top, BlockType.GRASS));
+});
