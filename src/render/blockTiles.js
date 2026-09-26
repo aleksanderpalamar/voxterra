@@ -13,6 +13,7 @@ export const Tile = Object.freeze({
   SAND: 7,
   SNOW: 8,
   WATER: 9,
+  ICE: 10,
 });
 
 export const TILE_COUNT = Object.keys(Tile).length;
@@ -31,6 +32,7 @@ const BLOCK_TILES = Object.freeze({
   [BlockType.SAND]: uniformTiles(Tile.SAND),
   [BlockType.SNOW]: uniformTiles(Tile.SNOW),
   [BlockType.WATER]: uniformTiles(Tile.WATER),
+  [BlockType.ICE]: uniformTiles(Tile.ICE),
 });
 
 const MISSING_TILES = uniformTiles(Tile.STONE);

@@ -7,11 +7,11 @@ export function columnBlockAt(y, surfaceY, surface) {
   return BlockType.STONE;
 }
 
-export function fillColumn(target, x, z, surfaceY, surface, waterLevel) {
+export function fillColumn(target, x, z, surfaceY, surface, water) {
   for (let y = 0; y <= surfaceY; y++) {
     target.setBlock(x, y, z, columnBlockAt(y, surfaceY, surface));
   }
-  for (let y = surfaceY + 1; y <= waterLevel; y++) {
-    target.setBlock(x, y, z, BlockType.WATER);
+  for (let y = surfaceY + 1; y <= water.level; y++) {
+    target.setBlock(x, y, z, y === water.level ? water.surfaceBlock : BlockType.WATER);
   }
 }

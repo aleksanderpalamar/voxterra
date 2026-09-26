@@ -19,7 +19,7 @@ No build step, no bundler and no runtime dependencies besides [Three.js](https:/
 ### Features
 
 - **Infinite procedural world**: rolling hills, rocky peaks and trees generated chunk by chunk from a seed (Perlin noise with fractal octaves).
-- **Continents and oceans**: a continentalness map shapes oceans, coasts and inland terrain around a fixed sea level, with lakes wherever the land dips below it.
+- **Continents and oceans**: a continentalness map shapes oceans, coasts and inland terrain around a fixed sea level, with lakes wherever the land dips below it. Lakes have dirt and stone beds, and they freeze over in the tundra.
 - **Biomes**: temperature and humidity maps shape eight land biomes (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest and Mountains), plus Ocean and Beach, with sand dunes, snowfields, snowy peaks and irregular borders between them.
 - **Water**: a translucent fluid you can walk into and swim in, with buoyancy, slower movement and a separate underwater atmosphere (short blue fog, tint and no sky).
 - **Chunk streaming**: chunks are generated around the player and unloaded when they fall behind.
@@ -118,7 +118,7 @@ Sem etapa de build, sem bundler e sem dependências além do [Three.js](https://
 ### Funcionalidades
 
 - **Mundo procedural infinito**: colinas, picos rochosos e árvores gerados chunk a chunk a partir de uma seed (ruído Perlin com oitavas fractais).
-- **Continentes e oceanos**: um mapa de continentalidade molda oceanos, costas e interior em volta de um nível do mar fixo, com lagos onde o terreno fica abaixo dele.
+- **Continentes e oceanos**: um mapa de continentalidade molda oceanos, costas e interior em volta de um nível do mar fixo, com lagos onde o terreno fica abaixo dele. Os lagos têm fundo de terra e pedra e congelam na tundra.
 - **Biomas**: mapas de temperatura e umidade formam oito biomas terrestres (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest e Mountains), além de Ocean e Beach, com dunas de areia, campos de neve, picos nevados e fronteiras irregulares entre eles.
 - **Água**: um fluido translúcido em que você entra e nada, com flutuabilidade, movimento mais lento e uma atmosfera subaquática própria (névoa azul curta, tonalidade e sem céu).
 - **Streaming de chunks**: os chunks são gerados em volta do jogador e descarregados quando ficam para trás.

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BlockType } from '../src/world/blockTypes.js';
 import { Biome } from '../src/world/biomes.js';
-import { SNOW_LINE, surfaceLayers } from '../src/world/surfaceRules.js';
+import { SNOW_LINE, surfaceLayers, waterSurfaceBlock } from '../src/world/surfaceRules.js';
 import { SEA_LEVEL } from '../src/world/terrainShape.js';
 
 const temperate = { temperature: 0.1, humidity: 0 };
@@ -33,8 +33,22 @@ test('oceanos e praias são de areia', () => {
   assert.equal(surfaceLayers(Biome.BEACH, temperate, SEA_LEVEL + 1).top, BlockType.SAND);
 });
 
-test('o fundo de lagos é de areia mesmo em biomas de grama', () => {
-  const lakebed = surfaceLayers(Biome.FOREST, temperate, SEA_LEVEL - 3);
-  assert.equal(lakebed.top, BlockType.SAND);
-  assert.equal(surfaceLayers(Biome.FOREST, temperate, SEA_LEVEL).top, BlockType.GRASS);
+test('o fundo de lagos no interior mistura terra e pedra conforme a variação', () => {
+  [Biome.FOREST, Biome.PLAINS, Biome.TAIGA, Biome.TUNDRA, Biome.SAVANNA].forEach((biome) => {
+    assert.equal(surfaceLayers(biome, temperate, SEA_LEVEL - 3, -0.5).top, BlockType.DIRT);
+    assert.equal(surfaceLayers(biome, temperate, SEA_LEVEL - 3, 0.8).top, BlockType.STONE);
+  });
+  assert.equal(surfaceLayers(Biome.FOREST, temperate, SEA_LEVEL, 0.8).top, BlockType.GRASS);
+});
+
+test('oceanos continuam de areia e lagos no deserto viram oásis de areia', () => {
+  assert.equal(surfaceLayers(Biome.OCEAN, temperate, SEA_LEVEL - 8, 0.8).top, BlockType.SAND);
+  assert.equal(surfaceLayers(Biome.DESERT, temperate, SEA_LEVEL - 2, 0.8).top, BlockType.SAND);
+});
+
+test('a água congela na superfície apenas na tundra', () => {
+  assert.equal(waterSurfaceBlock(Biome.TUNDRA), BlockType.ICE);
+  [Biome.FOREST, Biome.TAIGA, Biome.OCEAN, Biome.DESERT].forEach((biome) => {
+    assert.equal(waterSurfaceBlock(biome), BlockType.WATER);
+  });
 });

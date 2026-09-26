@@ -5,10 +5,19 @@ import { fillColumn } from './terrainGenerator.js';
 import { SEA_LEVEL, TerrainShaper } from './terrainShape.js';
 import { placeTree, treesInArea } from './treeGenerator.js';
 import { ClimateSampler } from './climate.js';
-import { resolveBiome, withinBeachBand } from './biomes.js';
-import { surfaceLayers } from './surfaceRules.js';
+import { mayBeBeach, resolveBiome } from './biomes.js';
+import { surfaceLayers, waterSurfaceBlock } from './surfaceRules.js';
+import { createNoiseField } from './noiseField.js';
 
 const CEILING_MARGIN = 10;
+const SURFACE_VARIATION = Object.freeze({
+  salt: 0x5ab1,
+  scale: 1 / 7,
+  octaves: 2,
+  gain: 1.8,
+  detailScale: 1 / 2.5,
+  detailAmplitude: 0.25,
+});
 const SHORE_SAMPLES = Object.freeze([
   [2, 0], [-2, 0], [0, 2], [0, -2],
   [4, 0], [-4, 0], [0, 4], [0, -4],
@@ -21,6 +30,7 @@ export class ChunkGenerator {
     this.height = height;
     this.shaper = new TerrainShaper(seed, height - CEILING_MARGIN);
     this.climate = new ClimateSampler(seed);
+    this.variationAt = createNoiseField(seed, SURFACE_VARIATION);
   }
 
   surfaceHeightAt(x, z) {
@@ -31,9 +41,11 @@ export class ChunkGenerator {
     const continentalness = this.shaper.continentalnessAt(x, z);
     const surfaceY = this.shaper.heightAt(x, z, continentalness);
     const climate = this.climate.sample(x, z);
-    const besideWater = withinBeachBand(surfaceY) && this.hasWaterNearby(x, z, surfaceY);
+    const besideWater = mayBeBeach(surfaceY, continentalness) && this.hasWaterNearby(x, z, surfaceY);
     const biome = resolveBiome({ ...climate, surfaceY, continentalness, besideWater });
-    return { surfaceY, continentalness, climate, biome, surface: surfaceLayers(biome, climate, surfaceY) };
+    const variation = surfaceY < SEA_LEVEL ? this.variationAt(x, z) : 0;
+    const surface = surfaceLayers(biome, climate, surfaceY, variation);
+    return { surfaceY, continentalness, climate, biome, surface, waterSurface: waterSurfaceBlock(biome) };
   }
 
   hasWaterNearby(x, z, surfaceY) {
@@ -59,7 +71,7 @@ export class ChunkGenerator {
         const x = chunk.originX + localX;
         const z = chunk.originZ + localZ;
         const column = this.columnAt(x, z);
-        fillColumn(chunk, x, z, column.surfaceY, column.surface, SEA_LEVEL);
+        fillColumn(chunk, x, z, column.surfaceY, column.surface, { level: SEA_LEVEL, surfaceBlock: column.waterSurface });
       }
     }
   }

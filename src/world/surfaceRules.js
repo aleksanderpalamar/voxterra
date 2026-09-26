@@ -6,6 +6,7 @@ export const SNOW_LINE = 48;
 
 const SNOWY_PEAK_TEMPERATURE = 0.1;
 const FILLER_DEPTH = 3;
+const LAKEBED_STONE_THRESHOLD = 0.2;
 
 function layers(top, filler, fillerDepth = FILLER_DEPTH) {
   return Object.freeze({ top, filler, fillerDepth });
@@ -16,11 +17,12 @@ const DUNES = layers(BlockType.SAND, BlockType.SAND);
 const SNOWFIELD = layers(BlockType.SNOW, BlockType.DIRT);
 const BARE_ROCK = layers(BlockType.STONE, BlockType.STONE, 0);
 const SNOWY_ROCK = layers(BlockType.SNOW, BlockType.STONE, 0);
+const MUDDY_BED = layers(BlockType.DIRT, BlockType.DIRT, 2);
+const ROCKY_BED = layers(BlockType.STONE, BlockType.STONE, 0);
+
+const SANDY_BIOMES = new Set([Biome.OCEAN, Biome.BEACH, Biome.DESERT]);
 
 const BIOME_SURFACES = Object.freeze({
-  [Biome.OCEAN]: DUNES,
-  [Biome.BEACH]: DUNES,
-  [Biome.DESERT]: DUNES,
   [Biome.TUNDRA]: SNOWFIELD,
 });
 
@@ -29,8 +31,17 @@ function mountainSurface(climate, surfaceY) {
   return snowy ? SNOWY_ROCK : BARE_ROCK;
 }
 
-export function surfaceLayers(biome, climate, surfaceY) {
+function lakebed(variation) {
+  return variation > LAKEBED_STONE_THRESHOLD ? ROCKY_BED : MUDDY_BED;
+}
+
+export function surfaceLayers(biome, climate, surfaceY, variation = 0) {
   if (biome === Biome.MOUNTAINS) return mountainSurface(climate, surfaceY);
-  if (surfaceY < SEA_LEVEL) return DUNES;
+  if (SANDY_BIOMES.has(biome)) return DUNES;
+  if (surfaceY < SEA_LEVEL) return lakebed(variation);
   return BIOME_SURFACES[biome] ?? GRASSLAND;
+}
+
+export function waterSurfaceBlock(biome) {
+  return biome === Biome.TUNDRA ? BlockType.ICE : BlockType.WATER;
 }

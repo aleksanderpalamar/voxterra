@@ -137,8 +137,9 @@ test('colunas abaixo do nível do mar ficam cobertas de água até o nível do m
         continue;
       }
       underwater += 1;
-      assert.equal(world.getBlock(x, surfaceY + 1, z), BlockType.WATER);
-      assert.equal(world.getBlock(x, SEA_LEVEL, z), BlockType.WATER);
+      const liquid = surfaceY + 1 === SEA_LEVEL ? [BlockType.WATER, BlockType.ICE] : [BlockType.WATER];
+      assert.ok(liquid.includes(world.getBlock(x, surfaceY + 1, z)));
+      assert.ok([BlockType.WATER, BlockType.ICE].includes(world.getBlock(x, SEA_LEVEL, z)));
       assert.equal(world.getBlock(x, SEA_LEVEL + 1, z), BlockType.AIR);
     }
   }
@@ -168,4 +169,34 @@ test('toda praia gerada tem água a poucos blocos', () => {
     }
   }
   assert.ok(beaches > 0);
+});
+
+function scanLakes(seed, visit) {
+  const generator = new ChunkGenerator(seed);
+  for (let z = -1500; z < 1500; z += 7) {
+    for (let x = -1500; x < 1500; x += 7) {
+      const column = generator.columnAt(x, z);
+      if (column.surfaceY >= SEA_LEVEL || column.biome === 'ocean' || column.biome === 'beach') continue;
+      visit(column, x, z, generator);
+    }
+  }
+}
+
+test('lagos no interior têm fundo de terra e pedra, sem areia fora do deserto', () => {
+  const beds = new Set();
+  scanLakes(11, (column) => {
+    if (column.biome === 'desert') return;
+    beds.add(column.surface.top);
+  });
+  assert.deepEqual([...beds].sort(), [BlockType.DIRT, BlockType.STONE].sort());
+});
+
+test('lagos na tundra ficam congelados na superfície', () => {
+  let frozen = 0;
+  scanLakes(11, (column) => {
+    if (column.biome !== 'tundra') return;
+    assert.equal(column.waterSurface, BlockType.ICE);
+    frozen += 1;
+  });
+  assert.ok(frozen > 0, 'nenhum lago de tundra encontrado na região');
 });

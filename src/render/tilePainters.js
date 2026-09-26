@@ -33,6 +33,9 @@ const Palette = Object.freeze({
   WATER: [40, 88, 178],
   WATER_LIGHT: [66, 118, 204],
   WATER_DARK: [32, 72, 156],
+  ICE: [176, 210, 242],
+  ICE_LIGHT: [222, 238, 252],
+  ICE_DARK: [150, 188, 228],
 });
 
 function shade(color, factor) {
@@ -138,6 +141,15 @@ function waterPainter(random) {
   };
 }
 
+function icePainter(random) {
+  const crack = Array.from({ length: TILE_SIZE }, () => Math.floor(random() * TILE_SIZE));
+  return (x, y) => {
+    if (crack[x] === y) return jitter(Palette.ICE_LIGHT, random, 0.02);
+    if (random() < 0.12) return jitter(Palette.ICE_DARK, random, 0.02);
+    return jitter(Palette.ICE, random, 0.03);
+  };
+}
+
 const TILE_PAINTERS = Object.freeze({
   [Tile.GRASS_TOP]: grassTopPainter,
   [Tile.GRASS_SIDE]: grassSidePainter,
@@ -149,6 +161,7 @@ const TILE_PAINTERS = Object.freeze({
   [Tile.SAND]: sandPainter,
   [Tile.SNOW]: snowPainter,
   [Tile.WATER]: waterPainter,
+  [Tile.ICE]: icePainter,
 });
 
 export function paintTile(tile, seed = DEFAULT_TEXTURE_SEED) {

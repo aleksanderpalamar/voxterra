@@ -24,7 +24,7 @@ test('columnBlockAt respeita outras camadas de superfície', () => {
 
 test('fillColumn preenche a coluna até a superfície', () => {
   const world = createEmptyWorld({ height: 32 });
-  fillColumn(world, 5, 7, 20, GRASSLAND, 10);
+  fillColumn(world, 5, 7, 20, GRASSLAND, { level: 10, surfaceBlock: BlockType.WATER });
   assert.equal(world.findSurfaceY(5, 7), 20);
   assert.equal(world.getBlock(5, 20, 7), BlockType.GRASS);
   assert.equal(world.getBlock(5, 0, 7), BlockType.STONE);
@@ -33,8 +33,15 @@ test('fillColumn preenche a coluna até a superfície', () => {
 
 test('fillColumn enche de água o espaço entre a superfície e o nível do mar', () => {
   const world = createEmptyWorld({ height: 32 });
-  fillColumn(world, 2, 2, 12, GRASSLAND, 15);
+  fillColumn(world, 2, 2, 12, GRASSLAND, { level: 15, surfaceBlock: BlockType.WATER });
   assert.equal(world.getBlock(2, 12, 2), BlockType.GRASS);
   [13, 14, 15].forEach((y) => assert.equal(world.getBlock(2, y, 2), BlockType.WATER));
   assert.equal(world.getBlock(2, 16, 2), BlockType.AIR);
+});
+
+test('fillColumn usa o bloco de superfície da água no topo, como gelo', () => {
+  const world = createEmptyWorld({ height: 32 });
+  fillColumn(world, 2, 2, 12, GRASSLAND, { level: 15, surfaceBlock: BlockType.ICE });
+  [13, 14].forEach((y) => assert.equal(world.getBlock(2, y, 2), BlockType.WATER));
+  assert.equal(world.getBlock(2, 15, 2), BlockType.ICE);
 });

@@ -8,6 +8,7 @@ export const BlockType = Object.freeze({
   SAND: 6,
   SNOW: 7,
   WATER: 8,
+  ICE: 9,
 });
 
 export const RenderLayer = Object.freeze({
@@ -31,6 +32,7 @@ const BLOCK_NAMES = Object.freeze({
   [BlockType.SAND]: 'Sand',
   [BlockType.SNOW]: 'Snow',
   [BlockType.WATER]: 'Water',
+  [BlockType.ICE]: 'Ice',
 });
 
 const SOLID_BLOCK = Object.freeze({

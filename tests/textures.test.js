@@ -55,6 +55,11 @@ test('água é azulada', () => {
   assert.ok(blue > red + 60 && blue > green + 30);
 });
 
+test('gelo é azul-claro', () => {
+  const [red, green, blue] = averageColor(paintTile(Tile.ICE));
+  assert.ok(blue > red + 20 && blue > 200 && red > 150);
+});
+
 test('tiles são determinísticos e visualmente distintos', () => {
   assert.deepEqual(paintTile(Tile.DIRT), paintTile(Tile.DIRT));
   const [grassR, grassG] = averageColor(paintTile(Tile.GRASS_TOP));

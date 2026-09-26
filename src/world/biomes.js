@@ -29,6 +29,7 @@ const BIOME_NAMES = Object.freeze({
 });
 
 const OCEAN_LIMIT = -0.05;
+const COAST_LIMIT = 0.02;
 const BEACH_DEPTH = 1;
 const BEACH_HEIGHT = 1;
 
@@ -55,8 +56,12 @@ export function withinBeachBand(surfaceY) {
   return surfaceY >= SEA_LEVEL - BEACH_DEPTH && surfaceY <= SEA_LEVEL + BEACH_HEIGHT;
 }
 
+export function mayBeBeach(surfaceY, continentalness) {
+  return continentalness < COAST_LIMIT && withinBeachBand(surfaceY);
+}
+
 export function resolveBiome({ temperature, humidity, surfaceY, continentalness, besideWater = false }) {
-  if (besideWater && withinBeachBand(surfaceY)) return Biome.BEACH;
+  if (besideWater && mayBeBeach(surfaceY, continentalness)) return Biome.BEACH;
   if (surfaceY < SEA_LEVEL && continentalness < OCEAN_LIMIT) return Biome.OCEAN;
   if (surfaceY >= MOUNTAIN_LINE) return Biome.MOUNTAINS;
   const rule = CLIMATE_RULES.find((candidate) => withinRange(temperature, candidate.temperature)

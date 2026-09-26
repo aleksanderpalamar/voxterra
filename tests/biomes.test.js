@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Biome, MOUNTAIN_LINE, biomeName, resolveBiome, withinBeachBand } from '../src/world/biomes.js';
+import { Biome, MOUNTAIN_LINE, biomeName, mayBeBeach, resolveBiome, withinBeachBand } from '../src/world/biomes.js';
 import { SEA_LEVEL } from '../src/world/terrainShape.js';
 
 const lowland = MOUNTAIN_LINE - 5;
@@ -71,4 +71,15 @@ test('withinBeachBand delimita a faixa de altura das praias', () => {
 test('lagos no interior mantêm o bioma do clima', () => {
   const lake = resolveBiome({ temperature: 0.1, humidity: 0.6, surfaceY: SEA_LEVEL - 4, continentalness: 0.7 });
   assert.equal(lake, Biome.FOREST);
+});
+
+test('margens de lagos no interior mantêm o bioma do clima', () => {
+  const climate = { temperature: 0.1, humidity: 0.6 };
+  assert.equal(resolveBiome({ ...climate, surfaceY: SEA_LEVEL, continentalness: 0.4, besideWater: true }), Biome.FOREST);
+});
+
+test('mayBeBeach exige costa marítima e altura de praia', () => {
+  assert.equal(mayBeBeach(SEA_LEVEL, -0.03), true);
+  assert.equal(mayBeBeach(SEA_LEVEL, 0.4), false);
+  assert.equal(mayBeBeach(SEA_LEVEL + 3, -0.03), false);
 });

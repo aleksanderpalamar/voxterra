@@ -49,3 +49,9 @@ test('ar é substituível e blocos comuns não', () => {
   assert.equal(renderLayerOf(BlockType.LEAVES), RenderLayer.SOLID);
   assert.equal(mediumOf(BlockType.STONE), Medium.AIR);
 });
+
+test('gelo é sólido, opaco e tem nome', () => {
+  assert.equal(isSolidBlock(BlockType.ICE), true);
+  assert.equal(isOpaqueBlock(BlockType.ICE), true);
+  assert.equal(blockName(BlockType.ICE), 'Ice');
+});
