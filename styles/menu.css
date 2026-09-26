@@ -110,6 +110,34 @@
   outline-offset: 3px;
 }
 
+.coming-soon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.coming-soon:disabled {
+  opacity: 1;
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(244, 244, 240, 0.38);
+  cursor: not-allowed;
+}
+
+.soon-tag {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #ffe98a;
+  color: #2b2716;
+  font-family: var(--ui-font);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .menu-status {
   min-height: 1.4em;
   margin: 14px 0 18px;
