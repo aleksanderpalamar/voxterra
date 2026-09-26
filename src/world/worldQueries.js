@@ -2,7 +2,7 @@ import { isOpaqueBlock, isSolidBlock } from './blockTypes.js';
 
 export function createCollisionQuery(world) {
   return (x, y, z) => {
-    if (y >= world.sizeY) return false;
+    if (y >= world.height) return false;
     if (!world.contains(x, y, z)) return true;
     return isSolidBlock(world.getBlock(x, y, z));
   };

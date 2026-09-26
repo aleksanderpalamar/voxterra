@@ -3,13 +3,8 @@ import assert from 'node:assert/strict';
 import { createRandom } from '../src/core/random.js';
 import { createNoise2D } from '../src/core/noise.js';
 import { BlockType } from '../src/world/blockTypes.js';
-import { World } from '../src/world/world.js';
-import {
-  TERRAIN_SETTINGS,
-  columnBlockAt,
-  createHeightMap,
-  fillTerrain,
-} from '../src/world/terrainGenerator.js';
+import { TERRAIN_SETTINGS, columnBlockAt, fillColumn, surfaceHeight } from '../src/world/terrainGenerator.js';
+import { createEmptyWorld } from './helpers.js';
 
 test('columnBlockAt empilha grama, terra e pedra', () => {
   const surface = 20;
@@ -25,22 +20,23 @@ test('columnBlockAt gera picos rochosos acima da linha de rocha', () => {
   assert.equal(columnBlockAt(surface, surface), BlockType.STONE);
 });
 
-test('createHeightMap respeita os limites e não é plano', () => {
+test('surfaceHeight respeita os limites e varia pelo terreno', () => {
   const noise = createNoise2D(createRandom(42));
-  const heightMap = createHeightMap(noise, 64, 64, 40);
-  const heights = Array.from(heightMap.heights);
+  const heights = [];
+  for (let z = -64; z < 64; z += 4) {
+    for (let x = -64; x < 64; x += 4) heights.push(surfaceHeight(noise, x, z, 40));
+  }
   assert.ok(Math.min(...heights) >= 1);
   assert.ok(Math.max(...heights) <= 40);
   assert.ok(new Set(heights).size > 5);
+  assert.ok(heights.every(Number.isInteger));
 });
 
-test('fillTerrain preenche cada coluna até a altura da superfície', () => {
-  const noise = createNoise2D(createRandom(8));
-  const world = new World(16, 64, 16);
-  const heightMap = createHeightMap(noise, 16, 16, 50);
-  fillTerrain(world, heightMap);
-  const surface = heightMap.heightAt(5, 7);
-  assert.equal(world.findSurfaceY(5, 7), surface);
+test('fillColumn preenche a coluna até a superfície', () => {
+  const world = createEmptyWorld({ height: 32 });
+  fillColumn(world, 5, 7, 20);
+  assert.equal(world.findSurfaceY(5, 7), 20);
+  assert.equal(world.getBlock(5, 20, 7), BlockType.GRASS);
   assert.equal(world.getBlock(5, 0, 7), BlockType.STONE);
-  assert.equal(world.getBlock(5, surface + 1, 7), BlockType.AIR);
+  assert.equal(world.getBlock(5, 21, 7), BlockType.AIR);
 });

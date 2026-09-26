@@ -1,20 +1,13 @@
 import { BlockType } from './blockTypes.js';
-import { createRandom } from '../core/random.js';
-import { createNoise2D } from '../core/noise.js';
-import { createHeightMap, fillTerrain } from './terrainGenerator.js';
-import { planTrees, placeTree } from './treeGenerator.js';
 
-const CEILING_MARGIN = 10;
 const SPAWN_SEARCH_RADIUS = 12;
 
-export function generateWorld(world, seed) {
-  const random = createRandom(seed);
-  const noise = createNoise2D(random);
-  const heightMap = createHeightMap(noise, world.sizeX, world.sizeZ, world.sizeY - CEILING_MARGIN);
-  fillTerrain(world, heightMap);
-  const isFertile = (x, z) => world.getBlock(x, heightMap.heightAt(x, z), z) === BlockType.GRASS;
-  planTrees(random, heightMap, isFertile).forEach((tree) => placeTree(world, tree));
-  return heightMap;
+export function generateRegion(world, generator, region) {
+  for (let chunkZ = region.minChunkZ; chunkZ <= region.maxChunkZ; chunkZ++) {
+    for (let chunkX = region.minChunkX; chunkX <= region.maxChunkX; chunkX++) {
+      world.loadChunk(generator.generate(chunkX, chunkZ));
+    }
+  }
 }
 
 function spawnCandidates(centerX, centerZ, radius) {
@@ -36,11 +29,11 @@ function isGrassColumn(world, column) {
   return world.getBlock(column.x, surfaceY, column.z) === BlockType.GRASS;
 }
 
-export function findSpawnPoint(world) {
-  const centerX = Math.floor(world.sizeX / 2);
-  const centerZ = Math.floor(world.sizeZ / 2);
-  const column = spawnCandidates(centerX, centerZ, SPAWN_SEARCH_RADIUS)
-    .find((candidate) => isGrassColumn(world, candidate)) ?? { x: centerX, z: centerZ };
+export function findSpawnPoint(world, centerX, centerZ) {
+  const originX = Math.floor(centerX);
+  const originZ = Math.floor(centerZ);
+  const column = spawnCandidates(originX, originZ, SPAWN_SEARCH_RADIUS)
+    .find((candidate) => isGrassColumn(world, candidate)) ?? { x: originX, z: originZ };
   const surfaceY = world.findSurfaceY(column.x, column.z) ?? -1;
   return { x: column.x + 0.5, y: surfaceY + 1, z: column.z + 0.5 };
 }

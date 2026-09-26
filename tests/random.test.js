@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createRandom, randomInt } from '../src/core/random.js';
+import { createRandom, hashCoordinates, randomInt } from '../src/core/random.js';
 
 test('createRandom produz a mesma sequência para a mesma seed', () => {
   const a = createRandom(123);
@@ -33,4 +33,20 @@ test('randomInt respeita os limites inclusivos', () => {
     seen.add(value);
   }
   assert.deepEqual([...seen].sort(), [2, 3, 4]);
+});
+
+test('hashCoordinates é determinístico e sensível a cada coordenada', () => {
+  assert.equal(hashCoordinates(5, 10, -3), hashCoordinates(5, 10, -3));
+  const hashes = new Set();
+  for (let z = -4; z <= 4; z++) {
+    for (let x = -4; x <= 4; x++) hashes.add(hashCoordinates(5, x, z));
+  }
+  assert.equal(hashes.size, 81);
+  assert.notEqual(hashCoordinates(5, 1, 2), hashCoordinates(5, 2, 1));
+  assert.notEqual(hashCoordinates(5, 1, 2), hashCoordinates(6, 1, 2));
+});
+
+test('hashCoordinates retorna um inteiro sem sinal de 32 bits', () => {
+  const hash = hashCoordinates(123, -99999, 77777);
+  assert.ok(Number.isInteger(hash) && hash >= 0 && hash < 2 ** 32);
 });

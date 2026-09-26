@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { buildChunkMesh } from './chunkMesher.js';
-
-export const CHUNK_SIZE = 16;
+import { CHUNK_SIZE } from '../world/chunkLayout.js';
 
 function createGeometry(meshData) {
   const geometry = new THREE.BufferGeometry();

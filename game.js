@@ -1,6 +1,8 @@
-import { World } from './src/world/world.js';
+import { ChunkedWorld } from './src/world/chunkedWorld.js';
+import { ChunkGenerator } from './src/world/chunkGenerator.js';
+import { CHUNK_SIZE, WORLD_HEIGHT } from './src/world/chunkLayout.js';
 import { PLACEABLE_BLOCKS } from './src/world/blockTypes.js';
-import { findSpawnPoint, generateWorld } from './src/world/worldGenerator.js';
+import { findSpawnPoint, generateRegion } from './src/world/worldGenerator.js';
 import { createCollisionQuery, createRenderSource, createTargetQuery } from './src/world/worldQueries.js';
 import { VoxelCollider } from './src/physics/voxelCollider.js';
 import { PLAYER_DIMENSIONS, Player } from './src/player/player.js';
@@ -22,7 +24,18 @@ import { StartScreen } from './src/ui/startScreen.js';
 import { Game } from './src/game/game.js';
 import { startGameLoop } from './src/game/gameLoop.js';
 
-const WORLD_DIMENSIONS = Object.freeze({ sizeX: 160, sizeY: 64, sizeZ: 160 });
+const REGION_CHUNKS = 10;
+const WORLD_DIMENSIONS = Object.freeze({
+  sizeX: REGION_CHUNKS * CHUNK_SIZE,
+  sizeY: WORLD_HEIGHT,
+  sizeZ: REGION_CHUNKS * CHUNK_SIZE,
+});
+const INITIAL_REGION = Object.freeze({
+  minChunkX: 0,
+  maxChunkX: REGION_CHUNKS - 1,
+  minChunkZ: 0,
+  maxChunkZ: REGION_CHUNKS - 1,
+});
 const MAX_RANDOM_SEED = 1_000_000_000;
 const LOADING_DELAY_MS = 30;
 
@@ -53,8 +66,8 @@ function tryCreateRenderContext() {
 }
 
 function createWorld(seed) {
-  const world = new World(WORLD_DIMENSIONS.sizeX, WORLD_DIMENSIONS.sizeY, WORLD_DIMENSIONS.sizeZ);
-  generateWorld(world, seed);
+  const world = new ChunkedWorld(WORLD_HEIGHT);
+  generateRegion(world, new ChunkGenerator(seed, WORLD_HEIGHT), INITIAL_REGION);
   return world;
 }
 
@@ -93,7 +106,8 @@ function buildGame(context, startScreen, seed) {
   const tiles = paintAllTiles();
   const view = createWorldView(context, world, tiles, seed);
   const collider = new VoxelCollider(createCollisionQuery(world), PLAYER_DIMENSIONS);
-  const player = new Player(findSpawnPoint(world), collider);
+  const spawn = findSpawnPoint(world, WORLD_DIMENSIONS.sizeX / 2, WORLD_DIMENSIONS.sizeZ / 2);
+  const player = new Player(spawn, collider);
   const hotbar = new Hotbar(PLACEABLE_BLOCKS);
   const game = new Game({
     world,

@@ -48,7 +48,7 @@ test('não coloca bloco dentro do jogador', () => {
 });
 
 test('não coloca bloco em posição ocupada nem fora do mundo', () => {
-  const world = createFlatWorld({ size: 16, height: 16, groundY: 15 });
+  const world = createFlatWorld({ height: 16, groundY: 15 });
   const occupied = { position: { x: 8, y: 3, z: 8 }, normal: { x: 0, y: 1, z: 0 } };
   const outside = { position: { x: 8, y: 15, z: 8 }, normal: { x: 0, y: 1, z: 0 } };
   assert.equal(placeBlock(world, occupied, BlockType.DIRT, farAwayBox), PlacementResult.OCCUPIED);

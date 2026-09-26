@@ -14,3 +14,14 @@ export function createRandom(seed) {
 export function randomInt(random, min, max) {
   return min + Math.floor(random() * (max - min + 1));
 }
+
+function mixBits(value) {
+  let hash = value >>> 0;
+  hash = Math.imul(hash ^ (hash >>> 16), 0x85ebca6b);
+  hash = Math.imul(hash ^ (hash >>> 13), 0xc2b2ae35);
+  return (hash ^ (hash >>> 16)) >>> 0;
+}
+
+export function hashCoordinates(seed, x, z) {
+  return mixBits(mixBits(mixBits(seed) ^ x) ^ z);
+}

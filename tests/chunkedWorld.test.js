@@ -1,0 +1,55 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { ChunkedWorld } from '../src/world/chunkedWorld.js';
+import { Chunk } from '../src/world/chunk.js';
+import { BlockType } from '../src/world/blockTypes.js';
+import { CHUNK_SIZE } from '../src/world/chunkLayout.js';
+import { createEmptyWorld } from './helpers.js';
+
+test('setBlock e getBlock funcionam através de vários chunks', () => {
+  const world = createEmptyWorld({ height: 8, chunks: [[0, 0], [-1, 0], [0, -1]] });
+  assert.equal(world.setBlock(3, 2, 3, BlockType.STONE), true);
+  assert.equal(world.setBlock(-1, 2, 3, BlockType.DIRT), true);
+  assert.equal(world.setBlock(3, 2, -CHUNK_SIZE, BlockType.WOOD), true);
+  assert.equal(world.getBlock(3, 2, 3), BlockType.STONE);
+  assert.equal(world.getBlock(-1, 2, 3), BlockType.DIRT);
+  assert.equal(world.getBlock(3, 2, -CHUNK_SIZE), BlockType.WOOD);
+});
+
+test('posições em chunks não carregados ficam fora do mundo', () => {
+  const world = createEmptyWorld({ height: 8 });
+  assert.equal(world.contains(CHUNK_SIZE, 1, 1), false);
+  assert.equal(world.getBlock(CHUNK_SIZE, 1, 1), BlockType.AIR);
+  assert.equal(world.setBlock(CHUNK_SIZE, 1, 1, BlockType.STONE), false);
+  assert.equal(world.contains(1, 8, 1), false);
+  assert.equal(world.contains(1, 7, 1), true);
+});
+
+test('listeners são notificados apenas quando o bloco muda', () => {
+  const world = createEmptyWorld({ height: 8 });
+  const changes = [];
+  world.onBlockChanged((...args) => changes.push(args));
+  world.setBlock(1, 1, 1, BlockType.WOOD);
+  world.setBlock(1, 1, 1, BlockType.WOOD);
+  world.setBlock(CHUNK_SIZE, 1, 1, BlockType.WOOD);
+  assert.deepEqual(changes, [[1, 1, 1, BlockType.WOOD]]);
+});
+
+test('findSurfaceY retorna o bloco sólido mais alto ou null', () => {
+  const world = createEmptyWorld({ height: 8 });
+  world.setBlock(2, 0, 2, BlockType.STONE);
+  world.setBlock(2, 5, 2, BlockType.LEAVES);
+  assert.equal(world.findSurfaceY(2, 2), 5);
+  assert.equal(world.findSurfaceY(0, 0), null);
+  assert.equal(world.findSurfaceY(CHUNK_SIZE * 3, 0), null);
+});
+
+test('loadChunk substitui o chunk carregado na mesma posição', () => {
+  const world = new ChunkedWorld(8);
+  world.loadChunk(new Chunk(0, 0, 8));
+  world.setBlock(1, 1, 1, BlockType.STONE);
+  world.loadChunk(new Chunk(0, 0, 8));
+  assert.equal(world.getBlock(1, 1, 1), BlockType.AIR);
+  assert.equal(world.getChunk(0, 0).chunkX, 0);
+  assert.equal(world.getChunk(5, 5), null);
+});

@@ -1,5 +1,5 @@
 import { BlockType } from './blockTypes.js';
-import { randomInt } from '../core/random.js';
+import { createRandom, hashCoordinates, randomInt } from '../core/random.js';
 
 export const TREE_SETTINGS = Object.freeze({
   cellSize: 7,
@@ -31,15 +31,22 @@ function rollCandidate(random, cellX, cellZ, settings) {
   };
 }
 
-export function planTrees(random, heightMap, isFertile, settings = TREE_SETTINGS) {
+export function treeInCell(seed, cellX, cellZ, terrain, settings = TREE_SETTINGS) {
+  const random = createRandom(hashCoordinates(seed, cellX, cellZ));
+  const candidate = rollCandidate(random, cellX * settings.cellSize, cellZ * settings.cellSize, settings);
+  if (candidate.roll > settings.chance) return null;
+  const groundY = terrain.surfaceHeightAt(candidate.x, candidate.z);
+  if (!terrain.isFertile(groundY)) return null;
+  return { x: candidate.x, z: candidate.z, groundY, trunkHeight: candidate.trunkHeight };
+}
+
+export function treesInArea(seed, area, terrain, settings = TREE_SETTINGS) {
+  const cellOf = (coordinate) => Math.floor(coordinate / settings.cellSize);
   const trees = [];
-  for (let cellZ = 0; cellZ + settings.cellSize <= heightMap.sizeZ; cellZ += settings.cellSize) {
-    for (let cellX = 0; cellX + settings.cellSize <= heightMap.sizeX; cellX += settings.cellSize) {
-      const candidate = rollCandidate(random, cellX, cellZ, settings);
-      if (candidate.roll > settings.chance) continue;
-      if (!isFertile(candidate.x, candidate.z)) continue;
-      const groundY = heightMap.heightAt(candidate.x, candidate.z);
-      trees.push({ x: candidate.x, z: candidate.z, groundY, trunkHeight: candidate.trunkHeight });
+  for (let cellZ = cellOf(area.minZ); cellZ <= cellOf(area.maxZ); cellZ++) {
+    for (let cellX = cellOf(area.minX); cellX <= cellOf(area.maxX); cellX++) {
+      const tree = treeInCell(seed, cellX, cellZ, terrain, settings);
+      if (tree !== null) trees.push(tree);
     }
   }
   return trees;
