@@ -28,7 +28,7 @@ No build step, no bundler and no runtime dependencies besides [Three.js](https:/
 - **Voxel rendering**: face-culled chunk meshes, per-vertex ambient occlusion, see-through leaves and textures painted by code (no image assets).
 - **Atmosphere**: sunlight with stable shadows, sky gradient, drifting clouds and distance fog.
 - **First-person controller**: gravity, jumping and AABB collision against the world.
-- **Building**: voxel raycasting to break and place blocks, with a five-slot hotbar (Grass, Dirt, Stone, Wood, Leaves).
+- **Building**: voxel raycasting to break and place blocks, with a five-slot hotbar (Grass, Dirt, Stone, Wood, Leaves). The name of the block under the crosshair appears above the hotbar.
 - **Automatic saving**: modified chunks, seed and player position are stored in IndexedDB, with **Continue** and **New world** in the menu.
 
 ### Getting started
@@ -128,7 +128,7 @@ Sem etapa de build, sem bundler e sem dependências além do [Three.js](https://
 - **Renderização voxel**: malhas por chunk só com as faces visíveis, oclusão ambiente por vértice, folhas vazadas e texturas pintadas por código (sem imagens).
 - **Atmosfera**: luz do sol com sombras estáveis, céu em gradiente, nuvens em movimento e névoa na distância.
 - **Controle em primeira pessoa**: gravidade, pulo e colisão AABB com o mundo.
-- **Construção**: raycasting voxel para quebrar e colocar blocos, com hotbar de cinco espaços (Grass, Dirt, Stone, Wood, Leaves).
+- **Construção**: raycasting voxel para quebrar e colocar blocos, com hotbar de cinco espaços (Grass, Dirt, Stone, Wood, Leaves). O nome do bloco sob a mira aparece acima da hotbar.
 - **Salvamento automático**: chunks alterados, seed e posição do jogador ficam no IndexedDB, com **Continuar** e **Novo mundo** no menu.
 
 ### Como rodar

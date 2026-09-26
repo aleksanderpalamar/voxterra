@@ -9,6 +9,31 @@
   transform: translateX(-50%);
 }
 
+.target-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px 3px 6px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(18, 20, 26, 0.72);
+  font-family: var(--pixel-font);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.7);
+}
+
+.target-block[hidden] {
+  display: none;
+}
+
+.target-icon {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+}
+
 .selected-block {
   padding: 3px 12px;
   border-radius: 6px;

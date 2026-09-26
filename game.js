@@ -18,6 +18,8 @@ import { HudView } from './src/hud/hudView.js';
 import { FpsCounter } from './src/hud/fpsCounter.js';
 import { DebugPanel } from './src/hud/debugPanel.js';
 import { DebugOverlay } from './src/hud/debugOverlay.js';
+import { TargetInfo } from './src/hud/targetInfo.js';
+import { TargetLabel } from './src/hud/targetLabel.js';
 import { MenuMode, StartScreen } from './src/ui/startScreen.js';
 import { Game } from './src/game/game.js';
 import { startGameLoop } from './src/game/gameLoop.js';
@@ -69,13 +71,17 @@ function createInput(canvas) {
   return { pointerLock, keyboard: new Keyboard(window), mouse: new MouseInput(document, isLocked) };
 }
 
-function createHud(tiles, hotbar, inspector) {
+function createHud({ tiles, hotbar, inspector, world }) {
   const createIcon = createBlockIconFactory(document, tiles, TILE_SIZE);
   return {
     hud: new HudView({ fps: requireElement('fps'), selectedBlock: requireElement('selected-block') }),
     hotbarView: new HotbarView(requireElement('hotbar'), document, hotbar.items, createIcon),
     fpsCounter: new FpsCounter(),
     debugOverlay: new DebugOverlay(new DebugPanel(requireElement('debug-panel')), (x, z) => inspector.columnAt(x, z)),
+    targetInfo: new TargetInfo(
+      new TargetLabel(requireElement('target-block'), document, createIcon),
+      ({ x, y, z }) => world.getBlock(x, y, z),
+    ),
   };
 }
 
@@ -113,7 +119,7 @@ async function buildGame(context, startScreen) {
     onError: reportError,
     targeting: new BlockTargeting(createTargetQuery(world)),
     ...createInput(context.canvas),
-    ...createHud(tiles, hotbar, inspector),
+    ...createHud({ tiles, hotbar, inspector, world }),
   });
   game.start();
   startGameLoop(window, (elapsed) => game.frame(elapsed));

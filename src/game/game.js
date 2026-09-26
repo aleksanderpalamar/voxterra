@@ -36,6 +36,7 @@ export class Game {
     this.startScreen = dependencies.startScreen;
     this.fpsCounter = dependencies.fpsCounter;
     this.debugOverlay = dependencies.debugOverlay;
+    this.targetInfo = dependencies.targetInfo;
     this.autosave = dependencies.autosave;
     this.leafDecay = dependencies.leafDecay;
     this.menuMode = dependencies.menuMode;
@@ -170,6 +171,7 @@ export class Game {
       this.leafDecay.update(dt);
     }
     this.refreshTarget();
+    this.targetInfo.update(this.targeting.current);
     this.view.update(dt, this.player, this.targeting.current);
     this.view.render();
     this.debugOverlay.update(this.player.position);
