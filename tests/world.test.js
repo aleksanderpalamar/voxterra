@@ -2,7 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { World } from '../src/world/world.js';
 import { BlockType } from '../src/world/blockTypes.js';
-import { createCollisionQuery, createOcclusionQuery, createTargetQuery } from '../src/world/worldQueries.js';
+import {
+  createCollisionQuery,
+  createOcclusionQuery,
+  createOpacityQuery,
+  createRenderSource,
+  createTargetQuery,
+} from '../src/world/worldQueries.js';
 
 test('setBlock e getBlock armazenam blocos dentro dos limites', () => {
   const world = new World(4, 4, 4);
@@ -56,4 +62,23 @@ test('consulta de alvo considera apenas blocos sólidos existentes', () => {
   const isTarget = createTargetQuery(world);
   assert.equal(isTarget(1, 1, 1), true);
   assert.equal(isTarget(-1, 1, 1), false);
+});
+
+test('consulta de opacidade deixa ver através das folhas', () => {
+  const world = new World(4, 4, 4);
+  world.setBlock(1, 1, 1, BlockType.LEAVES);
+  world.setBlock(2, 1, 1, BlockType.STONE);
+  const isOpaque = createOpacityQuery(world);
+  assert.equal(isOpaque(1, 1, 1), false);
+  assert.equal(isOpaque(2, 1, 1), true);
+  assert.equal(isOpaque(1, -1, 1), true);
+});
+
+test('createRenderSource agrupa as consultas usadas pelo mesher', () => {
+  const world = new World(4, 4, 4);
+  world.setBlock(1, 1, 1, BlockType.LEAVES);
+  const source = createRenderSource(world);
+  assert.equal(source.getBlock(1, 1, 1), BlockType.LEAVES);
+  assert.equal(source.isOpaque(1, 1, 1), false);
+  assert.equal(source.isOccluding(1, 1, 1), true);
 });

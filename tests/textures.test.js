@@ -14,13 +14,33 @@ function averageColor(pixels) {
   return totals.map((total) => total / (pixels.length / 4));
 }
 
-test('todos os tiles são opacos e do tamanho esperado', () => {
+function alphaValues(pixels) {
+  return Array.from({ length: pixels.length / 4 }, (_, index) => pixels[index * 4 + 3]);
+}
+
+test('tiles sólidos são opacos e do tamanho esperado', () => {
   const tiles = paintAllTiles();
   assert.equal(tiles.length, TILE_COUNT);
-  tiles.forEach((pixels) => {
+  tiles.forEach((pixels, tile) => {
     assert.equal(pixels.length, TILE_SIZE * TILE_SIZE * 4);
-    for (let i = 3; i < pixels.length; i += 4) assert.equal(pixels[i], 255);
+    if (tile === Tile.LEAVES) return;
+    assert.ok(alphaValues(pixels).every((alpha) => alpha === 255));
   });
+});
+
+test('folhas possuem furos transparentes e partes opacas', () => {
+  const alphas = alphaValues(paintTile(Tile.LEAVES));
+  const holes = alphas.filter((alpha) => alpha === 0).length;
+  assert.ok(alphas.every((alpha) => alpha === 0 || alpha === 255));
+  assert.ok(holes > alphas.length * 0.1 && holes < alphas.length * 0.4);
+});
+
+test('furos das folhas mantêm cor de folha para não escurecer o filtro', () => {
+  const pixels = paintTile(Tile.LEAVES);
+  for (let i = 0; i < pixels.length; i += 4) {
+    if (pixels[i + 3] !== 0) continue;
+    assert.ok(pixels[i + 1] > pixels[i] && pixels[i + 1] > pixels[i + 2]);
+  }
 });
 
 test('tiles são determinísticos e visualmente distintos', () => {
@@ -38,6 +58,16 @@ test('paintTile retorna null para tile desconhecido', () => {
 test('downsampleTile calcula a média de blocos 2x2', () => {
   const pixels = new Uint8ClampedArray([0, 0, 0, 255, 100, 100, 100, 255, 200, 200, 200, 255, 100, 100, 100, 255]);
   assert.deepEqual(Array.from(downsampleTile(pixels, 2)), [100, 100, 100, 255]);
+});
+
+test('downsampleTile pondera a cor pelo alpha', () => {
+  const pixels = new Uint8ClampedArray([40, 200, 40, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  assert.deepEqual(Array.from(downsampleTile(pixels, 2)), [40, 200, 40, 64]);
+});
+
+test('downsampleTile totalmente transparente usa média simples', () => {
+  const pixels = new Uint8ClampedArray([10, 20, 30, 0, 30, 40, 50, 0, 10, 20, 30, 0, 30, 40, 50, 0]);
+  assert.deepEqual(Array.from(downsampleTile(pixels, 2)), [20, 30, 40, 0]);
 });
 
 test('composeAtlasLevel posiciona tiles lado a lado com linhas invertidas', () => {

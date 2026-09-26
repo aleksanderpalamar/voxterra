@@ -24,10 +24,16 @@ export const PLACEABLE_BLOCKS = Object.freeze([
   BlockType.LEAVES,
 ]);
 
+const SEE_THROUGH_BLOCKS = new Set([BlockType.LEAVES]);
+
 export function blockName(type) {
   return BLOCK_NAMES[type] ?? 'Unknown';
 }
 
 export function isSolidBlock(type) {
   return type !== BlockType.AIR;
+}
+
+export function isOpaqueBlock(type) {
+  return isSolidBlock(type) && !SEE_THROUGH_BLOCKS.has(type);
 }

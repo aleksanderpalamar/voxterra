@@ -23,8 +23,10 @@ function drawFace(context, tileCanvas, face, tileSize) {
   context.setTransform(a * scale, b * scale, c * scale, d * scale, e * ICON_SIZE, f * ICON_SIZE);
   context.drawImage(tileCanvas, 0, 0);
   if (face.shadow === 0) return;
+  context.globalCompositeOperation = 'source-atop';
   context.fillStyle = `rgba(0, 0, 0, ${face.shadow})`;
   context.fillRect(0, 0, tileSize, tileSize);
+  context.globalCompositeOperation = 'source-over';
 }
 
 export function createBlockIconFactory(document, tilePixels, tileSize) {

@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { buildAtlasLevels } from './atlasLayout.js';
 
+const ALPHA_CUTOFF = 0.5;
+
 export function createAtlasTexture(tilePixels, tileSize) {
   const levels = buildAtlasLevels(tilePixels, tileSize);
   const [base] = levels;
@@ -15,5 +17,5 @@ export function createAtlasTexture(tilePixels, tileSize) {
 }
 
 export function createBlockMaterial(texture) {
-  return new THREE.MeshLambertMaterial({ map: texture, vertexColors: true });
+  return new THREE.MeshLambertMaterial({ map: texture, vertexColors: true, alphaTest: ALPHA_CUTOFF });
 }

@@ -4,12 +4,12 @@ import { buildChunkMesh } from '../src/render/chunkMesher.js';
 import { createTileUvLookup } from '../src/render/blockTiles.js';
 import { BlockType } from '../src/world/blockTypes.js';
 import { World } from '../src/world/world.js';
-import { createOcclusionQuery } from '../src/world/worldQueries.js';
+import { createRenderSource } from '../src/world/worldQueries.js';
 
 function meshWorld(world) {
-  const source = { getBlock: (x, y, z) => world.getBlock(x, y, z), isOccluding: createOcclusionQuery(world) };
+  const source = createRenderSource(world);
   const bounds = { minX: 0, minY: 0, minZ: 0, maxX: world.sizeX, maxY: world.sizeY, maxZ: world.sizeZ };
-  return buildChunkMesh(source, bounds, createTileUvLookup());
+  return buildChunkMesh(createRenderSource(world), bounds, createTileUvLookup());
 }
 
 const faceCount = (mesh) => mesh.indices.length / 6;
@@ -47,4 +47,18 @@ test('vértices recebem sombreamento de oclusão ambiente', () => {
   const colors = Array.from(meshWorld(world).colors);
   assert.ok(Math.min(...colors) < 1);
   assert.equal(Math.max(...colors), 1);
+});
+
+test('faces entre folhas vizinhas são mantidas para ver através dos furos', () => {
+  const world = new World(4, 4, 4);
+  world.setBlock(1, 1, 1, BlockType.LEAVES);
+  world.setBlock(2, 1, 1, BlockType.LEAVES);
+  assert.equal(faceCount(meshWorld(world)), 12);
+});
+
+test('bloco opaco encostado em folhas mantém sua face e oculta a da folha', () => {
+  const world = new World(4, 4, 4);
+  world.setBlock(1, 1, 1, BlockType.WOOD);
+  world.setBlock(2, 1, 1, BlockType.LEAVES);
+  assert.equal(faceCount(meshWorld(world)), 11);
 });

@@ -4,6 +4,9 @@ import { Tile, TILE_COUNT } from './blockTiles.js';
 export const TILE_SIZE = 16;
 
 const DEFAULT_TEXTURE_SEED = 1971;
+const OPAQUE = 255;
+const TRANSPARENT = 0;
+const LEAF_HOLE_CHANCE = 0.22;
 
 const Palette = Object.freeze({
   GRASS: [98, 164, 60],
@@ -94,8 +97,9 @@ function woodTopPainter(random) {
 function leavesPainter(random) {
   return () => {
     const roll = random();
-    if (roll < 0.2) return jitter(Palette.LEAVES_DARK, random, 0.1);
-    if (roll < 0.32) return jitter(Palette.LEAVES_LIGHT, random, 0.08);
+    if (roll < LEAF_HOLE_CHANCE) return [...Palette.LEAVES_DARK, TRANSPARENT];
+    if (roll < 0.4) return jitter(Palette.LEAVES_DARK, random, 0.1);
+    if (roll < 0.52) return jitter(Palette.LEAVES_LIGHT, random, 0.08);
     return jitter(Palette.LEAVES, random, 0.12);
   };
 }
@@ -117,8 +121,8 @@ export function paintTile(tile, seed = DEFAULT_TEXTURE_SEED) {
   const pixels = new Uint8ClampedArray(TILE_SIZE * TILE_SIZE * 4);
   for (let y = 0; y < TILE_SIZE; y++) {
     for (let x = 0; x < TILE_SIZE; x++) {
-      const offset = (y * TILE_SIZE + x) * 4;
-      pixels.set([...pixelAt(x, y), 255], offset);
+      const [red, green, blue, alpha = OPAQUE] = pixelAt(x, y);
+      pixels.set([red, green, blue, alpha], (y * TILE_SIZE + x) * 4);
     }
   }
   return pixels;

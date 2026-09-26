@@ -1,4 +1,4 @@
-import { isSolidBlock } from './blockTypes.js';
+import { isOpaqueBlock, isSolidBlock } from './blockTypes.js';
 
 export function createCollisionQuery(world) {
   return (x, y, z) => {
@@ -12,6 +12,21 @@ export function createOcclusionQuery(world) {
   return (x, y, z) => {
     if (y < 0) return true;
     return isSolidBlock(world.getBlock(x, y, z));
+  };
+}
+
+export function createOpacityQuery(world) {
+  return (x, y, z) => {
+    if (y < 0) return true;
+    return isOpaqueBlock(world.getBlock(x, y, z));
+  };
+}
+
+export function createRenderSource(world) {
+  return {
+    getBlock: (x, y, z) => world.getBlock(x, y, z),
+    isOpaque: createOpacityQuery(world),
+    isOccluding: createOcclusionQuery(world),
   };
 }
 

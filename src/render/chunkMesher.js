@@ -27,7 +27,7 @@ function appendFace(buffers, source, face, x, y, z, uvRect) {
 function appendVisibleFaces(buffers, source, blockType, x, y, z, tileUv) {
   for (const face of FACES) {
     const [nx, ny, nz] = face.normal;
-    if (source.isOccluding(x + nx, y + ny, z + nz)) continue;
+    if (source.isOpaque(x + nx, y + ny, z + nz)) continue;
     appendFace(buffers, source, face, x, y, z, tileUv(blockType, face.direction));
   }
 }

@@ -1,7 +1,7 @@
 import { World } from './src/world/world.js';
 import { PLACEABLE_BLOCKS } from './src/world/blockTypes.js';
 import { findSpawnPoint, generateWorld } from './src/world/worldGenerator.js';
-import { createCollisionQuery, createOcclusionQuery, createTargetQuery } from './src/world/worldQueries.js';
+import { createCollisionQuery, createRenderSource, createTargetQuery } from './src/world/worldQueries.js';
 import { VoxelCollider } from './src/physics/voxelCollider.js';
 import { PLAYER_DIMENSIONS, Player } from './src/player/player.js';
 import { Keyboard } from './src/input/keyboard.js';
@@ -62,7 +62,7 @@ function createWorldView(context, world, tiles, seed) {
   const view = new WorldView({
     context,
     document,
-    source: { getBlock: (x, y, z) => world.getBlock(x, y, z), isOccluding: createOcclusionQuery(world) },
+    source: createRenderSource(world),
     dimensions: WORLD_DIMENSIONS,
     material: createBlockMaterial(createAtlasTexture(tiles, TILE_SIZE)),
     tileUv: createTileUvLookup(),
