@@ -4,7 +4,8 @@ import { BlockType } from '../src/world/blockTypes.js';
 import { ChunkedWorld } from '../src/world/chunkedWorld.js';
 import { ChunkGenerator } from '../src/world/chunkGenerator.js';
 import { WORLD_HEIGHT } from '../src/world/chunkLayout.js';
-import { findSpawnPoint } from '../src/world/worldGenerator.js';
+import { findLandCenter, findSpawnPoint } from '../src/world/worldGenerator.js';
+import { SEA_LEVEL } from '../src/world/terrainShape.js';
 
 function generatedWorld(seed) {
   const world = new ChunkedWorld(WORLD_HEIGHT);
@@ -36,4 +37,33 @@ test('findSpawnPoint prefere grama quando existe por perto', () => {
 test('findSpawnPoint procura perto do centro informado', () => {
   const spawn = findSpawnPoint(generatedWorld(42), 0, 0);
   assert.ok(Math.abs(spawn.x) <= 13 && Math.abs(spawn.z) <= 13);
+});
+
+const column = (surfaceY, top = BlockType.GRASS) => ({ surfaceY, surface: { top } });
+
+test('findLandCenter mantém a origem quando ela já é terra firme', () => {
+  const center = findLandCenter(() => column(SEA_LEVEL + 5), { x: 0, z: 0 });
+  assert.deepEqual(center, { x: 0, z: 0 });
+});
+
+test('findLandCenter procura a terra mais próxima quando a origem é oceano', () => {
+  const columnAt = (x, z) => (Math.max(Math.abs(x), Math.abs(z)) >= 96 ? column(SEA_LEVEL + 3) : column(SEA_LEVEL - 10, BlockType.SAND));
+  const center = findLandCenter(columnAt, { x: 0, z: 0 });
+  const distance = Math.max(Math.abs(center.x), Math.abs(center.z));
+  assert.ok(distance >= 96 && distance < 96 + 32, JSON.stringify(center));
+});
+
+test('findLandCenter ignora praias e cai na origem se não encontrar terra', () => {
+  const beachOnly = () => column(SEA_LEVEL + 1, BlockType.SAND);
+  assert.deepEqual(findLandCenter(beachOnly, { x: 5, z: -5 }, 64), { x: 5, z: -5 });
+});
+
+test('com o gerador real a terra encontrada fica acima do nível do mar', () => {
+  [1, 42, 2024].forEach((seed) => {
+    const generator = new ChunkGenerator(seed, WORLD_HEIGHT);
+    const center = findLandCenter((x, z) => generator.columnAt(x, z), { x: 0, z: 0 });
+    const land = generator.columnAt(center.x, center.z);
+    assert.ok(land.surfaceY > SEA_LEVEL);
+    assert.equal(land.surface.top, BlockType.GRASS);
+  });
 });

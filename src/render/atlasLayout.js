@@ -25,16 +25,29 @@ export function downsampleTile(pixels, size) {
   return result;
 }
 
-export function composeAtlasLevel(tiles, tileSize) {
-  const width = tileSize * tiles.length;
-  const height = tileSize;
+export function padTile(pixels, tileSize) {
+  const gutter = tileSize / 2;
+  const cellSize = tileSize * 2;
+  const cell = new Uint8ClampedArray(cellSize * cellSize * CHANNELS);
+  const clamp = (value) => Math.min(Math.max(value - gutter, 0), tileSize - 1);
+  for (let y = 0; y < cellSize; y++) {
+    for (let x = 0; x < cellSize; x++) {
+      const source = (clamp(y) * tileSize + clamp(x)) * CHANNELS;
+      cell.set(pixels.subarray(source, source + CHANNELS), (y * cellSize + x) * CHANNELS);
+    }
+  }
+  return cell;
+}
+
+export function composeAtlasLevel(cells, cellSize) {
+  const width = cellSize * cells.length;
+  const height = cellSize;
   const data = new Uint8Array(width * height * CHANNELS);
-  tiles.forEach((pixels, tileIndex) => {
-    for (let y = 0; y < tileSize; y++) {
-      const sourceStart = y * tileSize * CHANNELS;
-      const row = pixels.subarray(sourceStart, sourceStart + tileSize * CHANNELS);
-      const targetRow = height - 1 - y;
-      data.set(row, (targetRow * width + tileIndex * tileSize) * CHANNELS);
+  cells.forEach((pixels, cellIndex) => {
+    for (let y = 0; y < cellSize; y++) {
+      const sourceStart = y * cellSize * CHANNELS;
+      const row = pixels.subarray(sourceStart, sourceStart + cellSize * CHANNELS);
+      data.set(row, ((height - 1 - y) * width + cellIndex * cellSize) * CHANNELS);
     }
   });
   return { data, width, height };
@@ -42,10 +55,20 @@ export function composeAtlasLevel(tiles, tileSize) {
 
 export function buildAtlasLevels(tiles, tileSize) {
   const levels = [];
-  let current = tiles;
-  for (let size = tileSize; size >= 1; size /= 2) {
-    levels.push(composeAtlasLevel(current, size));
-    if (size > 1) current = current.map((pixels) => downsampleTile(pixels, size));
+  let cells = tiles.map((pixels) => padTile(pixels, tileSize));
+  for (let size = tileSize * 2; size >= 1; size /= 2) {
+    levels.push(composeAtlasLevel(cells, size));
+    if (size > 1) cells = cells.map((pixels) => downsampleTile(pixels, size));
   }
   return levels;
+}
+
+export function tileUvRect(tile, tileCount) {
+  const cellWidth = 1 / tileCount;
+  return Object.freeze({
+    u0: (tile + 0.25) * cellWidth,
+    u1: (tile + 0.75) * cellWidth,
+    v0: 0.25,
+    v1: 0.75,
+  });
 }

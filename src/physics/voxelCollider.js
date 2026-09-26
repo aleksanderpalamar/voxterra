@@ -34,14 +34,16 @@ export class VoxelCollider {
   move(position, velocity, dt) {
     const steps = stepCount(velocity, dt);
     const stepDt = dt / steps;
-    let grounded = false;
+    const report = { grounded: false, blockedHorizontally: false };
     for (let step = 0; step < steps; step++) {
       for (const axis of AXIS_ORDER) {
         const contact = this.moveAxis(position, velocity, axis, velocity[axis] * stepDt);
-        grounded ||= axis === 'y' && contact === Contact.NEGATIVE;
+        if (contact === Contact.NONE) continue;
+        if (axis === 'y') report.grounded ||= contact === Contact.NEGATIVE;
+        else report.blockedHorizontally = true;
       }
     }
-    return grounded;
+    return report;
   }
 
   moveAxis(position, velocity, axis, delta) {

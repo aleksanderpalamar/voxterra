@@ -75,3 +75,12 @@ test('createMeshSource funciona com qualquer leitor de blocos', () => {
   assert.equal(source.isOccluding(0, 0, 0), true);
   assert.equal(source.isOccluding(0, -1, 0), true);
 });
+
+test('água não bloqueia colisão nem a mira', () => {
+  const world = createEmptyWorld({ height: 4 });
+  world.setBlock(1, 1, 1, BlockType.WATER);
+  assert.equal(createCollisionQuery(world)(1, 1, 1), false);
+  assert.equal(createTargetQuery(world)(1, 1, 1), false);
+  assert.equal(createOpacityQuery(world)(1, 1, 1), false);
+  assert.equal(createOcclusionQuery(world)(1, 1, 1), false);
+});

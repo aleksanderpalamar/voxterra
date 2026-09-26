@@ -1,18 +1,38 @@
 import { BlockType } from './blockTypes.js';
+import { SEA_LEVEL } from './terrainShape.js';
 
 const SPAWN_SEARCH_RADIUS = 12;
+const LAND_SEARCH_RADIUS = 2048;
+const LAND_SEARCH_STEP = 16;
 
-function spawnCandidates(centerX, centerZ, radius) {
+function ringCandidates(centerX, centerZ, ring, step) {
   const candidates = [];
-  for (let ring = 0; ring <= radius; ring++) {
-    for (let dz = -ring; dz <= ring; dz++) {
-      for (let dx = -ring; dx <= ring; dx++) {
-        if (Math.max(Math.abs(dx), Math.abs(dz)) !== ring) continue;
-        candidates.push({ x: centerX + dx, z: centerZ + dz });
-      }
+  for (let dz = -ring; dz <= ring; dz += step) {
+    for (let dx = -ring; dx <= ring; dx += step) {
+      if (Math.max(Math.abs(dx), Math.abs(dz)) !== ring) continue;
+      candidates.push({ x: centerX + dx, z: centerZ + dz });
     }
   }
   return candidates;
+}
+
+function spawnCandidates(centerX, centerZ, radius, step = 1) {
+  const candidates = [];
+  for (let ring = 0; ring <= radius; ring += step) candidates.push(...ringCandidates(centerX, centerZ, ring, step));
+  return candidates;
+}
+
+function isDryGrass(column) {
+  return column.surfaceY > SEA_LEVEL && column.surface.top === BlockType.GRASS;
+}
+
+export function findLandCenter(columnAt, origin, maxRadius = LAND_SEARCH_RADIUS) {
+  for (let ring = 0; ring <= maxRadius; ring += LAND_SEARCH_STEP) {
+    const found = ringCandidates(origin.x, origin.z, ring, LAND_SEARCH_STEP)
+      .find((candidate) => isDryGrass(columnAt(candidate.x, candidate.z)));
+    if (found !== undefined) return found;
+  }
+  return { x: origin.x, z: origin.z };
 }
 
 function isGrassColumn(world, column) {

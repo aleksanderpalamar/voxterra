@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { TILE_COUNT, Tile, createTileUvLookup, tileFor, tileUvRect } from '../src/render/blockTiles.js';
+import { Tile, createTileUvLookup, tileFor } from '../src/render/blockTiles.js';
 import { FaceDirection } from '../src/render/faceDefinitions.js';
 import { BlockType } from '../src/world/blockTypes.js';
 
@@ -15,13 +15,6 @@ test('tronco mostra anéis no topo e casca nos lados', () => {
   assert.equal(tileFor(BlockType.WOOD, FaceDirection.FRONT), Tile.WOOD_SIDE);
 });
 
-test('tileUvRect fica contido na fatia do tile no atlas', () => {
-  const rect = tileUvRect(Tile.STONE);
-  assert.ok(rect.u0 > Tile.STONE / TILE_COUNT);
-  assert.ok(rect.u1 < (Tile.STONE + 1) / TILE_COUNT);
-  assert.ok(rect.v0 > 0 && rect.v1 < 1);
-});
-
 test('lookup reutiliza o mesmo retângulo para o mesmo tile', () => {
   const lookup = createTileUvLookup();
   assert.equal(lookup(BlockType.DIRT, FaceDirection.TOP), lookup(BlockType.DIRT, FaceDirection.LEFT));
@@ -32,4 +25,8 @@ test('areia e neve usam o mesmo tile em todas as faces', () => {
     assert.equal(tileFor(BlockType.SAND, direction), Tile.SAND);
     assert.equal(tileFor(BlockType.SNOW, direction), Tile.SNOW);
   });
+});
+
+test('água usa o tile de água em todas as faces', () => {
+  [FaceDirection.TOP, FaceDirection.FRONT].forEach((direction) => assert.equal(tileFor(BlockType.WATER, direction), Tile.WATER));
 });

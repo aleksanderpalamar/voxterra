@@ -1,14 +1,20 @@
 import { biomeName } from '../world/biomes.js';
 import { chunkCoordinate } from '../world/chunkLayout.js';
 
+function formatValue(value, digits) {
+  const text = value.toFixed(digits);
+  return Number(text) === 0 ? (0).toFixed(digits) : text;
+}
+
 export function formatDebugLines(position, column) {
   const { x, y, z } = position;
   return [
-    `XYZ: ${x.toFixed(1)} / ${y.toFixed(1)} / ${z.toFixed(1)}`,
+    `XYZ: ${formatValue(x, 1)} / ${formatValue(y, 1)} / ${formatValue(z, 1)}`,
     `Chunk: ${chunkCoordinate(x)}, ${chunkCoordinate(z)}`,
     `Bioma: ${biomeName(column.biome)}`,
-    `Temperatura: ${column.climate.temperature.toFixed(2)}`,
-    `Umidade: ${column.climate.humidity.toFixed(2)}`,
+    `Continentalidade: ${formatValue(column.continentalness, 2)}`,
+    `Temperatura: ${formatValue(column.climate.temperature, 2)}`,
+    `Umidade: ${formatValue(column.climate.humidity, 2)}`,
   ];
 }
 

@@ -73,6 +73,11 @@ export class Sky {
     scene.add(this.dome, this.sun);
   }
 
+  setVisible(visible) {
+    this.dome.visible = visible;
+    this.sun.visible = visible;
+  }
+
   follow(cameraPosition) {
     this.dome.position.copy(cameraPosition);
     this.sun.position.copy(cameraPosition).addScaledVector(this.sunDirection, SUN_SPRITE_DISTANCE);

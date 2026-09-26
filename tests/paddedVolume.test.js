@@ -56,7 +56,7 @@ test('a malha montada a partir do volume é idêntica à montada do mundo', () =
     const bounds = chunkBounds(chunkX, chunkZ, HEIGHT);
     const fromWorld = buildChunkMesh(createMeshSource(world), bounds, tileUv);
     const fromVolume = buildChunkMesh(createMeshSource(paddedOf(world, chunkX, chunkZ)), bounds, tileUv);
-    assert.ok(fromWorld.indices.length > 0);
+    assert.ok(fromWorld.solid.indices.length > 0);
     assert.deepEqual(fromVolume, fromWorld);
   });
 });

@@ -4,6 +4,7 @@ import { PaddedVolume } from '../world/paddedVolume.js';
 import { createMeshSource } from '../world/worldQueries.js';
 import { buildChunkMesh } from '../render/chunkMesher.js';
 import { createTileUvLookup } from '../render/blockTiles.js';
+import { meshDataArrays } from '../render/meshBuffers.js';
 
 export const JobType = Object.freeze({
   GENERATE: 'generate',
@@ -24,8 +25,7 @@ function generate(cache, { seed, height, chunkX, chunkZ }) {
 function mesh(tileUv, { height, chunkX, chunkZ, volume }) {
   const source = createMeshSource(new PaddedVolume(volume, chunkX, chunkZ, height));
   const meshData = buildChunkMesh(source, chunkBounds(chunkX, chunkZ, height), tileUv);
-  const transfer = [meshData.positions, meshData.normals, meshData.uvs, meshData.colors, meshData.indices]
-    .map((array) => array.buffer);
+  const transfer = [...meshDataArrays(meshData.solid), ...meshDataArrays(meshData.water)].map((array) => array.buffer);
   return { result: meshData, transfer };
 }
 

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TILE_SIZE, paintAllTiles, paintTile } from '../src/render/tilePainters.js';
-import { buildAtlasLevels, composeAtlasLevel, downsampleTile } from '../src/render/atlasLayout.js';
+import { buildAtlasLevels, composeAtlasLevel, downsampleTile, padTile, tileUvRect } from '../src/render/atlasLayout.js';
 import { TILE_COUNT, Tile } from '../src/render/blockTiles.js';
 
 function averageColor(pixels) {
@@ -50,6 +50,11 @@ test('areia é amarelada e neve é quase branca', () => {
   assert.ok(Math.min(snowR, snowG, snowB) > 215);
 });
 
+test('água é azulada', () => {
+  const [red, green, blue] = averageColor(paintTile(Tile.WATER));
+  assert.ok(blue > red + 60 && blue > green + 30);
+});
+
 test('tiles são determinísticos e visualmente distintos', () => {
   assert.deepEqual(paintTile(Tile.DIRT), paintTile(Tile.DIRT));
   const [grassR, grassG] = averageColor(paintTile(Tile.GRASS_TOP));
@@ -87,8 +92,28 @@ test('composeAtlasLevel posiciona tiles lado a lado com linhas invertidas', () =
   assert.equal(tall.data[0], 9);
 });
 
-test('buildAtlasLevels gera a cadeia de mipmaps por tile', () => {
+test('buildAtlasLevels gera a cadeia de mipmaps por célula com margem', () => {
   const levels = buildAtlasLevels(paintAllTiles(), TILE_SIZE);
-  assert.deepEqual(levels.map((level) => level.height), [16, 8, 4, 2, 1]);
+  assert.deepEqual(levels.map((level) => level.height), [32, 16, 8, 4, 2, 1]);
+  assert.equal(levels[0].width, TILE_COUNT * TILE_SIZE * 2);
   assert.equal(levels.at(-1).width, TILE_COUNT);
+});
+
+test('padTile repete os pixels da borda na margem e preserva o centro', () => {
+  const pixels = new Uint8ClampedArray([10, 0, 0, 255, 20, 0, 0, 255, 30, 0, 0, 255, 40, 0, 0, 255]);
+  const cell = padTile(pixels, 2);
+  const red = (x, y) => cell[(y * 4 + x) * 4];
+  assert.deepEqual([red(1, 1), red(2, 1), red(1, 2), red(2, 2)], [10, 20, 30, 40]);
+  assert.deepEqual([red(0, 0), red(3, 0), red(0, 3), red(3, 3)], [10, 20, 30, 40]);
+  assert.deepEqual([red(0, 1), red(3, 2)], [10, 40]);
+});
+
+test('tileUvRect aponta para o centro da célula, longe dos vizinhos', () => {
+  const cellWidth = 1 / TILE_COUNT;
+  [0, 4, TILE_COUNT - 1].forEach((tile) => {
+    const rect = tileUvRect(tile, TILE_COUNT);
+    assert.ok(Math.abs(rect.u0 - (tile + 0.25) * cellWidth) < 1e-12);
+    assert.ok(Math.abs(rect.u1 - (tile + 0.75) * cellWidth) < 1e-12);
+    assert.deepEqual([rect.v0, rect.v1], [0.25, 0.75]);
+  });
 });

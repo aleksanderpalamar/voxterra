@@ -29,6 +29,10 @@ export class Clouds {
     scene.add(this.mesh);
   }
 
+  setVisible(visible) {
+    this.mesh.visible = visible;
+  }
+
   update(dt, cameraPosition) {
     this.drift = (this.drift + dt * this.settings.driftSpeed) % this.span;
     this.mesh.position.x = cloudTileOrigin(cameraPosition.x, this.drift, this.span);

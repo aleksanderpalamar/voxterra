@@ -1,4 +1,4 @@
-import { BlockType } from '../world/blockTypes.js';
+import { BlockType, isReplaceableBlock, isSolidBlock } from '../world/blockTypes.js';
 import { blockBox, boxesOverlap } from '../physics/aabb.js';
 
 export const BreakResult = Object.freeze({
@@ -32,7 +32,7 @@ function hasFace(hit) {
 export function evaluatePlacement(world, position, occupiedBox) {
   const { x, y, z } = position;
   if (!world.contains(x, y, z)) return PlacementResult.OUT_OF_WORLD;
-  if (world.getBlock(x, y, z) !== BlockType.AIR) return PlacementResult.OCCUPIED;
+  if (!isReplaceableBlock(world.getBlock(x, y, z))) return PlacementResult.OCCUPIED;
   if (boxesOverlap(blockBox(x, y, z), occupiedBox)) return PlacementResult.BLOCKED_BY_PLAYER;
   return PlacementResult.PLACED;
 }
@@ -49,7 +49,7 @@ export function placeBlock(world, hit, blockType, occupiedBox) {
 export function breakBlock(world, position) {
   const { x, y, z } = position;
   if (y <= BEDROCK_LEVEL) return BreakResult.UNBREAKABLE;
-  if (world.getBlock(x, y, z) === BlockType.AIR) return BreakResult.EMPTY;
+  if (!isSolidBlock(world.getBlock(x, y, z))) return BreakResult.EMPTY;
   world.setBlock(x, y, z, BlockType.AIR);
   return BreakResult.BROKEN;
 }

@@ -18,7 +18,7 @@ test('corpo em queda para sobre o chão e fica apoiado', () => {
   let grounded = false;
   for (let i = 0; i < 30; i++) {
     velocity.y = -10;
-    grounded = collider.move(position, velocity, 1 / 60);
+    grounded = collider.move(position, velocity, 1 / 60).grounded;
   }
   assert.equal(grounded, true);
   assert.ok(Math.abs(position.y - 5) < 0.01);
@@ -39,7 +39,7 @@ test('queda muito rápida não atravessa o chão', () => {
   const { collider } = setup();
   const position = { x: 8.5, y: 12, z: 8.5 };
   const velocity = { x: 0, y: -200, z: 0 };
-  const grounded = collider.move(position, velocity, 0.05);
+  const { grounded } = collider.move(position, velocity, 0.05);
   assert.equal(grounded, true);
   assert.ok(position.y >= 5);
 });
@@ -60,4 +60,12 @@ test('borda do mundo funciona como parede invisível', () => {
   const velocity = { x: -5, y: 0, z: 0 };
   for (let i = 0; i < 60; i++) collider.move(position, velocity, 1 / 60);
   assert.ok(position.x - PLAYER_DIMENSIONS.width / 2 >= 0);
+});
+
+test('o relatório de colisão indica bloqueio horizontal', () => {
+  const { world, collider } = setup();
+  world.setBlock(10, 5, 8, BlockType.STONE);
+  const position = { x: 9.5, y: 5, z: 8.5 };
+  assert.equal(collider.move(position, { x: 5, y: 0, z: 0 }, 1 / 20).blockedHorizontally, true);
+  assert.equal(collider.move(position, { x: 0, y: 0, z: 5 }, 1 / 60).blockedHorizontally, false);
 });

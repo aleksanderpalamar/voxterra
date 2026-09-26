@@ -4,18 +4,22 @@ import { Clouds } from './clouds.js';
 import { BlockHighlight } from './blockHighlight.js';
 import { ChunkRenderer } from './chunkRenderer.js';
 import { MeshPipeline } from './meshPipeline.js';
+import { Atmosphere } from './atmosphere.js';
 import { buildChunkMesh } from './chunkMesher.js';
 import { chunkBounds, chunkCoordinate } from '../world/chunkLayout.js';
+import { mediumAt } from '../world/fluids.js';
 
 export class WorldView {
-  constructor({ context, document, source, height, material, tileUv, seed, mesher, onError }) {
+  constructor({ context, document, source, height, materials, tileUv, seed, mesher, onError }) {
     this.context = context;
-    const { scene } = context;
+    this.source = source;
+    const { scene, camera } = context;
     this.lighting = new Lighting(scene);
     this.sky = new Sky(scene, document, this.lighting.sunDirection);
     this.clouds = new Clouds(scene, seed);
+    this.atmosphere = new Atmosphere({ scene, camera, sky: this.sky, clouds: this.clouds });
     this.highlight = new BlockHighlight(scene);
-    this.chunks = new ChunkRenderer(scene, material);
+    this.chunks = new ChunkRenderer(scene, materials);
     this.meshes = new MeshPipeline({
       isMeshable: source.isChunkMeshable,
       mesher,
@@ -46,6 +50,7 @@ export class WorldView {
     const eye = viewer.eyePosition();
     camera.position.set(eye.x, eye.y, eye.z);
     camera.rotation.set(viewer.pitch, viewer.yaw, 0);
+    this.atmosphere.apply(mediumAt(this.source.getBlock, eye.x, eye.y, eye.z));
     const { position } = viewer;
     this.meshes.update(chunkCoordinate(position.x), chunkCoordinate(position.z));
     this.lighting.follow(position);

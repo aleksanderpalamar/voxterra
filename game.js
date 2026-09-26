@@ -1,22 +1,16 @@
 import { ChunkedWorld } from './src/world/chunkedWorld.js';
 import { ChunkGenerator } from './src/world/chunkGenerator.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from './src/world/chunkLayout.js';
-import { ChunkStreamer, STREAMING_SETTINGS } from './src/world/chunkStreamer.js';
+import { STREAMING_SETTINGS } from './src/world/chunkStreamer.js';
 import { PLACEABLE_BLOCKS } from './src/world/blockTypes.js';
-import { findSpawnPoint } from './src/world/worldGenerator.js';
-import { createCollisionQuery, createRenderSource, createTargetQuery } from './src/world/worldQueries.js';
-import { VoxelCollider } from './src/physics/voxelCollider.js';
-import { PLAYER_DIMENSIONS, Player } from './src/player/player.js';
+import { createTargetQuery } from './src/world/worldQueries.js';
 import { Keyboard } from './src/input/keyboard.js';
 import { MouseInput } from './src/input/mouseInput.js';
 import { LockState, PointerLock } from './src/input/pointerLock.js';
 import { BlockTargeting } from './src/interaction/blockTargeting.js';
 import { Hotbar } from './src/hotbar/hotbar.js';
 import { RenderContext } from './src/render/renderContext.js';
-import { WorldView } from './src/render/worldView.js';
-import { createTileUvLookup } from './src/render/blockTiles.js';
 import { TILE_SIZE, paintAllTiles } from './src/render/tilePainters.js';
-import { createAtlasTexture, createBlockMaterial } from './src/render/textureAtlas.js';
 import { createBlockIconFactory } from './src/hud/blockIcons.js';
 import { HotbarView } from './src/hud/hotbarView.js';
 import { HudView } from './src/hud/hudView.js';
@@ -26,15 +20,13 @@ import { DebugOverlay } from './src/hud/debugOverlay.js';
 import { MenuMode, StartScreen } from './src/ui/startScreen.js';
 import { Game } from './src/game/game.js';
 import { startGameLoop } from './src/game/gameLoop.js';
+import { createPlayer, createStreamer, createWorldView, startingPoint } from './src/game/worldSetup.js';
 import { createExecutor } from './src/workers/createExecutor.js';
-import { AsyncChunkGenerator } from './src/workers/asyncChunkGenerator.js';
-import { AsyncChunkMesher } from './src/workers/asyncChunkMesher.js';
 import { loadSavedWorld, openWorldStore } from './src/persistence/openWorldStore.js';
 import { parseWorldMetadata } from './src/persistence/worldMetadata.js';
 import { WorldAutosave } from './src/persistence/worldAutosave.js';
 import { saveOnPageExit } from './src/persistence/pageLifecycle.js';
 
-const WORLD_ORIGIN = Object.freeze({ x: 0, y: 0, z: 0 });
 const VIEW_DISTANCE = (STREAMING_SETTINGS.loadRadius - 1) * CHUNK_SIZE;
 const MAX_RANDOM_SEED = 1_000_000_000;
 const LOADING_DELAY_MS = 30;
@@ -70,46 +62,14 @@ function reportError(error) {
   console.error(error);
 }
 
-function createWorldView(context, world, tiles, seed, executor) {
-  const view = new WorldView({
-    context,
-    document,
-    source: createRenderSource(world),
-    height: WORLD_HEIGHT,
-    material: createBlockMaterial(createAtlasTexture(tiles, TILE_SIZE)),
-    tileUv: createTileUvLookup(),
-    seed,
-    mesher: new AsyncChunkMesher(executor, world),
-    onError: reportError,
-  });
-  world.onBlockChanged((x, _y, z) => view.invalidateBlock(x, z));
-  world.onChunkLoaded((chunkX, chunkZ) => view.handleChunkLoaded(chunkX, chunkZ));
-  world.onChunkUnloaded((chunkX, chunkZ) => view.handleChunkUnloaded(chunkX, chunkZ));
-  return view;
-}
-
-function createStreamer(world, seed, executor, store) {
-  const generator = new AsyncChunkGenerator(executor, seed, WORLD_HEIGHT);
-  return new ChunkStreamer({ world, generator, store, onError: reportError });
-}
-
-function createPlayer(world, saved) {
-  const collider = new VoxelCollider(createCollisionQuery(world), PLAYER_DIMENSIONS);
-  if (saved === null) return new Player(findSpawnPoint(world, WORLD_ORIGIN.x, WORLD_ORIGIN.z), collider);
-  const player = new Player(saved.player, collider);
-  player.setOrientation(saved.player.yaw, saved.player.pitch);
-  return player;
-}
-
 function createInput(canvas) {
   const pointerLock = new PointerLock(document, canvas);
   const isLocked = () => pointerLock.state === LockState.LOCKED;
   return { pointerLock, keyboard: new Keyboard(window), mouse: new MouseInput(document, isLocked) };
 }
 
-function createHud(tiles, hotbar, seed) {
+function createHud(tiles, hotbar, inspector) {
   const createIcon = createBlockIconFactory(document, tiles, TILE_SIZE);
-  const inspector = new ChunkGenerator(seed, WORLD_HEIGHT);
   return {
     hud: new HudView({ fps: requireElement('fps'), selectedBlock: requireElement('selected-block') }),
     hotbarView: new HotbarView(requireElement('hotbar'), document, hotbar.items, createIcon),
@@ -124,13 +84,14 @@ async function buildGame(context, startScreen) {
   const seed = saved?.seed ?? resolveSeed(window.location);
   const world = new ChunkedWorld(WORLD_HEIGHT);
   const tiles = paintAllTiles();
+  const inspector = new ChunkGenerator(seed, WORLD_HEIGHT);
   const executor = createExecutor(navigator, reportError);
-  const view = createWorldView(context, world, tiles, seed, executor);
-  const streamer = createStreamer(world, seed, executor, store);
-  const start = saved?.player ?? WORLD_ORIGIN;
+  const view = createWorldView({ context, document, world, tiles, seed, executor, onError: reportError });
+  const streamer = createStreamer({ world, seed, executor, store, onError: reportError });
+  const start = startingPoint(saved, inspector);
   await streamer.loadAround(start);
   await view.build(start);
-  const player = createPlayer(world, saved);
+  const player = createPlayer(world, saved, start);
   const autosave = new WorldAutosave({ world, store, player, seed, onError: reportError });
   if (saved === null) await autosave.saveNow();
   saveOnPageExit(window, document, autosave);
@@ -150,7 +111,7 @@ async function buildGame(context, startScreen) {
     onError: reportError,
     targeting: new BlockTargeting(createTargetQuery(world)),
     ...createInput(context.canvas),
-    ...createHud(tiles, hotbar, seed),
+    ...createHud(tiles, hotbar, inspector),
   });
   game.start();
   startGameLoop(window, (elapsed) => game.frame(elapsed));

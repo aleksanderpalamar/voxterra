@@ -60,3 +60,18 @@ test('não coloca bloco quando o alvo não possui face definida', () => {
   const hit = { position: { x: 8, y: 4, z: 8 }, normal: { x: 0, y: 0, z: 0 } };
   assert.equal(placeBlock(world, hit, BlockType.DIRT, farAwayBox), PlacementResult.INVALID_FACE);
 });
+
+test('é possível colocar um bloco dentro da água', () => {
+  const world = createFlatWorld({ groundY: 4 });
+  world.setBlock(8, 5, 8, BlockType.WATER);
+  const hit = { position: { x: 8, y: 4, z: 8 }, normal: { x: 0, y: 1, z: 0 } };
+  assert.equal(placeBlock(world, hit, BlockType.STONE, farAwayBox), PlacementResult.PLACED);
+  assert.equal(world.getBlock(8, 5, 8), BlockType.STONE);
+});
+
+test('água não pode ser quebrada', () => {
+  const world = createFlatWorld({ groundY: 4 });
+  world.setBlock(8, 5, 8, BlockType.WATER);
+  assert.equal(breakBlock(world, { x: 8, y: 5, z: 8 }), BreakResult.EMPTY);
+  assert.equal(world.getBlock(8, 5, 8), BlockType.WATER);
+});

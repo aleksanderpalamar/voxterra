@@ -26,8 +26,9 @@ test('job de malha reproduz a malha montada a partir do mundo', () => {
   const { result, transfer } = createChunkJobHandler()({ type: JobType.MESH, height: HEIGHT, chunkX: 0, chunkZ: 0, volume });
   const expected = buildChunkMesh(createMeshSource(world), chunkBounds(0, 0, HEIGHT), createTileUvLookup());
   assert.deepEqual(result, expected);
-  assert.equal(transfer.length, 5);
-  assert.ok(transfer.includes(result.indices.buffer));
+  assert.equal(transfer.length, 10);
+  assert.ok(transfer.includes(result.solid.indices.buffer));
+  assert.ok(transfer.includes(result.water.positions.buffer));
 });
 
 test('tipo de job desconhecido gera erro explícito', () => {

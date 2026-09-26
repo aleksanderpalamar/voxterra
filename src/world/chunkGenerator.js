@@ -1,35 +1,44 @@
 import { BlockType } from './blockTypes.js';
 import { Chunk } from './chunk.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from './chunkLayout.js';
-import { createRandom } from '../core/random.js';
-import { createNoise2D } from '../core/noise.js';
-import { TERRAIN_SETTINGS, fillColumn, surfaceHeight } from './terrainGenerator.js';
+import { fillColumn } from './terrainGenerator.js';
+import { SEA_LEVEL, TerrainShaper } from './terrainShape.js';
 import { placeTree, treesInArea } from './treeGenerator.js';
 import { ClimateSampler } from './climate.js';
-import { resolveBiome } from './biomes.js';
+import { resolveBiome, withinBeachBand } from './biomes.js';
 import { surfaceLayers } from './surfaceRules.js';
 
 const CEILING_MARGIN = 10;
+const SHORE_SAMPLES = Object.freeze([
+  [2, 0], [-2, 0], [0, 2], [0, -2],
+  [4, 0], [-4, 0], [0, 4], [0, -4],
+  [3, 3], [3, -3], [-3, 3], [-3, -3],
+]);
 
 export class ChunkGenerator {
-  constructor(seed, height = WORLD_HEIGHT, settings = TERRAIN_SETTINGS) {
+  constructor(seed, height = WORLD_HEIGHT) {
     this.seed = seed;
     this.height = height;
-    this.settings = settings;
-    this.maxSurfaceY = height - CEILING_MARGIN;
-    this.noise = createNoise2D(createRandom(seed));
+    this.shaper = new TerrainShaper(seed, height - CEILING_MARGIN);
     this.climate = new ClimateSampler(seed);
   }
 
   surfaceHeightAt(x, z) {
-    return surfaceHeight(this.noise, x, z, this.maxSurfaceY, this.settings);
+    return this.shaper.heightAt(x, z);
   }
 
   columnAt(x, z) {
-    const surfaceY = this.surfaceHeightAt(x, z);
+    const continentalness = this.shaper.continentalnessAt(x, z);
+    const surfaceY = this.shaper.heightAt(x, z, continentalness);
     const climate = this.climate.sample(x, z);
-    const biome = resolveBiome({ ...climate, surfaceY });
-    return { surfaceY, climate, biome, surface: surfaceLayers(biome, climate, surfaceY) };
+    const besideWater = withinBeachBand(surfaceY) && this.hasWaterNearby(x, z, surfaceY);
+    const biome = resolveBiome({ ...climate, surfaceY, continentalness, besideWater });
+    return { surfaceY, continentalness, climate, biome, surface: surfaceLayers(biome, climate, surfaceY) };
+  }
+
+  hasWaterNearby(x, z, surfaceY) {
+    if (surfaceY < SEA_LEVEL) return true;
+    return SHORE_SAMPLES.some(([dx, dz]) => this.shaper.heightAt(x + dx, z + dz) < SEA_LEVEL);
   }
 
   plantableGround(x, z) {
@@ -50,7 +59,7 @@ export class ChunkGenerator {
         const x = chunk.originX + localX;
         const z = chunk.originZ + localZ;
         const column = this.columnAt(x, z);
-        fillColumn(chunk, x, z, column.surfaceY, column.surface);
+        fillColumn(chunk, x, z, column.surfaceY, column.surface, SEA_LEVEL);
       }
     }
   }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { DebugOverlay, formatDebugLines } from '../src/hud/debugOverlay.js';
 import { Biome } from '../src/world/biomes.js';
 
-const column = { biome: Biome.TAIGA, climate: { temperature: -0.3456, humidity: 0.1 } };
+const column = { biome: Biome.TAIGA, continentalness: 0.456, climate: { temperature: -0.3456, humidity: 0.1 } };
 
 test('formatDebugLines mostra posição, chunk, bioma e clima', () => {
   const lines = formatDebugLines({ x: -17.25, y: 30, z: 5.5 }, column);
@@ -11,6 +11,7 @@ test('formatDebugLines mostra posição, chunk, bioma e clima', () => {
     'XYZ: -17.3 / 30.0 / 5.5',
     'Chunk: -2, 0',
     'Bioma: Taiga',
+    'Continentalidade: 0.46',
     'Temperatura: -0.35',
     'Umidade: 0.10',
   ]);
@@ -59,4 +60,12 @@ test('a coluna consultada é a que está sob o jogador', () => {
   overlay.toggle();
   overlay.update({ x: -0.5, y: 10, z: 3.9 });
   assert.deepEqual(asked, [[-1, 3]]);
+});
+
+test('valores muito próximos de zero não aparecem como -0.00', () => {
+  const nearZero = { ...column, continentalness: -0.001, climate: { temperature: -0.004, humidity: 0.1 } };
+  const lines = formatDebugLines({ x: -0.01, y: 30, z: 5.5 }, nearZero);
+  assert.equal(lines[0], 'XYZ: 0.0 / 30.0 / 5.5');
+  assert.equal(lines[3], 'Continentalidade: 0.00');
+  assert.equal(lines[4], 'Temperatura: 0.00');
 });

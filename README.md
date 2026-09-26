@@ -19,7 +19,9 @@ No build step, no bundler and no runtime dependencies besides [Three.js](https:/
 ### Features
 
 - **Infinite procedural world**: rolling hills, rocky peaks and trees generated chunk by chunk from a seed (Perlin noise with fractal octaves).
-- **Biomes**: temperature and humidity maps shape eight land biomes (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest and Mountains), with sand dunes, snowfields, snowy peaks and irregular borders between them.
+- **Continents and oceans**: a continentalness map shapes oceans, coasts and inland terrain around a fixed sea level, with lakes wherever the land dips below it.
+- **Biomes**: temperature and humidity maps shape eight land biomes (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest and Mountains), plus Ocean and Beach, with sand dunes, snowfields, snowy peaks and irregular borders between them.
+- **Water**: a translucent fluid you can walk into and swim in, with buoyancy, slower movement and a separate underwater atmosphere (short blue fog, tint and no sky).
 - **Chunk streaming**: chunks are generated around the player and unloaded when they fall behind.
 - **Web Workers**: terrain generation and meshing run off the main thread, so new terrain appears without stutters.
 - **Voxel rendering**: face-culled chunk meshes, per-vertex ambient occlusion, see-through leaves and textures painted by code (no image assets).
@@ -49,7 +51,7 @@ To start a new world from a specific seed, open `http://localhost:8000/?seed=123
 | Input | Action |
 | --- | --- |
 | `W` `A` `S` `D` | Move |
-| `Space` | Jump |
+| `Space` | Jump; in water, swim up (against a ledge, climb out) |
 | Mouse | Look around |
 | Left click | Break block |
 | Right click | Place block |
@@ -116,7 +118,9 @@ Sem etapa de build, sem bundler e sem dependências além do [Three.js](https://
 ### Funcionalidades
 
 - **Mundo procedural infinito**: colinas, picos rochosos e árvores gerados chunk a chunk a partir de uma seed (ruído Perlin com oitavas fractais).
-- **Biomas**: mapas de temperatura e umidade formam oito biomas terrestres (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest e Mountains), com dunas de areia, campos de neve, picos nevados e fronteiras irregulares entre eles.
+- **Continentes e oceanos**: um mapa de continentalidade molda oceanos, costas e interior em volta de um nível do mar fixo, com lagos onde o terreno fica abaixo dele.
+- **Biomas**: mapas de temperatura e umidade formam oito biomas terrestres (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest e Mountains), além de Ocean e Beach, com dunas de areia, campos de neve, picos nevados e fronteiras irregulares entre eles.
+- **Água**: um fluido translúcido em que você entra e nada, com flutuabilidade, movimento mais lento e uma atmosfera subaquática própria (névoa azul curta, tonalidade e sem céu).
 - **Streaming de chunks**: os chunks são gerados em volta do jogador e descarregados quando ficam para trás.
 - **Web Workers**: a geração do terreno e a montagem das malhas rodam fora da thread principal, então o terreno novo aparece sem engasgos.
 - **Renderização voxel**: malhas por chunk só com as faces visíveis, oclusão ambiente por vértice, folhas vazadas e texturas pintadas por código (sem imagens).
@@ -144,7 +148,7 @@ Para começar um mundo novo a partir de uma seed específica, abra `http://local
 | Entrada | Ação |
 | --- | --- |
 | `W` `A` `S` `D` | Mover |
-| `Espaço` | Pular |
+| `Espaço` | Pular; na água, subir nadando (encostado num degrau, sair da água) |
 | Mouse | Olhar |
 | Clique esquerdo | Quebrar bloco |
 | Clique direito | Colocar bloco |

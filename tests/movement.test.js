@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MOVEMENT_SETTINGS, horizontalVelocity, verticalVelocity } from '../src/player/movement.js';
+import { MOVEMENT_SETTINGS, horizontalVelocity, swimVerticalVelocity, verticalVelocity } from '../src/player/movement.js';
 
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} != ${expected}`);
 
@@ -42,4 +42,31 @@ test('pulo só acontece quando o jogador está no chão', () => {
 
 test('gravidade respeita a velocidade terminal', () => {
   assert.equal(verticalVelocity(-1000, { jump: false }, false, 1), -MOVEMENT_SETTINGS.terminalSpeed);
+});
+
+const idle = { jump: false };
+const swimUp = { jump: true };
+
+test('na água o jogador afunda devagar até a velocidade limite', () => {
+  let velocity = 0;
+  for (let i = 0; i < 300; i++) velocity = swimVerticalVelocity(velocity, idle, false, 1 / 60);
+  assert.ok(Math.abs(velocity + MOVEMENT_SETTINGS.waterSinkSpeed) < 1e-6);
+  assert.ok(MOVEMENT_SETTINGS.waterSinkSpeed < MOVEMENT_SETTINGS.terminalSpeed / 5);
+});
+
+test('ao cair na água a queda rápida é amortecida', () => {
+  const velocity = swimVerticalVelocity(-20, idle, false, 1 / 60);
+  assert.ok(velocity > -20);
+  let settled = -20;
+  for (let i = 0; i < 60; i++) settled = swimVerticalVelocity(settled, idle, false, 1 / 60);
+  assert.ok(settled > -MOVEMENT_SETTINGS.waterSinkSpeed - 0.5, `ainda a ${settled} m/s após 1 s`);
+});
+
+test('segurar pular na água faz o jogador subir', () => {
+  assert.equal(swimVerticalVelocity(-2, swimUp, false, 1 / 60), MOVEMENT_SETTINGS.swimSpeed);
+});
+
+test('encostado num degrau dentro da água, pular dá impulso para sair', () => {
+  assert.equal(swimVerticalVelocity(0, swimUp, true, 1 / 60), MOVEMENT_SETTINGS.waterExitSpeed);
+  assert.ok(MOVEMENT_SETTINGS.waterExitSpeed > MOVEMENT_SETTINGS.jumpSpeed);
 });

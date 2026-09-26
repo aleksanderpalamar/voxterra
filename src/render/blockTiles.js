@@ -1,5 +1,6 @@
 import { BlockType } from '../world/blockTypes.js';
 import { FaceDirection } from './faceDefinitions.js';
+import { tileUvRect } from './atlasLayout.js';
 
 export const Tile = Object.freeze({
   GRASS_TOP: 0,
@@ -11,11 +12,11 @@ export const Tile = Object.freeze({
   LEAVES: 6,
   SAND: 7,
   SNOW: 8,
+  WATER: 9,
 });
 
 export const TILE_COUNT = Object.keys(Tile).length;
 
-const UV_INSET = 0.002;
 
 function uniformTiles(tile) {
   return Object.freeze({ top: tile, bottom: tile, side: tile });
@@ -29,6 +30,7 @@ const BLOCK_TILES = Object.freeze({
   [BlockType.LEAVES]: uniformTiles(Tile.LEAVES),
   [BlockType.SAND]: uniformTiles(Tile.SAND),
   [BlockType.SNOW]: uniformTiles(Tile.SNOW),
+  [BlockType.WATER]: uniformTiles(Tile.WATER),
 });
 
 const MISSING_TILES = uniformTiles(Tile.STONE);
@@ -45,22 +47,11 @@ export function tileFor(blockType, direction) {
   }
 }
 
-export function tileUvRect(tile, tileCount = TILE_COUNT) {
-  const width = 1 / tileCount;
-  const inset = width * UV_INSET;
-  return Object.freeze({
-    u0: tile * width + inset,
-    u1: (tile + 1) * width - inset,
-    v0: UV_INSET,
-    v1: 1 - UV_INSET,
-  });
-}
-
 export function createTileUvLookup() {
   const cache = new Map();
   return (blockType, direction) => {
     const tile = tileFor(blockType, direction);
-    if (!cache.has(tile)) cache.set(tile, tileUvRect(tile));
+    if (!cache.has(tile)) cache.set(tile, tileUvRect(tile, TILE_COUNT));
     return cache.get(tile);
   };
 }

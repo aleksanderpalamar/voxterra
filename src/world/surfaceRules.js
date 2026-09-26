@@ -1,5 +1,6 @@
 import { BlockType } from './blockTypes.js';
 import { Biome } from './biomes.js';
+import { SEA_LEVEL } from './terrainShape.js';
 
 export const SNOW_LINE = 48;
 
@@ -17,6 +18,8 @@ const BARE_ROCK = layers(BlockType.STONE, BlockType.STONE, 0);
 const SNOWY_ROCK = layers(BlockType.SNOW, BlockType.STONE, 0);
 
 const BIOME_SURFACES = Object.freeze({
+  [Biome.OCEAN]: DUNES,
+  [Biome.BEACH]: DUNES,
   [Biome.DESERT]: DUNES,
   [Biome.TUNDRA]: SNOWFIELD,
 });
@@ -28,5 +31,6 @@ function mountainSurface(climate, surfaceY) {
 
 export function surfaceLayers(biome, climate, surfaceY) {
   if (biome === Biome.MOUNTAINS) return mountainSurface(climate, surfaceY);
+  if (surfaceY < SEA_LEVEL) return DUNES;
   return BIOME_SURFACES[biome] ?? GRASSLAND;
 }

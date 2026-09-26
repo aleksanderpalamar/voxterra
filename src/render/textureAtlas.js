@@ -16,6 +16,18 @@ export function createAtlasTexture(tilePixels, tileSize) {
   return texture;
 }
 
+const WATER_OPACITY = 0.72;
+
+export function createWaterMaterial(texture) {
+  return new THREE.MeshLambertMaterial({
+    map: texture,
+    transparent: true,
+    opacity: WATER_OPACITY,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+}
+
 export function createBlockMaterial(texture) {
   return new THREE.MeshLambertMaterial({ map: texture, vertexColors: true, alphaTest: ALPHA_CUTOFF });
 }

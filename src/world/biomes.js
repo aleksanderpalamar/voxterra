@@ -1,4 +1,8 @@
+import { SEA_LEVEL } from './terrainShape.js';
+
 export const Biome = Object.freeze({
+  OCEAN: 'ocean',
+  BEACH: 'beach',
   PLAINS: 'plains',
   FOREST: 'forest',
   TAIGA: 'taiga',
@@ -12,6 +16,8 @@ export const Biome = Object.freeze({
 export const MOUNTAIN_LINE = 35;
 
 const BIOME_NAMES = Object.freeze({
+  [Biome.OCEAN]: 'Ocean',
+  [Biome.BEACH]: 'Beach',
   [Biome.PLAINS]: 'Plains',
   [Biome.FOREST]: 'Forest',
   [Biome.TAIGA]: 'Taiga',
@@ -21,6 +27,10 @@ const BIOME_NAMES = Object.freeze({
   [Biome.RAINFOREST]: 'Rainforest',
   [Biome.MOUNTAINS]: 'Mountains',
 });
+
+const OCEAN_LIMIT = -0.05;
+const BEACH_DEPTH = 1;
+const BEACH_HEIGHT = 1;
 
 const COLD = -0.2;
 const VERY_COLD = -0.6;
@@ -41,7 +51,13 @@ function withinRange(value, [min, max]) {
   return value >= min && (value < max || max === 1);
 }
 
-export function resolveBiome({ temperature, humidity, surfaceY }) {
+export function withinBeachBand(surfaceY) {
+  return surfaceY >= SEA_LEVEL - BEACH_DEPTH && surfaceY <= SEA_LEVEL + BEACH_HEIGHT;
+}
+
+export function resolveBiome({ temperature, humidity, surfaceY, continentalness, besideWater = false }) {
+  if (besideWater && withinBeachBand(surfaceY)) return Biome.BEACH;
+  if (surfaceY < SEA_LEVEL && continentalness < OCEAN_LIMIT) return Biome.OCEAN;
   if (surfaceY >= MOUNTAIN_LINE) return Biome.MOUNTAINS;
   const rule = CLIMATE_RULES.find((candidate) => withinRange(temperature, candidate.temperature)
     && withinRange(humidity, candidate.humidity));

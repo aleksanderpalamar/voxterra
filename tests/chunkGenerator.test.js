@@ -5,6 +5,7 @@ import { ChunkedWorld } from '../src/world/chunkedWorld.js';
 import { BlockType } from '../src/world/blockTypes.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from '../src/world/chunkLayout.js';
 import { TREE_SETTINGS, treesInArea } from '../src/world/treeGenerator.js';
+import { SEA_LEVEL } from '../src/world/terrainShape.js';
 
 function loadChunks(generator, coordinates) {
   const world = new ChunkedWorld(WORLD_HEIGHT);
@@ -122,4 +123,49 @@ test('árvores só nascem onde o terreno permite plantar', () => {
   const trees = treesInArea(generator.seed, area, generator);
   assert.ok(trees.length > 0);
   trees.forEach((tree) => assert.equal(generator.columnAt(tree.x, tree.z).surface.top, BlockType.GRASS));
+});
+
+test('colunas abaixo do nível do mar ficam cobertas de água até o nível do mar', () => {
+  const generator = new ChunkGenerator(42);
+  const world = loadChunks(generator, grid(-4, 4));
+  let underwater = 0;
+  for (let z = -64; z < 80; z += 3) {
+    for (let x = -64; x < 80; x += 3) {
+      const { surfaceY } = generator.columnAt(x, z);
+      if (surfaceY >= SEA_LEVEL) {
+        assert.notEqual(world.getBlock(x, SEA_LEVEL + 1, z), BlockType.WATER);
+        continue;
+      }
+      underwater += 1;
+      assert.equal(world.getBlock(x, surfaceY + 1, z), BlockType.WATER);
+      assert.equal(world.getBlock(x, SEA_LEVEL, z), BlockType.WATER);
+      assert.equal(world.getBlock(x, SEA_LEVEL + 1, z), BlockType.AIR);
+    }
+  }
+  assert.ok(underwater > 0, 'a região testada não tem água');
+});
+
+test('nenhuma árvore nasce dentro da água', () => {
+  const generator = new ChunkGenerator(42);
+  const trees = treesInArea(generator.seed, { minX: -400, minZ: -400, maxX: 400, maxZ: 400 }, generator);
+  trees.forEach((tree) => assert.ok(tree.groundY >= SEA_LEVEL));
+});
+
+test('toda praia gerada tem água a poucos blocos', () => {
+  const generator = new ChunkGenerator(7);
+  let beaches = 0;
+  for (let z = -600; z < 600; z += 9) {
+    for (let x = -600; x < 600; x += 9) {
+      if (generator.columnAt(x, z).biome !== 'beach') continue;
+      beaches += 1;
+      let nearest = Infinity;
+      for (let dz = -4; dz <= 4; dz++) {
+        for (let dx = -4; dx <= 4; dx++) {
+          if (generator.surfaceHeightAt(x + dx, z + dz) < SEA_LEVEL) nearest = Math.min(nearest, Math.hypot(dx, dz));
+        }
+      }
+      assert.ok(nearest <= 4.5, `praia sem água em ${x},${z}`);
+    }
+  }
+  assert.ok(beaches > 0);
 });
