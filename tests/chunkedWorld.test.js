@@ -32,7 +32,8 @@ test('listeners são notificados apenas quando o bloco muda', () => {
   world.setBlock(1, 1, 1, BlockType.WOOD);
   world.setBlock(1, 1, 1, BlockType.WOOD);
   world.setBlock(CHUNK_SIZE, 1, 1, BlockType.WOOD);
-  assert.deepEqual(changes, [[1, 1, 1, BlockType.WOOD]]);
+  world.setBlock(1, 1, 1, BlockType.AIR);
+  assert.deepEqual(changes, [[1, 1, 1, BlockType.WOOD, BlockType.AIR], [1, 1, 1, BlockType.AIR, BlockType.WOOD]]);
 });
 
 test('findSurfaceY retorna o bloco sólido mais alto ou null', () => {

@@ -28,7 +28,7 @@ test('select ignora índices inválidos', () => {
 test('cycle percorre a hotbar de forma circular', () => {
   const hotbar = new Hotbar(PLACEABLE_BLOCKS);
   hotbar.cycle(-1);
-  assert.equal(hotbar.selectedBlock, BlockType.LEAVES);
+  assert.equal(hotbar.selectedBlock, BlockType.PERSISTENT_LEAVES);
   hotbar.cycle(1);
   assert.equal(hotbar.selectedBlock, BlockType.GRASS);
 });

@@ -11,6 +11,7 @@ export const BlockType = Object.freeze({
   ICE: 9,
   PINE_LEAVES: 10,
   CACTUS: 11,
+  PERSISTENT_LEAVES: 12,
 });
 
 export const RenderLayer = Object.freeze({
@@ -37,6 +38,7 @@ const BLOCK_NAMES = Object.freeze({
   [BlockType.ICE]: 'Ice',
   [BlockType.PINE_LEAVES]: 'Pine Leaves',
   [BlockType.CACTUS]: 'Cactus',
+  [BlockType.PERSISTENT_LEAVES]: 'Leaves',
 });
 
 const SOLID_BLOCK = Object.freeze({
@@ -51,6 +53,7 @@ const BLOCK_PROPERTIES = Object.freeze({
   [BlockType.AIR]: Object.freeze({ ...SOLID_BLOCK, solid: false, opaque: false, replaceable: true, layer: RenderLayer.NONE }),
   [BlockType.LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
   [BlockType.PINE_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
+  [BlockType.PERSISTENT_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
   [BlockType.WATER]: Object.freeze({
     solid: false,
     opaque: false,
@@ -65,7 +68,7 @@ export const PLACEABLE_BLOCKS = Object.freeze([
   BlockType.DIRT,
   BlockType.STONE,
   BlockType.WOOD,
-  BlockType.LEAVES,
+  BlockType.PERSISTENT_LEAVES,
 ]);
 
 function propertiesOf(type) {

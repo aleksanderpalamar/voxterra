@@ -30,3 +30,7 @@ test('areia e neve usam o mesmo tile em todas as faces', () => {
 test('água usa o tile de água em todas as faces', () => {
   [FaceDirection.TOP, FaceDirection.FRONT].forEach((direction) => assert.equal(tileFor(BlockType.WATER, direction), Tile.WATER));
 });
+
+test('folhas persistentes usam a mesma textura das folhas comuns', () => {
+  assert.equal(tileFor(BlockType.PERSISTENT_LEAVES, FaceDirection.TOP), Tile.LEAVES);
+});

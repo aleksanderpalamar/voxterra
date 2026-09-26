@@ -56,9 +56,11 @@ export class ChunkedWorld {
 
   setBlock(x, y, z, type) {
     const chunk = this.chunkAt(x, z);
-    if (chunk === null || !chunk.setBlock(x, y, z, type)) return false;
+    if (chunk === null) return false;
+    const previous = chunk.getBlock(x, y, z);
+    if (!chunk.setBlock(x, y, z, type)) return false;
     chunk.markDirty();
-    this.blockListeners.forEach((listener) => listener(x, y, z, type));
+    this.blockListeners.forEach((listener) => listener(x, y, z, type, previous));
     return true;
   }
 

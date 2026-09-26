@@ -32,6 +32,7 @@ const BLOCK_TILES = Object.freeze({
   [BlockType.STONE]: uniformTiles(Tile.STONE),
   [BlockType.WOOD]: Object.freeze({ top: Tile.WOOD_TOP, bottom: Tile.WOOD_TOP, side: Tile.WOOD_SIDE }),
   [BlockType.LEAVES]: uniformTiles(Tile.LEAVES),
+  [BlockType.PERSISTENT_LEAVES]: uniformTiles(Tile.LEAVES),
   [BlockType.SAND]: uniformTiles(Tile.SAND),
   [BlockType.SNOW]: uniformTiles(Tile.SNOW),
   [BlockType.WATER]: uniformTiles(Tile.WATER),

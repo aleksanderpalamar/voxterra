@@ -37,6 +37,7 @@ export class Game {
     this.fpsCounter = dependencies.fpsCounter;
     this.debugOverlay = dependencies.debugOverlay;
     this.autosave = dependencies.autosave;
+    this.leafDecay = dependencies.leafDecay;
     this.menuMode = dependencies.menuMode;
     this.storageMode = dependencies.storageMode;
     this.confirm = dependencies.confirm;
@@ -164,7 +165,10 @@ export class Game {
     const dt = Math.min(elapsed, MAX_FRAME_TIME);
     this.player.update(dt, this.currentIntent());
     this.streamer.update(this.player.position);
-    if (this.state === GameState.PLAYING) this.autosave.update(dt);
+    if (this.state === GameState.PLAYING) {
+      this.autosave.update(dt);
+      this.leafDecay.update(dt);
+    }
     this.refreshTarget();
     this.view.update(dt, this.player, this.targeting.current);
     this.view.render();

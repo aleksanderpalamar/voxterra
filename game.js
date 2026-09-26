@@ -1,5 +1,6 @@
 import { ChunkedWorld } from './src/world/chunkedWorld.js';
 import { ChunkGenerator } from './src/world/chunkGenerator.js';
+import { LeafDecay } from './src/world/leafDecay.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from './src/world/chunkLayout.js';
 import { STREAMING_SETTINGS } from './src/world/chunkStreamer.js';
 import { PLACEABLE_BLOCKS } from './src/world/blockTypes.js';
@@ -104,6 +105,7 @@ async function buildGame(context, startScreen) {
     streamer,
     startScreen,
     autosave,
+    leafDecay: new LeafDecay({ world }),
     storageMode,
     menuMode: saved === null ? MenuMode.NEW_WORLD : MenuMode.RESUME,
     confirm: (message) => window.confirm(message),

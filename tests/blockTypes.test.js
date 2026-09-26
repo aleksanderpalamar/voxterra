@@ -8,6 +8,7 @@ import {
   isOpaqueBlock,
   isReplaceableBlock,
   isSolidBlock,
+  PLACEABLE_BLOCKS,
   mediumOf,
   renderLayerOf,
 } from '../src/world/blockTypes.js';
@@ -61,4 +62,12 @@ test('folhas de pinheiro são vazadas e cacto é sólido e opaco', () => {
   assert.equal(isOpaqueBlock(BlockType.PINE_LEAVES), false);
   assert.equal(isOpaqueBlock(BlockType.CACTUS), true);
   assert.equal(blockName(BlockType.CACTUS), 'Cactus');
+});
+
+test('folhas persistentes se comportam como folhas comuns e são o item da hotbar', () => {
+  assert.equal(isSolidBlock(BlockType.PERSISTENT_LEAVES), true);
+  assert.equal(isOpaqueBlock(BlockType.PERSISTENT_LEAVES), false);
+  assert.equal(blockName(BlockType.PERSISTENT_LEAVES), 'Leaves');
+  assert.ok(PLACEABLE_BLOCKS.includes(BlockType.PERSISTENT_LEAVES));
+  assert.ok(!PLACEABLE_BLOCKS.includes(BlockType.LEAVES));
 });
