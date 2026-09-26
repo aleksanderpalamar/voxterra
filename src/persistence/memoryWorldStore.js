@@ -10,13 +10,17 @@ export class MemoryWorldStore {
     return this.chunks.has(chunkKey(chunkX, chunkZ));
   }
 
+  chunkCoordinates() {
+    return [...this.chunks.values()].map(({ chunkX, chunkZ }) => ({ chunkX, chunkZ }));
+  }
+
   async loadChunk(chunkX, chunkZ) {
-    const blocks = this.chunks.get(chunkKey(chunkX, chunkZ));
-    return blocks === undefined ? null : blocks.slice();
+    const entry = this.chunks.get(chunkKey(chunkX, chunkZ));
+    return entry === undefined ? null : entry.blocks.slice();
   }
 
   async saveChunk(chunkX, chunkZ, blocks) {
-    this.chunks.set(chunkKey(chunkX, chunkZ), blocks.slice());
+    this.chunks.set(chunkKey(chunkX, chunkZ), { chunkX, chunkZ, blocks: blocks.slice() });
   }
 
   async loadMetadata() {

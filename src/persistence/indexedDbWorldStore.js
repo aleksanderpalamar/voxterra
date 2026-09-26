@@ -1,4 +1,5 @@
-const DATABASE_NAME = 'minecraft-web-demo';
+export const DATABASE_NAME = 'voxterra';
+export const LEGACY_DATABASE_NAME = 'minecraft-web-demo';
 const DATABASE_VERSION = 1;
 const METADATA_KEY = 'world';
 const BLOCKED_MESSAGE = 'O banco de dados está bloqueado por outra aba do jogo';
@@ -15,8 +16,8 @@ function requestResult(request) {
   });
 }
 
-function openDatabase(indexedDB) {
-  const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
+function openDatabase(indexedDB, name) {
+  const request = indexedDB.open(name, DATABASE_VERSION);
   request.addEventListener('upgradeneeded', () => {
     const database = request.result;
     Object.values(ObjectStore)
@@ -29,15 +30,60 @@ function openDatabase(indexedDB) {
   return Promise.race([requestResult(request), blocked]);
 }
 
+function openIfExists(indexedDB, name) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(name);
+    let missing = false;
+    request.addEventListener('upgradeneeded', (event) => {
+      if (event.oldVersion !== 0) return;
+      missing = true;
+      request.transaction.abort();
+    });
+    request.addEventListener('success', () => resolve(request.result));
+    request.addEventListener('error', (event) => {
+      if (!missing) {
+        reject(request.error);
+        return;
+      }
+      event.preventDefault();
+      resolve(null);
+    });
+    request.addEventListener('blocked', () => reject(new Error(BLOCKED_MESSAGE)));
+  });
+}
+
+export function deleteDatabase(indexedDB, name) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(name);
+    request.addEventListener('success', () => resolve());
+    request.addEventListener('error', () => reject(request.error));
+    request.addEventListener('blocked', () => reject(new Error(BLOCKED_MESSAGE)));
+  });
+}
+
 function chunkStorageKey(chunkX, chunkZ) {
   return `${chunkX},${chunkZ}`;
 }
 
+function parseChunkStorageKey(key) {
+  const [chunkX, chunkZ] = key.split(',').map(Number);
+  return { chunkX, chunkZ };
+}
+
 export class IndexedDbWorldStore {
-  static async open(indexedDB) {
-    const database = await openDatabase(indexedDB);
-    const keys = await requestResult(database.transaction(ObjectStore.CHUNKS).objectStore(ObjectStore.CHUNKS).getAllKeys());
-    return new IndexedDbWorldStore(database, new Set(keys));
+  static async open(indexedDB, name = DATABASE_NAME) {
+    return IndexedDbWorldStore.fromDatabase(await openDatabase(indexedDB, name));
+  }
+
+  static async openExisting(indexedDB, name) {
+    const database = await openIfExists(indexedDB, name);
+    if (database === null) return null;
+    return IndexedDbWorldStore.fromDatabase(database);
+  }
+
+  static async fromDatabase(database) {
+    const chunks = database.transaction(ObjectStore.CHUNKS).objectStore(ObjectStore.CHUNKS);
+    return new IndexedDbWorldStore(database, new Set(await requestResult(chunks.getAllKeys())));
   }
 
   constructor(database, chunkKeys) {
@@ -47,6 +93,14 @@ export class IndexedDbWorldStore {
 
   hasChunk(chunkX, chunkZ) {
     return this.chunkKeys.has(chunkStorageKey(chunkX, chunkZ));
+  }
+
+  chunkCoordinates() {
+    return [...this.chunkKeys].map(parseChunkStorageKey);
+  }
+
+  close() {
+    this.database.close();
   }
 
   async loadChunk(chunkX, chunkZ) {

@@ -32,3 +32,11 @@ test('clear apaga chunks e metadados', async () => {
   assert.equal(store.hasChunk(0, 0), false);
   assert.equal(await store.loadMetadata(), null);
 });
+
+test('chunkCoordinates lista as coordenadas dos chunks salvos', async () => {
+  const store = new MemoryWorldStore();
+  await store.saveChunk(-3, 5, new Uint8Array(1));
+  await store.saveChunk(2, 0, new Uint8Array(1));
+  const coordinates = store.chunkCoordinates().map(({ chunkX, chunkZ }) => [chunkX, chunkZ]).sort();
+  assert.deepEqual(coordinates, [[-3, 5], [2, 0]]);
+});

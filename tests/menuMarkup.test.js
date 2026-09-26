@@ -19,3 +19,10 @@ test('o menu exibe o botão de multiplayer desabilitado com a etiqueta Em breve'
   assert.match(button.content, /Multiplayer/);
   assert.match(button.content, /Em breve/);
 });
+
+test('o jogo se chama VOXTERRA e exibe o lema no menu', () => {
+  assert.match(html, /<title>VOXTERRA<\/title>/);
+  assert.match(html, /<h1[^>]*class="menu-title"[^>]*>VOXTERRA<\/h1>/);
+  assert.match(html, /Every world begins with a seed/);
+  assert.doesNotMatch(html, /minecraft/i);
+});

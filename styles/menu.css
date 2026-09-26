@@ -26,18 +26,21 @@
 
 .menu-title {
   margin: 0;
+  padding-left: 0.16em;
   font-family: var(--pixel-font);
-  font-size: clamp(26px, 6vw, 38px);
+  font-size: clamp(36px, 10vw, 56px);
   font-weight: 900;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.16em;
   color: #f7f3e3;
-  text-shadow: 3px 3px 0 #3a3a3a, 0 0 24px rgba(124, 201, 90, 0.35);
+  text-shadow: 4px 4px 0 #3a3a3a, 0 0 28px rgba(124, 201, 90, 0.4);
 }
 
 .menu-subtitle {
-  margin: 8px 0 24px;
-  color: var(--text-dim);
-  font-size: 14px;
+  margin: 10px 0 26px;
+  color: #b9dca6;
+  font-size: 15px;
+  font-style: italic;
+  letter-spacing: 0.05em;
 }
 
 .play-button {
