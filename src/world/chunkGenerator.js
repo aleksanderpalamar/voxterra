@@ -1,11 +1,12 @@
-import { BlockType } from './blockTypes.js';
 import { Chunk } from './chunk.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from './chunkLayout.js';
 import { fillColumn } from './terrainGenerator.js';
 import { SEA_LEVEL, TerrainShaper } from './terrainShape.js';
-import { placeTree, treesInArea } from './treeGenerator.js';
+import { plantsInArea } from './floraPlanner.js';
+import { placePlant } from './treeShapes.js';
+import { MAX_CROWN_REACH } from './vegetation.js';
 import { ClimateSampler } from './climate.js';
-import { mayBeBeach, resolveBiome } from './biomes.js';
+import { Biome, mayBeBeach, resolveBiome } from './biomes.js';
 import { surfaceLayers, waterSurfaceBlock } from './surfaceRules.js';
 import { createNoiseField } from './noiseField.js';
 
@@ -53,15 +54,23 @@ export class ChunkGenerator {
     return SHORE_SAMPLES.some(([dx, dz]) => this.shaper.heightAt(x + dx, z + dz) < SEA_LEVEL);
   }
 
-  plantableGround(x, z) {
+  floraSiteAt(x, z, jitter) {
     const column = this.columnAt(x, z);
-    return column.surface.top === BlockType.GRASS ? column.surfaceY : null;
+    if (column.surfaceY < SEA_LEVEL) return null;
+    return { groundY: column.surfaceY, groundBlock: column.surface.top, biome: this.floraBiome(column, jitter) };
+  }
+
+  floraBiome(column, jitter) {
+    if (column.biome === Biome.BEACH) return column.biome;
+    const temperature = column.climate.temperature + jitter.temperature;
+    const humidity = column.climate.humidity + jitter.humidity;
+    return resolveBiome({ temperature, humidity, surfaceY: column.surfaceY, continentalness: column.continentalness });
   }
 
   generate(chunkX, chunkZ) {
     const chunk = new Chunk(chunkX, chunkZ, this.height);
     this.fillTerrain(chunk);
-    this.plantTrees(chunk);
+    this.plantFlora(chunk);
     return chunk;
   }
 
@@ -76,13 +85,15 @@ export class ChunkGenerator {
     }
   }
 
-  plantTrees(chunk) {
+  plantFlora(chunk) {
+    const reach = MAX_CROWN_REACH;
     const area = {
-      minX: chunk.originX,
-      minZ: chunk.originZ,
-      maxX: chunk.originX + CHUNK_SIZE - 1,
-      maxZ: chunk.originZ + CHUNK_SIZE - 1,
+      minX: chunk.originX - reach,
+      minZ: chunk.originZ - reach,
+      maxX: chunk.originX + CHUNK_SIZE - 1 + reach,
+      maxZ: chunk.originZ + CHUNK_SIZE - 1 + reach,
     };
-    treesInArea(this.seed, area, this).forEach((tree) => placeTree(chunk, tree));
+    plantsInArea(this.seed, area, this).forEach((plant) => placePlant(chunk, plant));
   }
+
 }

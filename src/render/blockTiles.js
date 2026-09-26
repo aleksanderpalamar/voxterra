@@ -14,6 +14,9 @@ export const Tile = Object.freeze({
   SNOW: 8,
   WATER: 9,
   ICE: 10,
+  PINE_LEAVES: 11,
+  CACTUS_SIDE: 12,
+  CACTUS_TOP: 13,
 });
 
 export const TILE_COUNT = Object.keys(Tile).length;
@@ -33,6 +36,8 @@ const BLOCK_TILES = Object.freeze({
   [BlockType.SNOW]: uniformTiles(Tile.SNOW),
   [BlockType.WATER]: uniformTiles(Tile.WATER),
   [BlockType.ICE]: uniformTiles(Tile.ICE),
+  [BlockType.PINE_LEAVES]: uniformTiles(Tile.PINE_LEAVES),
+  [BlockType.CACTUS]: Object.freeze({ top: Tile.CACTUS_TOP, bottom: Tile.CACTUS_TOP, side: Tile.CACTUS_SIDE }),
 });
 
 const MISSING_TILES = uniformTiles(Tile.STONE);

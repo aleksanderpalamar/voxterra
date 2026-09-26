@@ -9,6 +9,8 @@ export const BlockType = Object.freeze({
   SNOW: 7,
   WATER: 8,
   ICE: 9,
+  PINE_LEAVES: 10,
+  CACTUS: 11,
 });
 
 export const RenderLayer = Object.freeze({
@@ -33,6 +35,8 @@ const BLOCK_NAMES = Object.freeze({
   [BlockType.SNOW]: 'Snow',
   [BlockType.WATER]: 'Water',
   [BlockType.ICE]: 'Ice',
+  [BlockType.PINE_LEAVES]: 'Pine Leaves',
+  [BlockType.CACTUS]: 'Cactus',
 });
 
 const SOLID_BLOCK = Object.freeze({
@@ -46,6 +50,7 @@ const SOLID_BLOCK = Object.freeze({
 const BLOCK_PROPERTIES = Object.freeze({
   [BlockType.AIR]: Object.freeze({ ...SOLID_BLOCK, solid: false, opaque: false, replaceable: true, layer: RenderLayer.NONE }),
   [BlockType.LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
+  [BlockType.PINE_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
   [BlockType.WATER]: Object.freeze({
     solid: false,
     opaque: false,

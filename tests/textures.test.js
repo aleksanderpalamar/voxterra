@@ -23,16 +23,25 @@ test('tiles sólidos são opacos e do tamanho esperado', () => {
   assert.equal(tiles.length, TILE_COUNT);
   tiles.forEach((pixels, tile) => {
     assert.equal(pixels.length, TILE_SIZE * TILE_SIZE * 4);
-    if (tile === Tile.LEAVES) return;
+    if (tile === Tile.LEAVES || tile === Tile.PINE_LEAVES) return;
     assert.ok(alphaValues(pixels).every((alpha) => alpha === 255));
   });
 });
 
-test('folhas possuem furos transparentes e partes opacas', () => {
-  const alphas = alphaValues(paintTile(Tile.LEAVES));
-  const holes = alphas.filter((alpha) => alpha === 0).length;
-  assert.ok(alphas.every((alpha) => alpha === 0 || alpha === 255));
-  assert.ok(holes > alphas.length * 0.1 && holes < alphas.length * 0.4);
+test('folhas comuns e de pinheiro possuem furos transparentes e partes opacas', () => {
+  [Tile.LEAVES, Tile.PINE_LEAVES].forEach((tile) => {
+    const alphas = alphaValues(paintTile(tile));
+    const holes = alphas.filter((alpha) => alpha === 0).length;
+    assert.ok(alphas.every((alpha) => alpha === 0 || alpha === 255));
+    assert.ok(holes > alphas.length * 0.1 && holes < alphas.length * 0.4);
+  });
+});
+
+test('folhas de pinheiro são mais escuras que as comuns e o cacto é verde', () => {
+  const brightness = (tile) => averageColor(paintTile(tile)).reduce((sum, channel) => sum + channel, 0);
+  assert.ok(brightness(Tile.PINE_LEAVES) < brightness(Tile.LEAVES));
+  const [red, green, blue] = averageColor(paintTile(Tile.CACTUS_SIDE));
+  assert.ok(green > red + 40 && green > blue + 40);
 });
 
 test('furos das folhas mantêm cor de folha para não escurecer o filtro', () => {

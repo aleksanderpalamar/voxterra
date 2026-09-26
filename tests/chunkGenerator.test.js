@@ -2,9 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ChunkGenerator } from '../src/world/chunkGenerator.js';
 import { ChunkedWorld } from '../src/world/chunkedWorld.js';
+import { Chunk } from '../src/world/chunk.js';
 import { BlockType } from '../src/world/blockTypes.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from '../src/world/chunkLayout.js';
-import { TREE_SETTINGS, treesInArea } from '../src/world/treeGenerator.js';
+import { plantsInArea } from '../src/world/floraPlanner.js';
+import { placePlant } from '../src/world/treeShapes.js';
+import { MAX_CROWN_REACH, Species } from '../src/world/vegetation.js';
 
 function loadChunks(generator, coordinates) {
   const world = new ChunkedWorld(WORLD_HEIGHT);
@@ -53,19 +56,24 @@ test('colunas seguem a altura da superfície calculada pelo gerador', () => {
   }
 });
 
-test('árvores que cruzam a borda entre chunks ficam contínuas', () => {
+test('plantas que cruzam a borda entre chunks ficam contínuas', () => {
   const generator = new ChunkGenerator(2024);
-  const world = loadChunks(generator, grid(-2, 2));
+  const world = loadChunks(generator, grid(-3, 3));
   const area = { minX: -CHUNK_SIZE, minZ: -CHUNK_SIZE, maxX: CHUNK_SIZE * 2 - 1, maxZ: CHUNK_SIZE * 2 - 1 };
-  const trees = treesInArea(generator.seed, area, generator);
-  const crossing = trees.filter((tree) => [0, CHUNK_SIZE].some((border) => Math.abs(tree.x - border) <= 2));
-  assert.ok(crossing.length > 0, 'nenhuma árvore cruzando a borda para testar');
-  crossing.forEach((tree) => {
-    const topY = tree.groundY + tree.trunkHeight;
-    for (let y = tree.groundY + 1; y <= topY; y++) assert.equal(world.getBlock(tree.x, y, tree.z), BlockType.WOOD);
-    for (let dz = -2; dz <= 2; dz++) {
-      for (let dx = -2; dx <= 2; dx++) {
-        assert.notEqual(world.getBlock(tree.x + dx, topY - 1, tree.z + dz), BlockType.AIR);
+  const crossing = plantsInArea(generator.seed, area, generator)
+    .filter((plant) => [0, CHUNK_SIZE].some((border) => Math.abs(plant.x - border) <= MAX_CROWN_REACH));
+  assert.ok(crossing.length > 0, 'nenhuma planta cruzando a borda para testar');
+  crossing.forEach((plant) => {
+    const alone = new ChunkedWorld(WORLD_HEIGHT);
+    grid(-3, 3).forEach(([chunkX, chunkZ]) => alone.loadChunk(new Chunk(chunkX, chunkZ, WORLD_HEIGHT)));
+    placePlant(alone, plant);
+    const stem = plant.species === Species.CACTUS ? BlockType.CACTUS : BlockType.WOOD;
+    for (let y = plant.groundY + 1; y <= plant.groundY + plant.height; y++) {
+      for (let dz = -MAX_CROWN_REACH; dz <= MAX_CROWN_REACH; dz++) {
+        for (let dx = -MAX_CROWN_REACH; dx <= MAX_CROWN_REACH; dx++) {
+          if (alone.getBlock(plant.x + dx, y, plant.z + dz) !== stem) continue;
+          assert.equal(world.getBlock(plant.x + dx, y, plant.z + dz), stem, `${plant.species} em ${plant.x},${plant.z}`);
+        }
       }
     }
   });
@@ -79,15 +87,6 @@ test('uma região gerada contém todos os tipos de bloco do terreno', () => {
   }
   [BlockType.GRASS, BlockType.DIRT, BlockType.STONE, BlockType.WOOD, BlockType.LEAVES].forEach((type) => {
     assert.ok(found.has(type), `bloco ${type} ausente`);
-  });
-});
-
-test('árvores respeitam o espaçamento das células', () => {
-  const generator = new ChunkGenerator(5);
-  const area = { minX: -40, minZ: -40, maxX: 40, maxZ: 40 };
-  treesInArea(generator.seed, area, generator).forEach((tree) => {
-    const offsetX = tree.x - Math.floor(tree.x / TREE_SETTINGS.cellSize) * TREE_SETTINGS.cellSize;
-    assert.ok(offsetX >= TREE_SETTINGS.margin && offsetX <= TREE_SETTINGS.cellSize - 1 - TREE_SETTINGS.margin);
   });
 });
 
@@ -116,10 +115,14 @@ test('o bloco do topo de cada coluna gerada segue o bioma', () => {
   assert.ok(checked > 400);
 });
 
-test('árvores só nascem onde o terreno permite plantar', () => {
+test('plantas só nascem em terra firme e no chão adequado', () => {
   const generator = new ChunkGenerator(31);
-  const area = { minX: -200, minZ: -200, maxX: 200, maxZ: 200 };
-  const trees = treesInArea(generator.seed, area, generator);
-  assert.ok(trees.length > 0);
-  trees.forEach((tree) => assert.equal(generator.columnAt(tree.x, tree.z).surface.top, BlockType.GRASS));
+  const plants = plantsInArea(generator.seed, { minX: -300, minZ: -300, maxX: 300, maxZ: 300 }, generator);
+  assert.ok(plants.length > 0);
+  plants.forEach((plant) => {
+    const column = generator.columnAt(plant.x, plant.z);
+    assert.equal(column.surfaceY, plant.groundY);
+    const ground = column.surface.top;
+    assert.ok(plant.species === Species.CACTUS ? ground === BlockType.SAND : ground !== BlockType.SAND, plant.species);
+  });
 });

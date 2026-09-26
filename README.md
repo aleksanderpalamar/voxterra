@@ -21,6 +21,7 @@ No build step, no bundler and no runtime dependencies besides [Three.js](https:/
 - **Infinite procedural world**: rolling hills, rocky peaks and trees generated chunk by chunk from a seed (Perlin noise with fractal octaves).
 - **Continents and oceans**: a continentalness map shapes oceans, coasts and inland terrain around a fixed sea level, with lakes wherever the land dips below it. Lakes have dirt and stone beds, and they freeze over in the tundra.
 - **Biomes**: temperature and humidity maps shape eight land biomes (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest and Mountains), plus Ocean and Beach, with sand dunes, snowfields, snowy peaks and irregular borders between them.
+- **Flora**: each biome has its own vegetation and density: sparse oaks on plains, dense forests, conifers in taigas, flat-topped acacias in savannas, tall trees in rainforests and cacti in deserts. Near borders, species from both sides mix.
 - **Water**: a translucent fluid you can walk into and swim in, with buoyancy, slower movement and a separate underwater atmosphere (short blue fog, tint and no sky).
 - **Chunk streaming**: chunks are generated around the player and unloaded when they fall behind.
 - **Web Workers**: terrain generation and meshing run off the main thread, so new terrain appears without stutters.
@@ -120,6 +121,7 @@ Sem etapa de build, sem bundler e sem dependências além do [Three.js](https://
 - **Mundo procedural infinito**: colinas, picos rochosos e árvores gerados chunk a chunk a partir de uma seed (ruído Perlin com oitavas fractais).
 - **Continentes e oceanos**: um mapa de continentalidade molda oceanos, costas e interior em volta de um nível do mar fixo, com lagos onde o terreno fica abaixo dele. Os lagos têm fundo de terra e pedra e congelam na tundra.
 - **Biomas**: mapas de temperatura e umidade formam oito biomas terrestres (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest e Mountains), além de Ocean e Beach, com dunas de areia, campos de neve, picos nevados e fronteiras irregulares entre eles.
+- **Flora**: cada bioma tem vegetação e densidade próprias: poucos carvalhos na planície, florestas densas, coníferas na taiga, acácias de copa achatada na savana, árvores altas na floresta tropical e cactos no deserto. Perto das fronteiras, as espécies dos dois lados se misturam.
 - **Água**: um fluido translúcido em que você entra e nada, com flutuabilidade, movimento mais lento e uma atmosfera subaquática própria (névoa azul curta, tonalidade e sem céu).
 - **Streaming de chunks**: os chunks são gerados em volta do jogador e descarregados quando ficam para trás.
 - **Web Workers**: a geração do terreno e a montagem das malhas rodam fora da thread principal, então o terreno novo aparece sem engasgos.

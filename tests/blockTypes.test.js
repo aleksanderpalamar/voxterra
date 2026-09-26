@@ -55,3 +55,10 @@ test('gelo é sólido, opaco e tem nome', () => {
   assert.equal(isOpaqueBlock(BlockType.ICE), true);
   assert.equal(blockName(BlockType.ICE), 'Ice');
 });
+
+test('folhas de pinheiro são vazadas e cacto é sólido e opaco', () => {
+  assert.equal(isSolidBlock(BlockType.PINE_LEAVES), true);
+  assert.equal(isOpaqueBlock(BlockType.PINE_LEAVES), false);
+  assert.equal(isOpaqueBlock(BlockType.CACTUS), true);
+  assert.equal(blockName(BlockType.CACTUS), 'Cactus');
+});

@@ -4,7 +4,7 @@ import { ChunkGenerator } from '../src/world/chunkGenerator.js';
 import { ChunkedWorld } from '../src/world/chunkedWorld.js';
 import { BlockType } from '../src/world/blockTypes.js';
 import { WORLD_HEIGHT } from '../src/world/chunkLayout.js';
-import { treesInArea } from '../src/world/treeGenerator.js';
+import { plantsInArea } from '../src/world/floraPlanner.js';
 import { SEA_LEVEL } from '../src/world/terrainShape.js';
 
 function loadChunks(generator, coordinates) {
@@ -42,10 +42,11 @@ test('colunas abaixo do nível do mar ficam cobertas de água até o nível do m
   assert.ok(underwater > 0, 'a região testada não tem água');
 });
 
-test('nenhuma árvore nasce dentro da água', () => {
+test('nenhuma planta nasce dentro da água', () => {
   const generator = new ChunkGenerator(42);
-  const trees = treesInArea(generator.seed, { minX: -400, minZ: -400, maxX: 400, maxZ: 400 }, generator);
-  trees.forEach((tree) => assert.ok(tree.groundY >= SEA_LEVEL));
+  const plants = plantsInArea(generator.seed, { minX: -400, minZ: -400, maxX: 400, maxZ: 400 }, generator);
+  assert.ok(plants.length > 0);
+  plants.forEach((plant) => assert.ok(plant.groundY >= SEA_LEVEL));
 });
 
 test('toda praia gerada tem água a poucos blocos', () => {
