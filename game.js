@@ -1,8 +1,10 @@
 import { ChunkedWorld } from './src/world/chunkedWorld.js';
 import { ChunkGenerator } from './src/world/chunkGenerator.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from './src/world/chunkLayout.js';
+import { ChunkStreamer, STREAMING_SETTINGS } from './src/world/chunkStreamer.js';
+import { MemoryChunkStore } from './src/world/memoryChunkStore.js';
 import { PLACEABLE_BLOCKS } from './src/world/blockTypes.js';
-import { findSpawnPoint, generateRegion } from './src/world/worldGenerator.js';
+import { findSpawnPoint } from './src/world/worldGenerator.js';
 import { createCollisionQuery, createRenderSource, createTargetQuery } from './src/world/worldQueries.js';
 import { VoxelCollider } from './src/physics/voxelCollider.js';
 import { PLAYER_DIMENSIONS, Player } from './src/player/player.js';
@@ -24,18 +26,8 @@ import { StartScreen } from './src/ui/startScreen.js';
 import { Game } from './src/game/game.js';
 import { startGameLoop } from './src/game/gameLoop.js';
 
-const REGION_CHUNKS = 10;
-const WORLD_DIMENSIONS = Object.freeze({
-  sizeX: REGION_CHUNKS * CHUNK_SIZE,
-  sizeY: WORLD_HEIGHT,
-  sizeZ: REGION_CHUNKS * CHUNK_SIZE,
-});
-const INITIAL_REGION = Object.freeze({
-  minChunkX: 0,
-  maxChunkX: REGION_CHUNKS - 1,
-  minChunkZ: 0,
-  maxChunkZ: REGION_CHUNKS - 1,
-});
+const WORLD_ORIGIN = Object.freeze({ x: 0, y: 0, z: 0 });
+const VIEW_DISTANCE = (STREAMING_SETTINGS.loadRadius - 1) * CHUNK_SIZE;
 const MAX_RANDOM_SEED = 1_000_000_000;
 const LOADING_DELAY_MS = 30;
 
@@ -58,17 +50,11 @@ function resolveSeed(location) {
 
 function tryCreateRenderContext() {
   try {
-    return new RenderContext(requireElement('game-root'), window);
+    return new RenderContext(requireElement('game-root'), window, VIEW_DISTANCE);
   } catch (error) {
     console.error(error);
     return null;
   }
-}
-
-function createWorld(seed) {
-  const world = new ChunkedWorld(WORLD_HEIGHT);
-  generateRegion(world, new ChunkGenerator(seed, WORLD_HEIGHT), INITIAL_REGION);
-  return world;
 }
 
 function createWorldView(context, world, tiles, seed) {
@@ -76,14 +62,20 @@ function createWorldView(context, world, tiles, seed) {
     context,
     document,
     source: createRenderSource(world),
-    dimensions: WORLD_DIMENSIONS,
+    height: WORLD_HEIGHT,
     material: createBlockMaterial(createAtlasTexture(tiles, TILE_SIZE)),
     tileUv: createTileUvLookup(),
     seed,
   });
-  view.build();
   world.onBlockChanged((x, _y, z) => view.invalidateBlock(x, z));
+  world.onChunkLoaded((chunkX, chunkZ) => view.handleChunkLoaded(chunkX, chunkZ));
+  world.onChunkUnloaded((chunkX, chunkZ) => view.handleChunkUnloaded(chunkX, chunkZ));
   return view;
+}
+
+function createStreamer(world, seed) {
+  const generator = new ChunkGenerator(seed, WORLD_HEIGHT);
+  return new ChunkStreamer(world, generator, new MemoryChunkStore());
 }
 
 function createInput(canvas) {
@@ -102,18 +94,21 @@ function createHud(tiles, hotbar) {
 }
 
 function buildGame(context, startScreen, seed) {
-  const world = createWorld(seed);
+  const world = new ChunkedWorld(WORLD_HEIGHT);
   const tiles = paintAllTiles();
   const view = createWorldView(context, world, tiles, seed);
+  const streamer = createStreamer(world, seed);
+  streamer.loadAround(WORLD_ORIGIN);
+  view.build(WORLD_ORIGIN);
   const collider = new VoxelCollider(createCollisionQuery(world), PLAYER_DIMENSIONS);
-  const spawn = findSpawnPoint(world, WORLD_DIMENSIONS.sizeX / 2, WORLD_DIMENSIONS.sizeZ / 2);
-  const player = new Player(spawn, collider);
+  const player = new Player(findSpawnPoint(world, WORLD_ORIGIN.x, WORLD_ORIGIN.z), collider);
   const hotbar = new Hotbar(PLACEABLE_BLOCKS);
   const game = new Game({
     world,
     player,
     hotbar,
     view,
+    streamer,
     startScreen,
     targeting: new BlockTargeting(createTargetQuery(world)),
     ...createInput(context.canvas),

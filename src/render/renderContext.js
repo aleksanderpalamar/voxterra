@@ -5,7 +5,7 @@ export const SKY_COLORS = Object.freeze({
   horizon: 0xa9d3f5,
 });
 
-const FOG_RANGE = Object.freeze({ near: 48, far: 128 });
+const FOG_NEAR_RATIO = 0.375;
 const CAMERA_SETTINGS = Object.freeze({ fov: 75, near: 0.05, far: 600 });
 const MAX_PIXEL_RATIO = 2;
 
@@ -18,10 +18,10 @@ function createRenderer(window) {
   return renderer;
 }
 
-function createScene() {
+function createScene(viewDistance) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(SKY_COLORS.horizon);
-  scene.fog = new THREE.Fog(SKY_COLORS.horizon, FOG_RANGE.near, FOG_RANGE.far);
+  scene.fog = new THREE.Fog(SKY_COLORS.horizon, viewDistance * FOG_NEAR_RATIO, viewDistance);
   return scene;
 }
 
@@ -33,9 +33,9 @@ function createCamera(window) {
 }
 
 export class RenderContext {
-  constructor(container, window) {
+  constructor(container, window, viewDistance) {
     this.renderer = createRenderer(window);
-    this.scene = createScene();
+    this.scene = createScene(viewDistance);
     this.camera = createCamera(window);
     this.canvas = this.renderer.domElement;
     container.appendChild(this.canvas);

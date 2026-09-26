@@ -53,4 +53,15 @@ test('createRenderSource agrupa as consultas usadas pelo mesher', () => {
   assert.equal(source.getBlock(1, 1, 1), BlockType.LEAVES);
   assert.equal(source.isOpaque(1, 1, 1), false);
   assert.equal(source.isOccluding(1, 1, 1), true);
+  assert.equal(source.isChunkMeshable(0, 0), false);
+});
+
+test('isChunkMeshable exige a vizinhança completa carregada', () => {
+  const chunks = [];
+  for (let chunkZ = -1; chunkZ <= 1; chunkZ++) {
+    for (let chunkX = -1; chunkX <= 1; chunkX++) chunks.push([chunkX, chunkZ]);
+  }
+  const source = createRenderSource(createEmptyWorld({ height: 4, chunks }));
+  assert.equal(source.isChunkMeshable(0, 0), true);
+  assert.equal(source.isChunkMeshable(1, 1), false);
 });

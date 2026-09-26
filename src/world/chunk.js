@@ -9,6 +9,11 @@ export class Chunk {
     this.blocks = blocks;
     this.originX = chunkX * CHUNK_SIZE;
     this.originZ = chunkZ * CHUNK_SIZE;
+    this.modified = false;
+  }
+
+  markModified() {
+    this.modified = true;
   }
 
   contains(x, y, z) {

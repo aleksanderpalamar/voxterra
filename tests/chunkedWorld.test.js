@@ -53,3 +53,45 @@ test('loadChunk substitui o chunk carregado na mesma posição', () => {
   assert.equal(world.getChunk(0, 0).chunkX, 0);
   assert.equal(world.getChunk(5, 5), null);
 });
+
+test('unloadChunk remove o chunk, limpa o cache e notifica', () => {
+  const world = createEmptyWorld({ height: 8 });
+  const unloaded = [];
+  world.onChunkUnloaded((chunkX, chunkZ) => unloaded.push([chunkX, chunkZ]));
+  world.setBlock(1, 1, 1, BlockType.STONE);
+  assert.equal(world.getBlock(1, 1, 1), BlockType.STONE);
+  assert.equal(world.unloadChunk(0, 0).chunkX, 0);
+  assert.equal(world.getBlock(1, 1, 1), BlockType.AIR);
+  assert.equal(world.unloadChunk(0, 0), null);
+  assert.deepEqual(unloaded, [[0, 0]]);
+});
+
+test('loadChunk notifica os ouvintes de carregamento', () => {
+  const world = new ChunkedWorld(8);
+  const loaded = [];
+  world.onChunkLoaded((chunkX, chunkZ) => loaded.push([chunkX, chunkZ]));
+  world.loadChunk(new Chunk(2, -3, 8));
+  assert.deepEqual(loaded, [[2, -3]]);
+  assert.equal(world.hasChunk(2, -3), true);
+  assert.deepEqual(world.loadedChunks().map((chunk) => [chunk.chunkX, chunk.chunkZ]), [[2, -3]]);
+});
+
+test('hasNeighborhood exige o chunk e os oito vizinhos carregados', () => {
+  const coordinates = [];
+  for (let chunkZ = -1; chunkZ <= 1; chunkZ++) {
+    for (let chunkX = -1; chunkX <= 1; chunkX++) coordinates.push([chunkX, chunkZ]);
+  }
+  const world = createEmptyWorld({ height: 8, chunks: coordinates });
+  assert.equal(world.hasNeighborhood(0, 0), true);
+  assert.equal(world.hasNeighborhood(1, 0), false);
+  world.unloadChunk(-1, -1);
+  assert.equal(world.hasNeighborhood(0, 0), false);
+});
+
+test('edições feitas pelo mundo marcam o chunk como modificado', () => {
+  const world = createEmptyWorld({ height: 8, chunks: [[0, 0], [1, 0]] });
+  world.getChunk(1, 0).setBlock(CHUNK_SIZE, 1, 1, BlockType.STONE);
+  world.setBlock(1, 1, 1, BlockType.DIRT);
+  assert.equal(world.getChunk(0, 0).modified, true);
+  assert.equal(world.getChunk(1, 0).modified, false);
+});

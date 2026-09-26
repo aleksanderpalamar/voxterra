@@ -2,14 +2,6 @@ import { BlockType } from './blockTypes.js';
 
 const SPAWN_SEARCH_RADIUS = 12;
 
-export function generateRegion(world, generator, region) {
-  for (let chunkZ = region.minChunkZ; chunkZ <= region.maxChunkZ; chunkZ++) {
-    for (let chunkX = region.minChunkX; chunkX <= region.maxChunkX; chunkX++) {
-      world.loadChunk(generator.generate(chunkX, chunkZ));
-    }
-  }
-}
-
 function spawnCandidates(centerX, centerZ, radius) {
   const candidates = [];
   for (let ring = 0; ring <= radius; ring++) {

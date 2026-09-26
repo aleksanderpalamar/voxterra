@@ -27,6 +27,7 @@ export function createRenderSource(world) {
     getBlock: (x, y, z) => world.getBlock(x, y, z),
     isOpaque: createOpacityQuery(world),
     isOccluding: createOcclusionQuery(world),
+    isChunkMeshable: (chunkX, chunkZ) => world.hasNeighborhood(chunkX, chunkZ),
   };
 }
 

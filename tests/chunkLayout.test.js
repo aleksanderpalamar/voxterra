@@ -5,6 +5,7 @@ import {
   chunkBlockIndex,
   chunkCoordinate,
   chunkKey,
+  chunkNeighborhood,
   chunkVolume,
 } from '../src/world/chunkLayout.js';
 
@@ -36,4 +37,13 @@ test('chunkBlockIndex cobre todo o volume sem colisões', () => {
   }
   assert.equal(indices.size, chunkVolume(height));
   assert.equal(Math.max(...indices), chunkVolume(height) - 1);
+});
+
+test('chunkNeighborhood retorna o chunk e seus oito vizinhos', () => {
+  const neighborhood = chunkNeighborhood(-1, 4);
+  assert.equal(neighborhood.length, 9);
+  assert.equal(new Set(neighborhood.map(({ chunkX, chunkZ }) => chunkKey(chunkX, chunkZ))).size, 9);
+  neighborhood.forEach(({ chunkX, chunkZ }) => {
+    assert.ok(Math.abs(chunkX + 1) <= 1 && Math.abs(chunkZ - 4) <= 1);
+  });
 });

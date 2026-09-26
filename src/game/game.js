@@ -23,6 +23,7 @@ export class Game {
     this.mouse = dependencies.mouse;
     this.pointerLock = dependencies.pointerLock;
     this.view = dependencies.view;
+    this.streamer = dependencies.streamer;
     this.hud = dependencies.hud;
     this.hotbarView = dependencies.hotbarView;
     this.startScreen = dependencies.startScreen;
@@ -121,6 +122,7 @@ export class Game {
   frame(elapsed) {
     const dt = Math.min(elapsed, MAX_FRAME_TIME);
     this.player.update(dt, this.currentIntent());
+    this.streamer.update(this.player.position);
     this.refreshTarget();
     this.view.update(dt, this.player, this.targeting.current);
     this.view.render();

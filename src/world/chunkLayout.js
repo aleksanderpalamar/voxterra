@@ -19,3 +19,11 @@ export function chunkVolume(height) {
 export function chunkBlockIndex(localX, y, localZ) {
   return localX + CHUNK_SIZE * (localZ + CHUNK_SIZE * y);
 }
+
+export function chunkNeighborhood(chunkX, chunkZ) {
+  const neighborhood = [];
+  for (let dz = -1; dz <= 1; dz++) {
+    for (let dx = -1; dx <= 1; dx++) neighborhood.push({ chunkX: chunkX + dx, chunkZ: chunkZ + dz });
+  }
+  return neighborhood;
+}
