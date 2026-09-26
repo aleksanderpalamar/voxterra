@@ -88,10 +88,19 @@ test('hasNeighborhood exige o chunk e os oito vizinhos carregados', () => {
   assert.equal(world.hasNeighborhood(0, 0), false);
 });
 
-test('edições feitas pelo mundo marcam o chunk como modificado', () => {
+test('edições feitas pelo mundo deixam o chunk com alterações não salvas', () => {
   const world = createEmptyWorld({ height: 8, chunks: [[0, 0], [1, 0]] });
   world.getChunk(1, 0).setBlock(CHUNK_SIZE, 1, 1, BlockType.STONE);
   world.setBlock(1, 1, 1, BlockType.DIRT);
-  assert.equal(world.getChunk(0, 0).modified, true);
-  assert.equal(world.getChunk(1, 0).modified, false);
+  assert.equal(world.getChunk(0, 0).dirty, true);
+  assert.equal(world.getChunk(1, 0).dirty, false);
+});
+
+test('o evento de descarga entrega o próprio chunk', () => {
+  const world = createEmptyWorld({ height: 8 });
+  const chunk = world.getChunk(0, 0);
+  const received = [];
+  world.onChunkUnloaded((chunkX, chunkZ, unloaded) => received.push(unloaded));
+  world.unloadChunk(0, 0);
+  assert.deepEqual(received, [chunk]);
 });

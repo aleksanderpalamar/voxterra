@@ -77,6 +77,39 @@
   outline-offset: 3px;
 }
 
+.secondary-button {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 10px auto 0;
+  padding: 8px 0;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-family: var(--pixel-font);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 80ms ease, border-color 80ms ease;
+}
+
+.secondary-button:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.secondary-button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.secondary-button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
 .menu-status {
   min-height: 1.4em;
   margin: 14px 0 18px;

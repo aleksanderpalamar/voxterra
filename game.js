@@ -1,7 +1,6 @@
 import { ChunkedWorld } from './src/world/chunkedWorld.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from './src/world/chunkLayout.js';
 import { ChunkStreamer, STREAMING_SETTINGS } from './src/world/chunkStreamer.js';
-import { MemoryChunkStore } from './src/world/memoryChunkStore.js';
 import { PLACEABLE_BLOCKS } from './src/world/blockTypes.js';
 import { findSpawnPoint } from './src/world/worldGenerator.js';
 import { createCollisionQuery, createRenderSource, createTargetQuery } from './src/world/worldQueries.js';
@@ -21,19 +20,20 @@ import { createBlockIconFactory } from './src/hud/blockIcons.js';
 import { HotbarView } from './src/hud/hotbarView.js';
 import { HudView } from './src/hud/hudView.js';
 import { FpsCounter } from './src/hud/fpsCounter.js';
-import { StartScreen } from './src/ui/startScreen.js';
+import { MenuMode, StartScreen } from './src/ui/startScreen.js';
 import { Game } from './src/game/game.js';
 import { startGameLoop } from './src/game/gameLoop.js';
-import { WorkerPool } from './src/workers/workerPool.js';
-import { InlineExecutor } from './src/workers/inlineExecutor.js';
-import { createChunkJobHandler } from './src/workers/chunkJobHandler.js';
+import { createExecutor } from './src/workers/createExecutor.js';
 import { AsyncChunkGenerator } from './src/workers/asyncChunkGenerator.js';
 import { AsyncChunkMesher } from './src/workers/asyncChunkMesher.js';
+import { loadSavedWorld, openWorldStore } from './src/persistence/openWorldStore.js';
+import { parseWorldMetadata } from './src/persistence/worldMetadata.js';
+import { WorldAutosave } from './src/persistence/worldAutosave.js';
+import { saveOnPageExit } from './src/persistence/pageLifecycle.js';
 
 const WORLD_ORIGIN = Object.freeze({ x: 0, y: 0, z: 0 });
 const VIEW_DISTANCE = (STREAMING_SETTINGS.loadRadius - 1) * CHUNK_SIZE;
 const MAX_RANDOM_SEED = 1_000_000_000;
-const MAX_WORKERS = 4;
 const LOADING_DELAY_MS = 30;
 
 const Message = Object.freeze({
@@ -67,21 +67,6 @@ function reportError(error) {
   console.error(error);
 }
 
-function workerCount() {
-  return Math.max(1, Math.min(MAX_WORKERS, (navigator.hardwareConcurrency ?? 2) - 1));
-}
-
-function createExecutor() {
-  if (typeof Worker === 'undefined') return new InlineExecutor(createChunkJobHandler());
-  try {
-    const url = new URL('./src/workers/chunkWorker.js', import.meta.url);
-    return new WorkerPool(() => new Worker(url, { type: 'module' }), workerCount());
-  } catch (error) {
-    reportError(error);
-    return new InlineExecutor(createChunkJobHandler());
-  }
-}
-
 function createWorldView(context, world, tiles, seed, executor) {
   const view = new WorldView({
     context,
@@ -100,9 +85,17 @@ function createWorldView(context, world, tiles, seed, executor) {
   return view;
 }
 
-function createStreamer(world, seed, executor) {
+function createStreamer(world, seed, executor, store) {
   const generator = new AsyncChunkGenerator(executor, seed, WORLD_HEIGHT);
-  return new ChunkStreamer({ world, generator, store: new MemoryChunkStore(), onError: reportError });
+  return new ChunkStreamer({ world, generator, store, onError: reportError });
+}
+
+function createPlayer(world, saved) {
+  const collider = new VoxelCollider(createCollisionQuery(world), PLAYER_DIMENSIONS);
+  if (saved === null) return new Player(findSpawnPoint(world, WORLD_ORIGIN.x, WORLD_ORIGIN.z), collider);
+  const player = new Player(saved.player, collider);
+  player.setOrientation(saved.player.yaw, saved.player.pitch);
+  return player;
 }
 
 function createInput(canvas) {
@@ -120,16 +113,22 @@ function createHud(tiles, hotbar) {
   };
 }
 
-async function buildGame(context, startScreen, seed) {
+async function buildGame(context, startScreen) {
+  const { store, mode: storageMode } = await openWorldStore(window.indexedDB, reportError);
+  const saved = await loadSavedWorld(store, parseWorldMetadata, reportError);
+  const seed = saved?.seed ?? resolveSeed(window.location);
   const world = new ChunkedWorld(WORLD_HEIGHT);
   const tiles = paintAllTiles();
-  const executor = createExecutor();
+  const executor = createExecutor(navigator, reportError);
   const view = createWorldView(context, world, tiles, seed, executor);
-  const streamer = createStreamer(world, seed, executor);
-  await streamer.loadAround(WORLD_ORIGIN);
-  await view.build(WORLD_ORIGIN);
-  const collider = new VoxelCollider(createCollisionQuery(world), PLAYER_DIMENSIONS);
-  const player = new Player(findSpawnPoint(world, WORLD_ORIGIN.x, WORLD_ORIGIN.z), collider);
+  const streamer = createStreamer(world, seed, executor, store);
+  const start = saved?.player ?? WORLD_ORIGIN;
+  await streamer.loadAround(start);
+  await view.build(start);
+  const player = createPlayer(world, saved);
+  const autosave = new WorldAutosave({ world, store, player, seed, onError: reportError });
+  if (saved === null) await autosave.saveNow();
+  saveOnPageExit(window, document, autosave);
   const hotbar = new Hotbar(PLACEABLE_BLOCKS);
   const game = new Game({
     world,
@@ -138,6 +137,12 @@ async function buildGame(context, startScreen, seed) {
     view,
     streamer,
     startScreen,
+    autosave,
+    storageMode,
+    menuMode: saved === null ? MenuMode.NEW_WORLD : MenuMode.RESUME,
+    confirm: (message) => window.confirm(message),
+    restart: () => window.location.reload(),
+    onError: reportError,
     targeting: new BlockTargeting(createTargetQuery(world)),
     ...createInput(context.canvas),
     ...createHud(tiles, hotbar),
@@ -150,6 +155,7 @@ function main() {
   const startScreen = new StartScreen({
     root: requireElement('start-screen'),
     playButton: requireElement('play-button'),
+    newWorldButton: requireElement('new-world-button'),
     status: requireElement('start-status'),
   });
   const context = tryCreateRenderContext();
@@ -159,7 +165,7 @@ function main() {
   }
   startScreen.setStatus(Message.LOADING);
   window.setTimeout(() => {
-    buildGame(context, startScreen, resolveSeed(window.location)).catch((error) => {
+    buildGame(context, startScreen).catch((error) => {
       reportError(error);
       startScreen.setStatus(Message.WORLD_FAILED);
     });

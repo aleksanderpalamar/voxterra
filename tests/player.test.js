@@ -53,3 +53,14 @@ test('eyePosition fica na altura dos olhos', () => {
   const player = createPlayer();
   assert.equal(player.eyePosition().y, 5 + PLAYER_DIMENSIONS.eyeHeight);
 });
+
+test('snapshot e setOrientation preservam posição e direção do olhar', () => {
+  const player = createPlayer();
+  player.setOrientation(1.25, 3);
+  const state = player.snapshot();
+  assert.equal(state.yaw, 1.25);
+  assert.ok(state.pitch < Math.PI / 2);
+  assert.deepEqual({ x: state.x, y: state.y, z: state.z }, { x: 8.5, y: 5, z: 8.5 });
+  state.x = 99;
+  assert.equal(player.position.x, 8.5);
+});

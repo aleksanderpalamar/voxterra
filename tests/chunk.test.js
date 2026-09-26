@@ -34,3 +34,12 @@ test('chunk pode ser criado a partir de dados existentes', () => {
   const chunk = new Chunk(1, 1, 4, blocks);
   assert.equal(chunk.getBlock(CHUNK_SIZE, 0, CHUNK_SIZE), BlockType.STONE);
 });
+
+test('markDirty e markSaved controlam as alterações pendentes', () => {
+  const chunk = new Chunk(0, 0, 4);
+  assert.equal(chunk.dirty, false);
+  chunk.markDirty();
+  assert.equal(chunk.dirty, true);
+  chunk.markSaved();
+  assert.equal(chunk.dirty, false);
+});

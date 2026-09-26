@@ -49,7 +49,7 @@ export class ChunkStreamer {
   recenter(chunkX, chunkZ) {
     this.center = { chunkX, chunkZ };
     const distant = chunksOutsideRadius(this.world.loadedChunks(), chunkX, chunkZ, this.settings.unloadRadius);
-    distant.forEach((chunk) => this.unload(chunk));
+    distant.forEach((chunk) => this.world.unloadChunk(chunk.chunkX, chunk.chunkZ));
     this.queue = chunksWithinRadius(chunkX, chunkZ, this.settings.loadRadius).filter((chunk) => this.isMissing(chunk));
   }
 
@@ -67,17 +67,12 @@ export class ChunkStreamer {
   }
 
   request(chunkX, chunkZ) {
-    const stored = this.store.load(chunkX, chunkZ);
-    if (stored !== null) {
-      this.restore(chunkX, chunkZ, stored);
-      return Promise.resolve();
-    }
     const key = chunkKey(chunkX, chunkZ);
     const scheduling = {
       priority: () => Math.hypot(chunkX - this.center.chunkX, chunkZ - this.center.chunkZ),
       isStale: () => !this.isWanted(chunkX, chunkZ),
     };
-    const pending = this.generator.generate(chunkX, chunkZ, scheduling)
+    const pending = this.fetchBlocks(chunkX, chunkZ, scheduling)
       .then((blocks) => this.receive(chunkX, chunkZ, blocks))
       .catch((error) => this.fail(chunkX, chunkZ, error))
       .finally(() => this.inFlight.delete(key));
@@ -85,25 +80,21 @@ export class ChunkStreamer {
     return pending;
   }
 
+  async fetchBlocks(chunkX, chunkZ, scheduling) {
+    if (this.store.hasChunk(chunkX, chunkZ)) {
+      const stored = await this.store.loadChunk(chunkX, chunkZ);
+      if (stored !== null) return stored;
+    }
+    return this.generator.generate(chunkX, chunkZ, scheduling);
+  }
+
   receive(chunkX, chunkZ, blocks) {
     if (blocks === null || !this.isWanted(chunkX, chunkZ) || this.world.hasChunk(chunkX, chunkZ)) return;
     this.world.loadChunk(new Chunk(chunkX, chunkZ, this.world.height, blocks));
   }
 
-  restore(chunkX, chunkZ, blocks) {
-    const chunk = new Chunk(chunkX, chunkZ, this.world.height, blocks);
-    chunk.markModified();
-    this.world.loadChunk(chunk);
-  }
-
   fail(chunkX, chunkZ, error) {
     this.onError(error);
     this.queue.push({ chunkX, chunkZ });
-  }
-
-  unload(chunk) {
-    this.world.unloadChunk(chunk.chunkX, chunk.chunkZ);
-    if (!chunk.modified) return;
-    this.store.save(chunk.chunkX, chunk.chunkZ, chunk.blocks);
   }
 }

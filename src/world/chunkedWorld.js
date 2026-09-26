@@ -22,7 +22,7 @@ export class ChunkedWorld {
     if (chunk === null) return null;
     this.chunks.delete(chunkKey(chunkX, chunkZ));
     this.lastChunk = null;
-    this.unloadListeners.forEach((listener) => listener(chunkX, chunkZ));
+    this.unloadListeners.forEach((listener) => listener(chunkX, chunkZ, chunk));
     return chunk;
   }
 
@@ -57,7 +57,7 @@ export class ChunkedWorld {
   setBlock(x, y, z, type) {
     const chunk = this.chunkAt(x, z);
     if (chunk === null || !chunk.setBlock(x, y, z, type)) return false;
-    chunk.markModified();
+    chunk.markDirty();
     this.blockListeners.forEach((listener) => listener(x, y, z, type));
     return true;
   }

@@ -22,8 +22,17 @@ export class Player {
   }
 
   look(deltaYaw, deltaPitch) {
-    this.yaw = (this.yaw + deltaYaw) % (Math.PI * 2);
-    this.pitch = Math.min(Math.max(this.pitch + deltaPitch, -PITCH_LIMIT), PITCH_LIMIT);
+    this.setOrientation(this.yaw + deltaYaw, this.pitch + deltaPitch);
+  }
+
+  setOrientation(yaw, pitch) {
+    this.yaw = yaw % (Math.PI * 2);
+    this.pitch = Math.min(Math.max(pitch, -PITCH_LIMIT), PITCH_LIMIT);
+  }
+
+  snapshot() {
+    const { x, y, z } = this.position;
+    return { x, y, z, yaw: this.yaw, pitch: this.pitch };
   }
 
   update(dt, intent) {

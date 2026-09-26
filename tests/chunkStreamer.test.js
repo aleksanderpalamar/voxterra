@@ -2,11 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ChunkStreamer } from '../src/world/chunkStreamer.js';
 import { ChunkedWorld } from '../src/world/chunkedWorld.js';
-import { MemoryChunkStore } from '../src/world/memoryChunkStore.js';
+import { MemoryWorldStore } from '../src/persistence/memoryWorldStore.js';
 import { BlockType } from '../src/world/blockTypes.js';
 import { CHUNK_SIZE, chunkBlockIndex, chunkVolume } from '../src/world/chunkLayout.js';
 
 const HEIGHT = 4;
+const settle = () => new Promise((resolve) => setImmediate(resolve));
 const SETTINGS = Object.freeze({ loadRadius: 2, unloadRadius: 3, maxInFlight: 3 });
 
 class DeferredGenerator {
@@ -27,19 +28,18 @@ class DeferredGenerator {
   }
 
   async resolveAll() {
+    await settle();
     while (this.requests.length > 0) {
       const pending = this.requests.splice(0);
       pending.forEach((request) => request.resolve(request.scheduling.isStale() ? null : this.flatBlocks()));
-      await Promise.resolve();
-      await Promise.resolve();
+      await settle();
     }
   }
 }
 
-function setup() {
+function setup(store = new MemoryWorldStore()) {
   const world = new ChunkedWorld(HEIGHT);
   const generator = new DeferredGenerator();
-  const store = new MemoryChunkStore();
   const errors = [];
   const streamer = new ChunkStreamer({
     world, generator, store, settings: SETTINGS, onError: (error) => errors.push(error),
@@ -48,7 +48,6 @@ function setup() {
 }
 
 const at = (chunkX, chunkZ) => ({ x: chunkX * CHUNK_SIZE + 8, y: 1, z: chunkZ * CHUNK_SIZE + 8 });
-const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 async function loadAround(context, position) {
   const loading = context.streamer.loadAround(position);
@@ -106,25 +105,26 @@ test('chunks além do raio de descarte são removidos quando o jogador se afasta
   assert.ok(context.world.loadedChunks().every((chunk) => Math.hypot(chunk.chunkX - 10, chunk.chunkZ) <= 3));
 });
 
-test('edições sobrevivem ao descarregar e recarregar o chunk', async () => {
-  const context = setup();
-  await loadAround(context, at(0, 0));
-  context.world.setBlock(3, 2, 3, BlockType.WOOD);
-  await loadAround(context, at(10, 0));
-  assert.notEqual(context.store.load(0, 0), null);
+test('chunks salvos no store são carregados sem passar pelo gerador', async () => {
+  const store = new MemoryWorldStore();
+  const saved = new Uint8Array(chunkVolume(HEIGHT));
+  saved[chunkBlockIndex(3, 2, 3)] = BlockType.WOOD;
+  await store.saveChunk(0, 0, saved);
+  const context = setup(store);
   const loading = context.streamer.loadAround(at(0, 0));
-  assert.ok(!context.generator.requests.some((request) => request.chunkX === 0 && request.chunkZ === 0));
   await context.generator.resolveAll();
   await loading;
+  assert.ok(!context.generator.requests.some((request) => request.chunkX === 0 && request.chunkZ === 0));
   assert.equal(context.world.getBlock(3, 2, 3), BlockType.WOOD);
-  assert.equal(context.world.getChunk(0, 0).modified, true);
+  assert.equal(context.world.getChunk(0, 0).dirty, false);
 });
 
-test('chunks não modificados não são guardados no store', async () => {
-  const context = setup();
+test('se o store anuncia um chunk mas não o devolve, ele é gerado', async () => {
+  const store = { hasChunk: () => true, loadChunk: async () => null };
+  const context = setup(store);
   await loadAround(context, at(0, 0));
-  await loadAround(context, at(10, 0));
-  assert.equal(context.store.load(0, 0), null);
+  assert.equal(context.world.loadedChunks().length, 13);
+  assert.equal(context.world.getBlock(3, 0, 3), BlockType.STONE);
 });
 
 test('falhas de geração são reportadas e o chunk volta para a fila', async () => {
