@@ -6,7 +6,7 @@
 
 [English](#english) · [Português](#português)
 
-![VOXTERRA — view from a mountain peak](docs/gameplay.jpg)
+![VOXTERRA — view from a mountain peak](docs/gameplay.png)
 
 </div>
 
