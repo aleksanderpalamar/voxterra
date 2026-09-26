@@ -1,7 +1,5 @@
 import * as THREE from 'three';
-import { buildChunkMesh } from './chunkMesher.js';
-import { MeshScheduler } from './meshScheduler.js';
-import { CHUNK_SIZE, chunkKey } from '../world/chunkLayout.js';
+import { chunkKey } from '../world/chunkLayout.js';
 
 function createGeometry(meshData) {
   const geometry = new THREE.BufferGeometry();
@@ -15,13 +13,9 @@ function createGeometry(meshData) {
 }
 
 export class ChunkRenderer {
-  constructor(scene, source, height, material, tileUv) {
+  constructor(scene, material) {
     this.scene = scene;
-    this.source = source;
-    this.height = height;
     this.material = material;
-    this.tileUv = tileUv;
-    this.scheduler = new MeshScheduler(source.isChunkMeshable);
     this.meshes = new Map();
   }
 
@@ -29,37 +23,8 @@ export class ChunkRenderer {
     return this.meshes.size;
   }
 
-  handleChunkLoaded(chunkX, chunkZ) {
-    this.scheduler.chunkLoaded(chunkX, chunkZ);
-  }
-
-  handleChunkUnloaded(chunkX, chunkZ) {
-    this.scheduler.chunkUnloaded(chunkX, chunkZ).forEach((chunk) => this.removeMesh(chunk.chunkX, chunk.chunkZ));
-  }
-
-  invalidateBlock(x, z) {
-    this.scheduler.blockChanged(x, z);
-  }
-
-  update(centerChunkX, centerChunkZ, budget) {
-    this.scheduler.takeUrgent().forEach((chunk) => this.rebuild(chunk.chunkX, chunk.chunkZ));
-    this.scheduler.takeNearest(budget, centerChunkX, centerChunkZ)
-      .forEach((chunk) => this.rebuild(chunk.chunkX, chunk.chunkZ));
-  }
-
-  buildPending(centerChunkX, centerChunkZ) {
-    this.update(centerChunkX, centerChunkZ, Infinity);
-  }
-
-  boundsOf(chunkX, chunkZ) {
-    const minX = chunkX * CHUNK_SIZE;
-    const minZ = chunkZ * CHUNK_SIZE;
-    return { minX, minY: 0, minZ, maxX: minX + CHUNK_SIZE, maxY: this.height, maxZ: minZ + CHUNK_SIZE };
-  }
-
-  rebuild(chunkX, chunkZ) {
-    const meshData = buildChunkMesh(this.source, this.boundsOf(chunkX, chunkZ), this.tileUv);
-    this.removeMesh(chunkX, chunkZ);
+  apply(chunkX, chunkZ, meshData) {
+    this.remove(chunkX, chunkZ);
     if (meshData.indices.length === 0) return;
     const mesh = new THREE.Mesh(createGeometry(meshData), this.material);
     mesh.castShadow = true;
@@ -68,7 +33,7 @@ export class ChunkRenderer {
     this.meshes.set(chunkKey(chunkX, chunkZ), mesh);
   }
 
-  removeMesh(chunkX, chunkZ) {
+  remove(chunkX, chunkZ) {
     const key = chunkKey(chunkX, chunkZ);
     const mesh = this.meshes.get(key);
     if (!mesh) return;

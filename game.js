@@ -1,5 +1,4 @@
 import { ChunkedWorld } from './src/world/chunkedWorld.js';
-import { ChunkGenerator } from './src/world/chunkGenerator.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from './src/world/chunkLayout.js';
 import { ChunkStreamer, STREAMING_SETTINGS } from './src/world/chunkStreamer.js';
 import { MemoryChunkStore } from './src/world/memoryChunkStore.js';
@@ -25,15 +24,22 @@ import { FpsCounter } from './src/hud/fpsCounter.js';
 import { StartScreen } from './src/ui/startScreen.js';
 import { Game } from './src/game/game.js';
 import { startGameLoop } from './src/game/gameLoop.js';
+import { WorkerPool } from './src/workers/workerPool.js';
+import { InlineExecutor } from './src/workers/inlineExecutor.js';
+import { createChunkJobHandler } from './src/workers/chunkJobHandler.js';
+import { AsyncChunkGenerator } from './src/workers/asyncChunkGenerator.js';
+import { AsyncChunkMesher } from './src/workers/asyncChunkMesher.js';
 
 const WORLD_ORIGIN = Object.freeze({ x: 0, y: 0, z: 0 });
 const VIEW_DISTANCE = (STREAMING_SETTINGS.loadRadius - 1) * CHUNK_SIZE;
 const MAX_RANDOM_SEED = 1_000_000_000;
+const MAX_WORKERS = 4;
 const LOADING_DELAY_MS = 30;
 
 const Message = Object.freeze({
   LOADING: 'Gerando mundo…',
   WEBGL_UNAVAILABLE: 'WebGL não está disponível neste navegador.',
+  WORLD_FAILED: 'Não foi possível gerar o mundo. Recarregue a página.',
 });
 
 function requireElement(id) {
@@ -57,7 +63,26 @@ function tryCreateRenderContext() {
   }
 }
 
-function createWorldView(context, world, tiles, seed) {
+function reportError(error) {
+  console.error(error);
+}
+
+function workerCount() {
+  return Math.max(1, Math.min(MAX_WORKERS, (navigator.hardwareConcurrency ?? 2) - 1));
+}
+
+function createExecutor() {
+  if (typeof Worker === 'undefined') return new InlineExecutor(createChunkJobHandler());
+  try {
+    const url = new URL('./src/workers/chunkWorker.js', import.meta.url);
+    return new WorkerPool(() => new Worker(url, { type: 'module' }), workerCount());
+  } catch (error) {
+    reportError(error);
+    return new InlineExecutor(createChunkJobHandler());
+  }
+}
+
+function createWorldView(context, world, tiles, seed, executor) {
   const view = new WorldView({
     context,
     document,
@@ -66,6 +91,8 @@ function createWorldView(context, world, tiles, seed) {
     material: createBlockMaterial(createAtlasTexture(tiles, TILE_SIZE)),
     tileUv: createTileUvLookup(),
     seed,
+    mesher: new AsyncChunkMesher(executor, world),
+    onError: reportError,
   });
   world.onBlockChanged((x, _y, z) => view.invalidateBlock(x, z));
   world.onChunkLoaded((chunkX, chunkZ) => view.handleChunkLoaded(chunkX, chunkZ));
@@ -73,9 +100,9 @@ function createWorldView(context, world, tiles, seed) {
   return view;
 }
 
-function createStreamer(world, seed) {
-  const generator = new ChunkGenerator(seed, WORLD_HEIGHT);
-  return new ChunkStreamer(world, generator, new MemoryChunkStore());
+function createStreamer(world, seed, executor) {
+  const generator = new AsyncChunkGenerator(executor, seed, WORLD_HEIGHT);
+  return new ChunkStreamer({ world, generator, store: new MemoryChunkStore(), onError: reportError });
 }
 
 function createInput(canvas) {
@@ -93,13 +120,14 @@ function createHud(tiles, hotbar) {
   };
 }
 
-function buildGame(context, startScreen, seed) {
+async function buildGame(context, startScreen, seed) {
   const world = new ChunkedWorld(WORLD_HEIGHT);
   const tiles = paintAllTiles();
-  const view = createWorldView(context, world, tiles, seed);
-  const streamer = createStreamer(world, seed);
-  streamer.loadAround(WORLD_ORIGIN);
-  view.build(WORLD_ORIGIN);
+  const executor = createExecutor();
+  const view = createWorldView(context, world, tiles, seed, executor);
+  const streamer = createStreamer(world, seed, executor);
+  await streamer.loadAround(WORLD_ORIGIN);
+  await view.build(WORLD_ORIGIN);
   const collider = new VoxelCollider(createCollisionQuery(world), PLAYER_DIMENSIONS);
   const player = new Player(findSpawnPoint(world, WORLD_ORIGIN.x, WORLD_ORIGIN.z), collider);
   const hotbar = new Hotbar(PLACEABLE_BLOCKS);
@@ -130,7 +158,12 @@ function main() {
     return;
   }
   startScreen.setStatus(Message.LOADING);
-  window.setTimeout(() => buildGame(context, startScreen, resolveSeed(window.location)), LOADING_DELAY_MS);
+  window.setTimeout(() => {
+    buildGame(context, startScreen, resolveSeed(window.location)).catch((error) => {
+      reportError(error);
+      startScreen.setStatus(Message.WORLD_FAILED);
+    });
+  }, LOADING_DELAY_MS);
 }
 
 main();

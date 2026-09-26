@@ -27,3 +27,9 @@ export function chunkNeighborhood(chunkX, chunkZ) {
   }
   return neighborhood;
 }
+
+export function chunkBounds(chunkX, chunkZ, height) {
+  const minX = chunkX * CHUNK_SIZE;
+  const minZ = chunkZ * CHUNK_SIZE;
+  return { minX, minY: 0, minZ, maxX: minX + CHUNK_SIZE, maxY: height, maxZ: minZ + CHUNK_SIZE };
+}

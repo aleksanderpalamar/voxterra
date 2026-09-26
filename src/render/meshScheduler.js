@@ -6,6 +6,8 @@ export class MeshScheduler {
     this.isMeshable = isMeshable;
     this.pending = new Map();
     this.urgent = new Map();
+    this.tickets = new Map();
+    this.lastTicket = 0;
   }
 
   get pendingCount() {
@@ -37,6 +39,21 @@ export class MeshScheduler {
     });
   }
 
+  requeue(chunkX, chunkZ) {
+    if (!this.isMeshable(chunkX, chunkZ)) return;
+    this.pending.set(chunkKey(chunkX, chunkZ), { chunkX, chunkZ });
+  }
+
+  issueTicket(chunkX, chunkZ) {
+    this.lastTicket += 1;
+    this.tickets.set(chunkKey(chunkX, chunkZ), this.lastTicket);
+    return this.lastTicket;
+  }
+
+  isCurrent(chunkX, chunkZ, ticket) {
+    return this.tickets.get(chunkKey(chunkX, chunkZ)) === ticket;
+  }
+
   takeUrgent() {
     const chunks = [...this.urgent.values()];
     this.urgent.forEach((_chunk, key) => this.pending.delete(key));
@@ -53,5 +70,6 @@ export class MeshScheduler {
   forget(key) {
     this.pending.delete(key);
     this.urgent.delete(key);
+    this.tickets.delete(key);
   }
 }

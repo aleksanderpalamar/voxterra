@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CHUNK_SIZE,
   chunkBlockIndex,
+  chunkBounds,
   chunkCoordinate,
   chunkKey,
   chunkNeighborhood,
@@ -45,5 +46,16 @@ test('chunkNeighborhood retorna o chunk e seus oito vizinhos', () => {
   assert.equal(new Set(neighborhood.map(({ chunkX, chunkZ }) => chunkKey(chunkX, chunkZ))).size, 9);
   neighborhood.forEach(({ chunkX, chunkZ }) => {
     assert.ok(Math.abs(chunkX + 1) <= 1 && Math.abs(chunkZ - 4) <= 1);
+  });
+});
+
+test('chunkBounds cobre a coluna inteira do chunk em coordenadas de mundo', () => {
+  assert.deepEqual(chunkBounds(-2, 3, 64), {
+    minX: -2 * CHUNK_SIZE,
+    minY: 0,
+    minZ: 3 * CHUNK_SIZE,
+    maxX: -CHUNK_SIZE,
+    maxY: 64,
+    maxZ: 4 * CHUNK_SIZE,
   });
 });

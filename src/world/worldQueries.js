@@ -22,11 +22,17 @@ export function createOpacityQuery(world) {
   };
 }
 
+export function createMeshSource(blocks) {
+  return {
+    getBlock: (x, y, z) => blocks.getBlock(x, y, z),
+    isOpaque: createOpacityQuery(blocks),
+    isOccluding: createOcclusionQuery(blocks),
+  };
+}
+
 export function createRenderSource(world) {
   return {
-    getBlock: (x, y, z) => world.getBlock(x, y, z),
-    isOpaque: createOpacityQuery(world),
-    isOccluding: createOcclusionQuery(world),
+    ...createMeshSource(world),
     isChunkMeshable: (chunkX, chunkZ) => world.hasNeighborhood(chunkX, chunkZ),
   };
 }

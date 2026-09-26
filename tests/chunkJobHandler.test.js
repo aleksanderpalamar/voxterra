@@ -1,0 +1,35 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { JobType, createChunkJobHandler } from '../src/workers/chunkJobHandler.js';
+import { ChunkGenerator } from '../src/world/chunkGenerator.js';
+import { ChunkedWorld } from '../src/world/chunkedWorld.js';
+import { chunkBounds, chunkNeighborhood } from '../src/world/chunkLayout.js';
+import { extractPaddedVolume } from '../src/world/paddedVolume.js';
+import { createMeshSource } from '../src/world/worldQueries.js';
+import { buildChunkMesh } from '../src/render/chunkMesher.js';
+import { createTileUvLookup } from '../src/render/blockTiles.js';
+
+const HEIGHT = 64;
+
+test('job de geração devolve os mesmos blocos do gerador e transfere o buffer', () => {
+  const handle = createChunkJobHandler();
+  const { result, transfer } = handle({ type: JobType.GENERATE, seed: 9, height: HEIGHT, chunkX: 2, chunkZ: -1 });
+  assert.deepEqual(result.blocks, new ChunkGenerator(9, HEIGHT).generate(2, -1).blocks);
+  assert.deepEqual(transfer, [result.blocks.buffer]);
+});
+
+test('job de malha reproduz a malha montada a partir do mundo', () => {
+  const generator = new ChunkGenerator(3, HEIGHT);
+  const world = new ChunkedWorld(HEIGHT);
+  chunkNeighborhood(0, 0).forEach(({ chunkX, chunkZ }) => world.loadChunk(generator.generate(chunkX, chunkZ)));
+  const volume = extractPaddedVolume((x, z) => world.getChunk(x, z), 0, 0, HEIGHT);
+  const { result, transfer } = createChunkJobHandler()({ type: JobType.MESH, height: HEIGHT, chunkX: 0, chunkZ: 0, volume });
+  const expected = buildChunkMesh(createMeshSource(world), chunkBounds(0, 0, HEIGHT), createTileUvLookup());
+  assert.deepEqual(result, expected);
+  assert.equal(transfer.length, 5);
+  assert.ok(transfer.includes(result.indices.buffer));
+});
+
+test('tipo de job desconhecido gera erro explícito', () => {
+  assert.throws(() => createChunkJobHandler()({ type: 'voar' }), /voar/);
+});

@@ -54,3 +54,27 @@ test('chunks urgentes saem da fila normal', () => {
   scheduler.takeUrgent();
   assert.ok(!scheduler.takeNearest(20, 0, 0).some(({ chunkX, chunkZ }) => chunkX === 0 && chunkZ === 0));
 });
+
+test('cada ticket novo invalida os anteriores do mesmo chunk', () => {
+  const scheduler = new MeshScheduler(meshableWithin(5));
+  const first = scheduler.issueTicket(1, 1);
+  const second = scheduler.issueTicket(1, 1);
+  const other = scheduler.issueTicket(2, 1);
+  assert.equal(scheduler.isCurrent(1, 1, first), false);
+  assert.equal(scheduler.isCurrent(1, 1, second), true);
+  assert.equal(scheduler.isCurrent(2, 1, other), true);
+});
+
+test('descarregar um chunk invalida os tickets da vizinhança', () => {
+  const scheduler = new MeshScheduler(meshableWithin(5));
+  const ticket = scheduler.issueTicket(0, 0);
+  scheduler.chunkUnloaded(1, 0);
+  assert.equal(scheduler.isCurrent(0, 0, ticket), false);
+});
+
+test('requeue devolve à fila apenas chunks montáveis', () => {
+  const scheduler = new MeshScheduler(meshableWithin(1));
+  scheduler.requeue(1, 1);
+  scheduler.requeue(4, 4);
+  assert.deepEqual(coordinates(scheduler.takeNearest(10, 0, 0)), [[1, 1]]);
+});

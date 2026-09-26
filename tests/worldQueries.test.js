@@ -4,6 +4,7 @@ import { BlockType } from '../src/world/blockTypes.js';
 import { CHUNK_SIZE } from '../src/world/chunkLayout.js';
 import {
   createCollisionQuery,
+  createMeshSource,
   createOcclusionQuery,
   createOpacityQuery,
   createRenderSource,
@@ -64,4 +65,13 @@ test('isChunkMeshable exige a vizinhança completa carregada', () => {
   const source = createRenderSource(createEmptyWorld({ height: 4, chunks }));
   assert.equal(source.isChunkMeshable(0, 0), true);
   assert.equal(source.isChunkMeshable(1, 1), false);
+});
+
+test('createMeshSource funciona com qualquer leitor de blocos', () => {
+  const reader = { getBlock: (x, y, z) => (x === 0 && y === 0 && z === 0 ? BlockType.LEAVES : BlockType.AIR) };
+  const source = createMeshSource(reader);
+  assert.equal(source.getBlock(0, 0, 0), BlockType.LEAVES);
+  assert.equal(source.isOpaque(0, 0, 0), false);
+  assert.equal(source.isOccluding(0, 0, 0), true);
+  assert.equal(source.isOccluding(0, -1, 0), true);
 });
