@@ -1,6 +1,8 @@
 {
   "name": "voxterra",
   "version": "1.0.0",
+  "description": "VOXTERRA — Every world begins with a seed. An infinite voxel sandbox that runs in the browser.",
+  "license": "GPL-3.0-or-later",
   "private": true,
   "type": "module",
   "scripts": {
