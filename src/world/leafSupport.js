@@ -1,8 +1,8 @@
-import { BlockType } from './blockTypes.js';
+import { BlockType, LOG_BLOCKS, isLogBlock } from './blockTypes.js';
 
 export const DECAYING_LEAVES = new Set([BlockType.LEAVES, BlockType.PINE_LEAVES]);
 export const LEAF_BLOCKS = new Set([...DECAYING_LEAVES, BlockType.PERSISTENT_LEAVES]);
-export const SUPPORT_BLOCKS = new Set([...LEAF_BLOCKS, BlockType.WOOD]);
+export const SUPPORT_BLOCKS = new Set([...LEAF_BLOCKS, ...LOG_BLOCKS]);
 
 const NEIGHBORS = Object.freeze([[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]);
 
@@ -25,7 +25,7 @@ export function isLeafSupported(world, x, y, z, maxDistance) {
         const [ox, oy, oz] = [cx + dx, cy + dy, cz + dz];
         if (isUnloaded(world, x + ox, y + oy, z + oz)) return true;
         const type = world.getBlock(x + ox, y + oy, z + oz);
-        if (type === BlockType.WOOD) return true;
+        if (isLogBlock(type)) return true;
         const key = packOffset(ox, oy, oz, span);
         if (!LEAF_BLOCKS.has(type) || visited.has(key)) continue;
         visited.add(key);
@@ -57,7 +57,7 @@ function spreadFromWood({ types, size }, reach) {
   const queue = new Int32Array(types.length);
   let tail = 0;
   types.forEach((type, index) => {
-    if (type !== BlockType.WOOD) return;
+    if (!isLogBlock(type)) return;
     reached[index] = 1;
     queue[tail++] = index;
   });

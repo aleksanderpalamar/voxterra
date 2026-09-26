@@ -1,5 +1,5 @@
 import { BlockType } from './blockTypes.js';
-import { Species } from './vegetation.js';
+import { SPECIES_TRAITS, Species } from './vegetation.js';
 
 const CrownShape = Object.freeze({
   SQUARE: 'square',
@@ -42,8 +42,9 @@ function placeCrownLayer(world, centerX, y, centerZ, radius, shape, leaf) {
   }
 }
 
-function placeStem(world, plant, block) {
-  for (let y = plant.groundY + 1; y <= plant.groundY + plant.height; y++) world.setBlock(plant.x, y, plant.z, block);
+function placeStem(world, plant) {
+  const { stem } = SPECIES_TRAITS[plant.species];
+  for (let y = plant.groundY + 1; y <= plant.groundY + plant.height; y++) world.setBlock(plant.x, y, plant.z, stem);
 }
 
 function prepareGround(world, plant) {
@@ -53,9 +54,10 @@ function prepareGround(world, plant) {
 
 function placeLayeredTree(world, plant, crown) {
   prepareGround(world, plant);
-  placeStem(world, plant, BlockType.WOOD);
+  placeStem(world, plant);
+  const { foliage } = SPECIES_TRAITS[plant.species];
   const topY = plant.groundY + plant.height;
-  crown.forEach(([offset, radius, shape]) => placeCrownLayer(world, plant.x, topY + offset, plant.z, radius, shape, BlockType.LEAVES));
+  crown.forEach(([offset, radius, shape]) => placeCrownLayer(world, plant.x, topY + offset, plant.z, radius, shape, foliage));
 }
 
 function coniferRadius(depth) {
@@ -66,15 +68,17 @@ function coniferRadius(depth) {
 
 function placeConifer(world, plant) {
   prepareGround(world, plant);
-  placeStem(world, plant, BlockType.WOOD);
+  placeStem(world, plant);
+  const { foliage } = SPECIES_TRAITS[plant.species];
   const topY = plant.groundY + plant.height;
   for (let y = topY + 1; y >= plant.groundY + CONIFER_BARE_TRUNK; y--) {
-    placeCrownLayer(world, plant.x, y, plant.z, coniferRadius(topY + 1 - y), CrownShape.ROUNDED, BlockType.PINE_LEAVES);
+    placeCrownLayer(world, plant.x, y, plant.z, coniferRadius(topY + 1 - y), CrownShape.ROUNDED, foliage);
   }
 }
 
 function placeAcacia(world, plant) {
   prepareGround(world, plant);
+  const { stem, foliage } = SPECIES_TRAITS[plant.species];
   const [dx, dz] = LEAN_DIRECTIONS[plant.variant % LEAN_DIRECTIONS.length];
   const straight = plant.height - ACACIA_LEAN;
   let x = plant.x;
@@ -84,18 +88,19 @@ function placeAcacia(world, plant) {
       x += dx;
       z += dz;
     }
-    world.setBlock(x, plant.groundY + step, z, BlockType.WOOD);
+    world.setBlock(x, plant.groundY + step, z, stem);
   }
   const topY = plant.groundY + plant.height;
-  placeCrownLayer(world, x, topY + 1, z, 3, CrownShape.ROUND, BlockType.LEAVES);
-  placeCrownLayer(world, x, topY + 2, z, 1, CrownShape.SQUARE, BlockType.LEAVES);
+  placeCrownLayer(world, x, topY + 1, z, 3, CrownShape.ROUND, foliage);
+  placeCrownLayer(world, x, topY + 2, z, 1, CrownShape.SQUARE, foliage);
 }
 
 function placeBush(world, plant) {
   prepareGround(world, plant);
-  placeStem(world, plant, BlockType.WOOD);
-  placeCrownLayer(world, plant.x, plant.groundY + 1, plant.z, 1, CrownShape.SQUARE, BlockType.LEAVES);
-  placeCrownLayer(world, plant.x, plant.groundY + 2, plant.z, 1, CrownShape.ROUNDED, BlockType.LEAVES);
+  placeStem(world, plant);
+  const { foliage } = SPECIES_TRAITS[plant.species];
+  placeCrownLayer(world, plant.x, plant.groundY + 1, plant.z, 1, CrownShape.SQUARE, foliage);
+  placeCrownLayer(world, plant.x, plant.groundY + 2, plant.z, 1, CrownShape.ROUNDED, foliage);
 }
 
 const PLACERS = Object.freeze({
@@ -104,7 +109,7 @@ const PLACERS = Object.freeze({
   [Species.CONIFER]: placeConifer,
   [Species.ACACIA]: placeAcacia,
   [Species.BUSH]: placeBush,
-  [Species.CACTUS]: (world, plant) => placeStem(world, plant, BlockType.CACTUS),
+  [Species.CACTUS]: placeStem,
 });
 
 export function placePlant(world, plant) {

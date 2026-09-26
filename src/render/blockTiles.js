@@ -17,6 +17,12 @@ export const Tile = Object.freeze({
   PINE_LEAVES: 11,
   CACTUS_SIDE: 12,
   CACTUS_TOP: 13,
+  PINE_WOOD_SIDE: 14,
+  PINE_WOOD_TOP: 15,
+  ACACIA_WOOD_SIDE: 16,
+  ACACIA_WOOD_TOP: 17,
+  JUNGLE_WOOD_SIDE: 18,
+  JUNGLE_WOOD_TOP: 19,
 });
 
 export const TILE_COUNT = Object.keys(Tile).length;
@@ -26,11 +32,18 @@ function uniformTiles(tile) {
   return Object.freeze({ top: tile, bottom: tile, side: tile });
 }
 
+function pillarTiles(end, side) {
+  return Object.freeze({ top: end, bottom: end, side });
+}
+
 const BLOCK_TILES = Object.freeze({
   [BlockType.GRASS]: Object.freeze({ top: Tile.GRASS_TOP, bottom: Tile.DIRT, side: Tile.GRASS_SIDE }),
   [BlockType.DIRT]: uniformTiles(Tile.DIRT),
   [BlockType.STONE]: uniformTiles(Tile.STONE),
-  [BlockType.WOOD]: Object.freeze({ top: Tile.WOOD_TOP, bottom: Tile.WOOD_TOP, side: Tile.WOOD_SIDE }),
+  [BlockType.WOOD]: pillarTiles(Tile.WOOD_TOP, Tile.WOOD_SIDE),
+  [BlockType.PINE_WOOD]: pillarTiles(Tile.PINE_WOOD_TOP, Tile.PINE_WOOD_SIDE),
+  [BlockType.ACACIA_WOOD]: pillarTiles(Tile.ACACIA_WOOD_TOP, Tile.ACACIA_WOOD_SIDE),
+  [BlockType.JUNGLE_WOOD]: pillarTiles(Tile.JUNGLE_WOOD_TOP, Tile.JUNGLE_WOOD_SIDE),
   [BlockType.LEAVES]: uniformTiles(Tile.LEAVES),
   [BlockType.PERSISTENT_LEAVES]: uniformTiles(Tile.LEAVES),
   [BlockType.SAND]: uniformTiles(Tile.SAND),
@@ -38,7 +51,7 @@ const BLOCK_TILES = Object.freeze({
   [BlockType.WATER]: uniformTiles(Tile.WATER),
   [BlockType.ICE]: uniformTiles(Tile.ICE),
   [BlockType.PINE_LEAVES]: uniformTiles(Tile.PINE_LEAVES),
-  [BlockType.CACTUS]: Object.freeze({ top: Tile.CACTUS_TOP, bottom: Tile.CACTUS_TOP, side: Tile.CACTUS_SIDE }),
+  [BlockType.CACTUS]: pillarTiles(Tile.CACTUS_TOP, Tile.CACTUS_SIDE),
 });
 
 const MISSING_TILES = uniformTiles(Tile.STONE);

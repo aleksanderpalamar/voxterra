@@ -47,13 +47,13 @@ test('conífera é alta, estreita no topo e usa folhas de pinheiro', () => {
   const widthAt = (y) => reach(leaves.filter((leaf) => leaf.y === y), plant);
   assert.equal(widthAt(topY), 0);
   assert.ok(widthAt(topY - 3) > widthAt(topY - 1));
-  assert.equal(world.getBlock(0, 2 + 9, 0), BlockType.WOOD);
+  assert.equal(world.getBlock(0, 2 + 9, 0), BlockType.PINE_WOOD);
 });
 
 test('acácia inclina o tronco e abre uma copa larga e achatada', () => {
   const plant = { species: Species.ACACIA, x: 0, z: 0, groundY: 2, height: 5 };
   const world = grow(plant);
-  const wood = blocksOf(world, BlockType.WOOD);
+  const wood = blocksOf(world, BlockType.ACACIA_WOOD);
   assert.ok(wood.some((block) => block.x !== 0 || block.z !== 0), 'tronco não inclinou');
   const leaves = blocksOf(world, BlockType.LEAVES);
   const layers = new Set(leaves.map((leaf) => leaf.y));
@@ -64,7 +64,7 @@ test('acácia inclina o tronco e abre uma copa larga e achatada', () => {
 test('árvore tropical é muito alta e tem copa ampla', () => {
   const plant = { species: Species.JUNGLE, x: 0, z: 0, groundY: 2, height: 12 };
   const world = grow(plant);
-  assert.equal(world.getBlock(0, 14, 0), BlockType.WOOD);
+  assert.equal(world.getBlock(0, 14, 0), BlockType.JUNGLE_WOOD);
   assert.ok(reach(blocksOf(world, BlockType.LEAVES), plant) >= 3);
 });
 
@@ -95,7 +95,8 @@ test('nenhuma espécie passa do alcance de copa declarado', () => {
       const { maxHeight, crownReach } = SPECIES_TRAITS[species];
       const plant = { species, x: 0, z: 0, groundY: 2, height: maxHeight, variant, ground: species === Species.CACTUS ? BlockType.SAND : BlockType.GRASS };
       const world = grow(plant);
-      const placed = [BlockType.WOOD, BlockType.LEAVES, BlockType.PINE_LEAVES, BlockType.CACTUS].flatMap((type) => blocksOf(world, type));
+      const { stem, foliage } = SPECIES_TRAITS[species];
+      const placed = [stem, foliage].filter((type) => type !== null).flatMap((type) => blocksOf(world, type));
       assert.ok(reach(placed, plant) <= crownReach, `${species}/${variant}`);
     });
   });
@@ -106,4 +107,22 @@ test('folhas não sobrescrevem blocos existentes', () => {
   world.setBlock(1, 6, 0, BlockType.STONE);
   placePlant(world, { species: Species.OAK, x: 0, z: 0, groundY: 2, height: 5, variant: 0 });
   assert.equal(world.getBlock(1, 6, 0), BlockType.STONE);
+});
+
+test('cada espécie usa o tronco e a folhagem declarados', () => {
+  const expected = {
+    [Species.OAK]: [BlockType.WOOD, BlockType.LEAVES],
+    [Species.BUSH]: [BlockType.WOOD, BlockType.LEAVES],
+    [Species.CONIFER]: [BlockType.PINE_WOOD, BlockType.PINE_LEAVES],
+    [Species.ACACIA]: [BlockType.ACACIA_WOOD, BlockType.LEAVES],
+    [Species.JUNGLE]: [BlockType.JUNGLE_WOOD, BlockType.LEAVES],
+    [Species.CACTUS]: [BlockType.CACTUS, null],
+  };
+  Object.entries(expected).forEach(([species, [stem, foliage]]) => {
+    assert.equal(SPECIES_TRAITS[species].stem, stem, species);
+    assert.equal(SPECIES_TRAITS[species].foliage, foliage, species);
+    const plant = { species, x: 0, z: 0, groundY: 2, height: SPECIES_TRAITS[species].minHeight, ground: species === Species.CACTUS ? BlockType.SAND : BlockType.GRASS };
+    const world = grow(plant);
+    assert.ok(blocksOf(world, stem).length > 0, species);
+  });
 });

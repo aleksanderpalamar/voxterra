@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { ChunkGenerator } from '../src/world/chunkGenerator.js';
 import { ChunkedWorld } from '../src/world/chunkedWorld.js';
 import { Chunk } from '../src/world/chunk.js';
-import { BlockType } from '../src/world/blockTypes.js';
+import { BlockType, isLogBlock } from '../src/world/blockTypes.js';
 import { CHUNK_SIZE, WORLD_HEIGHT } from '../src/world/chunkLayout.js';
 import { plantsInArea } from '../src/world/floraPlanner.js';
 import { placePlant } from '../src/world/treeShapes.js';
-import { MAX_CROWN_REACH, Species } from '../src/world/vegetation.js';
+import { MAX_CROWN_REACH, SPECIES_TRAITS, Species } from '../src/world/vegetation.js';
 
 function loadChunks(generator, coordinates) {
   const world = new ChunkedWorld(WORLD_HEIGHT);
@@ -67,7 +67,7 @@ test('plantas que cruzam a borda entre chunks ficam contínuas', () => {
     const alone = new ChunkedWorld(WORLD_HEIGHT);
     grid(-3, 3).forEach(([chunkX, chunkZ]) => alone.loadChunk(new Chunk(chunkX, chunkZ, WORLD_HEIGHT)));
     placePlant(alone, plant);
-    const stem = plant.species === Species.CACTUS ? BlockType.CACTUS : BlockType.WOOD;
+    const { stem } = SPECIES_TRAITS[plant.species];
     for (let y = plant.groundY + 1; y <= plant.groundY + plant.height; y++) {
       for (let dz = -MAX_CROWN_REACH; dz <= MAX_CROWN_REACH; dz++) {
         for (let dx = -MAX_CROWN_REACH; dx <= MAX_CROWN_REACH; dx++) {
@@ -85,9 +85,10 @@ test('uma região gerada contém todos os tipos de bloco do terreno', () => {
   for (let chunkZ = 0; chunkZ <= 3; chunkZ++) {
     for (let chunkX = 0; chunkX <= 3; chunkX++) world.getChunk(chunkX, chunkZ).blocks.forEach((type) => found.add(type));
   }
-  [BlockType.GRASS, BlockType.DIRT, BlockType.STONE, BlockType.WOOD, BlockType.LEAVES].forEach((type) => {
+  [BlockType.GRASS, BlockType.DIRT, BlockType.STONE, BlockType.LEAVES].forEach((type) => {
     assert.ok(found.has(type), `bloco ${type} ausente`);
   });
+  assert.ok([...found].some(isLogBlock), 'nenhum tronco gerado');
 });
 
 test('columnAt descreve altura, clima, bioma e camadas de superfície', () => {
@@ -107,7 +108,7 @@ test('o bloco do topo de cada coluna gerada segue o bioma', () => {
     for (let x = -48; x < 64; x += 5) {
       const column = generator.columnAt(x, z);
       const top = world.getBlock(x, column.surfaceY, z);
-      if (top === BlockType.WOOD || top === BlockType.DIRT) continue;
+      if (isLogBlock(top) || top === BlockType.DIRT) continue;
       assert.equal(top, column.surface.top, `coluna ${x},${z} (${column.biome})`);
       checked += 1;
     }

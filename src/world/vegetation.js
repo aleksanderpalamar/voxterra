@@ -10,17 +10,28 @@ export const Species = Object.freeze({
   CACTUS: 'cactus',
 });
 
-function traits(grounds, minHeight, maxHeight, crownReach) {
-  return Object.freeze({ grounds: Object.freeze(grounds), minHeight, maxHeight, crownReach });
+function traits({ grounds, stem, foliage = null, minHeight, maxHeight, crownReach }) {
+  return Object.freeze({ grounds: Object.freeze(grounds), stem, foliage, minHeight, maxHeight, crownReach });
 }
 
 export const SPECIES_TRAITS = Object.freeze({
-  [Species.OAK]: traits([BlockType.GRASS], 4, 6, 2),
-  [Species.CONIFER]: traits([BlockType.GRASS, BlockType.SNOW], 7, 10, 2),
-  [Species.ACACIA]: traits([BlockType.GRASS], 5, 6, 5),
-  [Species.JUNGLE]: traits([BlockType.GRASS], 10, 14, 3),
-  [Species.BUSH]: traits([BlockType.GRASS], 1, 1, 1),
-  [Species.CACTUS]: traits([BlockType.SAND], 1, 3, 0),
+  [Species.OAK]: traits({
+    grounds: [BlockType.GRASS], stem: BlockType.WOOD, foliage: BlockType.LEAVES, minHeight: 4, maxHeight: 6, crownReach: 2,
+  }),
+  [Species.CONIFER]: traits({
+    grounds: [BlockType.GRASS, BlockType.SNOW], stem: BlockType.PINE_WOOD, foliage: BlockType.PINE_LEAVES,
+    minHeight: 7, maxHeight: 10, crownReach: 2,
+  }),
+  [Species.ACACIA]: traits({
+    grounds: [BlockType.GRASS], stem: BlockType.ACACIA_WOOD, foliage: BlockType.LEAVES, minHeight: 5, maxHeight: 6, crownReach: 5,
+  }),
+  [Species.JUNGLE]: traits({
+    grounds: [BlockType.GRASS], stem: BlockType.JUNGLE_WOOD, foliage: BlockType.LEAVES, minHeight: 10, maxHeight: 14, crownReach: 3,
+  }),
+  [Species.BUSH]: traits({
+    grounds: [BlockType.GRASS], stem: BlockType.WOOD, foliage: BlockType.LEAVES, minHeight: 1, maxHeight: 1, crownReach: 1,
+  }),
+  [Species.CACTUS]: traits({ grounds: [BlockType.SAND], stem: BlockType.CACTUS, minHeight: 1, maxHeight: 3, crownReach: 0 }),
 });
 
 export const MAX_CROWN_REACH = Math.max(...Object.values(SPECIES_TRAITS).map((entry) => entry.crownReach));

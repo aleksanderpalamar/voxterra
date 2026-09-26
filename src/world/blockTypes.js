@@ -12,6 +12,9 @@ export const BlockType = Object.freeze({
   PINE_LEAVES: 10,
   CACTUS: 11,
   PERSISTENT_LEAVES: 12,
+  PINE_WOOD: 13,
+  ACACIA_WOOD: 14,
+  JUNGLE_WOOD: 15,
 });
 
 export const RenderLayer = Object.freeze({
@@ -39,6 +42,9 @@ const BLOCK_NAMES = Object.freeze({
   [BlockType.PINE_LEAVES]: 'Pine Leaves',
   [BlockType.CACTUS]: 'Cactus',
   [BlockType.PERSISTENT_LEAVES]: 'Leaves',
+  [BlockType.PINE_WOOD]: 'Pine Wood',
+  [BlockType.ACACIA_WOOD]: 'Acacia Wood',
+  [BlockType.JUNGLE_WOOD]: 'Jungle Wood',
 });
 
 const SOLID_BLOCK = Object.freeze({
@@ -71,6 +77,8 @@ export const PLACEABLE_BLOCKS = Object.freeze([
   BlockType.PERSISTENT_LEAVES,
 ]);
 
+export const LOG_BLOCKS = new Set([BlockType.WOOD, BlockType.PINE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD]);
+
 function propertiesOf(type) {
   return BLOCK_PROPERTIES[type] ?? SOLID_BLOCK;
 }
@@ -97,4 +105,8 @@ export function renderLayerOf(type) {
 
 export function mediumOf(type) {
   return propertiesOf(type).medium;
+}
+
+export function isLogBlock(type) {
+  return LOG_BLOCKS.has(type);
 }

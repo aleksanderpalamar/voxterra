@@ -6,6 +6,7 @@ import {
   RenderLayer,
   blockName,
   isOpaqueBlock,
+  isLogBlock,
   isReplaceableBlock,
   isSolidBlock,
   PLACEABLE_BLOCKS,
@@ -70,4 +71,14 @@ test('folhas persistentes se comportam como folhas comuns e são o item da hotba
   assert.equal(blockName(BlockType.PERSISTENT_LEAVES), 'Leaves');
   assert.ok(PLACEABLE_BLOCKS.includes(BlockType.PERSISTENT_LEAVES));
   assert.ok(!PLACEABLE_BLOCKS.includes(BlockType.LEAVES));
+});
+
+test('madeiras de cada espécie são troncos sólidos e opacos', () => {
+  [BlockType.WOOD, BlockType.PINE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD].forEach((type) => {
+    assert.equal(isLogBlock(type), true);
+    assert.equal(isSolidBlock(type), true);
+    assert.equal(isOpaqueBlock(type), true);
+  });
+  [BlockType.LEAVES, BlockType.CACTUS, BlockType.STONE].forEach((type) => assert.equal(isLogBlock(type), false));
+  assert.deepEqual([BlockType.PINE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD].map(blockName), ['Pine Wood', 'Acacia Wood', 'Jungle Wood']);
 });

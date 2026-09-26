@@ -1,12 +1,8 @@
-import { TILE_SIZE, TRANSPARENT, jitter, shade } from './paintKit.js';
+import { TILE_SIZE, TRANSPARENT, jitter } from './paintKit.js';
 
 const LEAF_HOLE_CHANCE = 0.22;
 
 const Palette = Object.freeze({
-  BARK: [106, 78, 48],
-  BARK_DARK: [72, 52, 32],
-  RING_LIGHT: [188, 150, 98],
-  RING_DARK: [152, 116, 72],
   LEAVES: [58, 126, 46],
   LEAVES_DARK: [34, 86, 30],
   LEAVES_LIGHT: [88, 156, 62],
@@ -18,24 +14,6 @@ const Palette = Object.freeze({
   CACTUS_SPINE: [214, 222, 176],
   CACTUS_CORE: [112, 170, 84],
 });
-
-export function barkPainter(random) {
-  const columns = Array.from({ length: TILE_SIZE }, () => 0.8 + random() * 0.28);
-  return (x) => {
-    const base = random() < 0.1 ? Palette.BARK_DARK : Palette.BARK;
-    return jitter(shade(base, columns[x]), random, 0.05);
-  };
-}
-
-export function woodTopPainter(random) {
-  const center = (TILE_SIZE - 1) / 2;
-  return (x, y) => {
-    const ring = Math.max(Math.abs(x - center), Math.abs(y - center));
-    if (ring > center - 1) return jitter(Palette.BARK, random, 0.06);
-    const color = Math.floor(ring / 2) % 2 === 0 ? Palette.RING_LIGHT : Palette.RING_DARK;
-    return jitter(color, random, 0.04);
-  };
-}
 
 function holedLeavesPainter(colors) {
   return (random) => () => {

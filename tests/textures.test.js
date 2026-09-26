@@ -69,6 +69,19 @@ test('gelo é azul-claro', () => {
   assert.ok(blue > red + 20 && blue > 200 && red > 150);
 });
 
+test('as madeiras têm tons distintos por espécie', () => {
+  const brightness = (tile) => averageColor(paintTile(tile)).reduce((sum, channel) => sum + channel, 0);
+  const spread = (tile) => {
+    const color = averageColor(paintTile(tile));
+    return Math.max(...color) - Math.min(...color);
+  };
+  assert.ok(brightness(Tile.PINE_WOOD_SIDE) < brightness(Tile.WOOD_SIDE) - 60);
+  assert.ok(spread(Tile.ACACIA_WOOD_SIDE) < 25, 'casca de acácia deveria ser acinzentada');
+  const [red, green] = averageColor(paintTile(Tile.ACACIA_WOOD_TOP));
+  assert.ok(red > green + 50, 'anéis de acácia deveriam ser alaranjados');
+  assert.ok(brightness(Tile.JUNGLE_WOOD_SIDE) > brightness(Tile.WOOD_SIDE) + 30);
+});
+
 test('tiles são determinísticos e visualmente distintos', () => {
   assert.deepEqual(paintTile(Tile.DIRT), paintTile(Tile.DIRT));
   const [grassR, grassG] = averageColor(paintTile(Tile.GRASS_TOP));

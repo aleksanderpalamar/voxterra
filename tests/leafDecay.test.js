@@ -162,3 +162,24 @@ test('quebrar terra ou pedra não dispara verificação de folhas', () => {
   world.setBlock(3, 9, 3, BlockType.AIR);
   assert.equal(decay.pendingCount, 0);
 });
+
+test('qualquer tipo de tronco sustenta as folhas', () => {
+  [BlockType.PINE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD].forEach((log) => {
+    const world = createWorld();
+    world.setBlock(0, 5, 0, log);
+    world.setBlock(1, 5, 0, BlockType.PINE_LEAVES);
+    assert.equal(isLeafSupported(world, 1, 5, 0, LEAF_DECAY.supportDistance), true);
+    assert.deepEqual(findUnsupportedLeaves(world, 0, 5, 0, LEAF_DECAY), []);
+  });
+});
+
+test('quebrar o tronco de uma conífera faz as folhas de pinheiro decaírem', () => {
+  const world = createWorld();
+  world.setBlock(0, 2, 0, BlockType.GRASS);
+  placePlant(world, { species: Species.CONIFER, x: 0, z: 0, groundY: 2, height: 8, variant: 0 });
+  const decay = new LeafDecay({ world, random: () => 0.5 });
+  assert.ok(countLeaves(world, BlockType.PINE_LEAVES) > 0);
+  for (let y = 3; y <= 10; y++) world.setBlock(0, y, 0, BlockType.AIR);
+  run(decay, LEAF_DECAY.maxDelay + 1);
+  assert.equal(countLeaves(world, BlockType.PINE_LEAVES), 0);
+});

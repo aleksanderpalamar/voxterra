@@ -34,3 +34,16 @@ test('água usa o tile de água em todas as faces', () => {
 test('folhas persistentes usam a mesma textura das folhas comuns', () => {
   assert.equal(tileFor(BlockType.PERSISTENT_LEAVES, FaceDirection.TOP), Tile.LEAVES);
 });
+
+test('cada madeira tem casca na lateral e anéis no topo próprios', () => {
+  const logs = [
+    [BlockType.PINE_WOOD, Tile.PINE_WOOD_SIDE, Tile.PINE_WOOD_TOP],
+    [BlockType.ACACIA_WOOD, Tile.ACACIA_WOOD_SIDE, Tile.ACACIA_WOOD_TOP],
+    [BlockType.JUNGLE_WOOD, Tile.JUNGLE_WOOD_SIDE, Tile.JUNGLE_WOOD_TOP],
+  ];
+  logs.forEach(([block, side, top]) => {
+    assert.equal(tileFor(block, FaceDirection.LEFT), side);
+    assert.equal(tileFor(block, FaceDirection.TOP), top);
+    assert.equal(tileFor(block, FaceDirection.BOTTOM), top);
+  });
+});
