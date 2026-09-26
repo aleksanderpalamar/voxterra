@@ -1,9 +1,11 @@
 import * as THREE from 'three';
+import { lightSpaceBasis, snapToTexelGrid } from './shadowAlignment.js';
 
 const SUN_DIRECTION = new THREE.Vector3(0.45, 0.82, 0.35).normalize();
 const SUN_DISTANCE = 90;
 const SHADOW_EXTENT = 48;
 const SHADOW_MAP_SIZE = 2048;
+const SHADOW_TEXEL_SIZE = (SHADOW_EXTENT * 2) / SHADOW_MAP_SIZE;
 
 function configureShadow(light) {
   light.castShadow = true;
@@ -26,8 +28,8 @@ export class Lighting {
     this.ambient = new THREE.AmbientLight(0xffffff, 0.75);
     this.hemisphere = new THREE.HemisphereLight(0xcfe4ff, 0x6a5a44, 0.85);
     this.sun = new THREE.DirectionalLight(0xfff2dc, 2.3);
+    this.shadowBasis = lightSpaceBasis(SUN_DIRECTION);
     configureShadow(this.sun);
-    this.anchor = new THREE.Vector3();
     scene.add(this.ambient, this.hemisphere, this.sun, this.sun.target);
   }
 
@@ -36,8 +38,13 @@ export class Lighting {
   }
 
   follow(position) {
-    this.anchor.set(Math.round(position.x), Math.round(position.y), Math.round(position.z));
-    this.sun.target.position.copy(this.anchor);
-    this.sun.position.copy(this.anchor).addScaledVector(SUN_DIRECTION, SUN_DISTANCE);
+    const anchor = this.shadowAnchor(position);
+    this.sun.target.position.set(anchor.x, anchor.y, anchor.z);
+    this.sun.position.copy(this.sun.target.position).addScaledVector(SUN_DIRECTION, SUN_DISTANCE);
+  }
+
+  shadowAnchor(position) {
+    if (this.shadowBasis === null) return position;
+    return snapToTexelGrid(position, this.shadowBasis, SHADOW_TEXEL_SIZE);
   }
 }
