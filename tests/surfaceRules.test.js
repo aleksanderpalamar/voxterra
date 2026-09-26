@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BlockType } from '../src/world/blockTypes.js';
-import { Biome } from '../src/world/biomes.js';
-import { SNOW_LINE, surfaceLayers, waterSurfaceBlock } from '../src/world/surfaceRules.js';
+import { Biome, MOUNTAIN_LINE } from '../src/world/biomes.js';
+import { SNOW_LINE, snowLineAt, surfaceLayers, waterSurfaceBlock } from '../src/world/surfaceRules.js';
+import { WORLD_HEIGHT } from '../src/world/chunkLayout.js';
 import { SEA_LEVEL } from '../src/world/terrainShape.js';
 
 const temperate = { temperature: 0.1, humidity: 0 };
@@ -21,11 +22,38 @@ test('deserto é coberto de areia e tundra de neve', () => {
   assert.equal(surfaceLayers(Biome.TUNDRA, temperate, 30).top, BlockType.SNOW);
 });
 
-test('montanhas são rochosas e ganham neve quando frias ou muito altas', () => {
-  assert.equal(surfaceLayers(Biome.MOUNTAINS, { temperature: 0.6, humidity: 0 }, 40).top, BlockType.STONE);
-  assert.equal(surfaceLayers(Biome.MOUNTAINS, { temperature: -0.4, humidity: 0 }, 40).top, BlockType.SNOW);
-  assert.equal(surfaceLayers(Biome.MOUNTAINS, { temperature: 0.6, humidity: 0 }, SNOW_LINE).top, BlockType.SNOW);
+test('montanhas são rochosas por baixo da neve', () => {
   assert.equal(surfaceLayers(Biome.MOUNTAINS, { temperature: 0.6, humidity: 0 }, 40).filler, BlockType.STONE);
+  assert.equal(surfaceLayers(Biome.MOUNTAINS, { temperature: -0.4, humidity: 0 }, 40).filler, BlockType.STONE);
+});
+
+test('a linha de neve sobe com a temperatura', () => {
+  assert.equal(snowLineAt(-0.6), MOUNTAIN_LINE);
+  assert.equal(snowLineAt(SNOW_LINE.coldTemperature), MOUNTAIN_LINE);
+  const lines = [-0.2, -0.1, 0, 0.1, 0.19].map(snowLineAt);
+  lines.slice(1).forEach((line, index) => assert.ok(line > lines[index], `${line} <= ${lines[index]}`));
+  assert.equal(snowLineAt(SNOW_LINE.warmTemperature), Infinity);
+  assert.equal(snowLineAt(1), Infinity);
+});
+
+test('montanhas frias ficam nevadas desde a base', () => {
+  assert.equal(surfaceLayers(Biome.MOUNTAINS, { temperature: -0.4, humidity: 0 }, MOUNTAIN_LINE).top, BlockType.SNOW);
+});
+
+test('montanhas amenas só ganham neve acima da linha de neve', () => {
+  const mild = { temperature: 0.05, humidity: -0.3 };
+  const line = snowLineAt(mild.temperature);
+  assert.equal(surfaceLayers(Biome.MOUNTAINS, mild, 36).top, BlockType.STONE);
+  assert.equal(surfaceLayers(Biome.MOUNTAINS, mild, line - 1).top, BlockType.STONE);
+  assert.equal(surfaceLayers(Biome.MOUNTAINS, mild, line).top, BlockType.SNOW);
+});
+
+test('montanhas com clima de deserto nunca têm neve, nem no topo do mundo', () => {
+  [SNOW_LINE.warmTemperature, 0.6, 1].forEach((temperature) => {
+    [MOUNTAIN_LINE, 48, WORLD_HEIGHT - 1].forEach((surfaceY) => {
+      assert.equal(surfaceLayers(Biome.MOUNTAINS, { temperature, humidity: -0.5 }, surfaceY).top, BlockType.STONE);
+    });
+  });
 });
 
 test('oceanos e praias são de areia', () => {

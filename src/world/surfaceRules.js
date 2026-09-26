@@ -1,10 +1,14 @@
 import { BlockType } from './blockTypes.js';
-import { Biome } from './biomes.js';
+import { Biome, MOUNTAIN_LINE } from './biomes.js';
 import { SEA_LEVEL } from './terrainShape.js';
 
-export const SNOW_LINE = 48;
+export const SNOW_LINE = Object.freeze({
+  coldTemperature: -0.2,
+  warmTemperature: 0.2,
+  lowest: MOUNTAIN_LINE,
+  highest: 60,
+});
 
-const SNOWY_PEAK_TEMPERATURE = 0.1;
 const FILLER_DEPTH = 3;
 const LAKEBED_STONE_THRESHOLD = 0.2;
 
@@ -26,9 +30,15 @@ const BIOME_SURFACES = Object.freeze({
   [Biome.TUNDRA]: SNOWFIELD,
 });
 
+export function snowLineAt(temperature) {
+  const { coldTemperature, warmTemperature, lowest, highest } = SNOW_LINE;
+  if (temperature >= warmTemperature) return Infinity;
+  const warmth = Math.max(0, (temperature - coldTemperature) / (warmTemperature - coldTemperature));
+  return Math.round(lowest + warmth * (highest - lowest));
+}
+
 function mountainSurface(climate, surfaceY) {
-  const snowy = climate.temperature < SNOWY_PEAK_TEMPERATURE || surfaceY >= SNOW_LINE;
-  return snowy ? SNOWY_ROCK : BARE_ROCK;
+  return surfaceY >= snowLineAt(climate.temperature) ? SNOWY_ROCK : BARE_ROCK;
 }
 
 function lakebed(variation) {
