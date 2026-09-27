@@ -3,12 +3,12 @@ import { TILE_SIZE, TRANSPARENT, jitter } from './paintKit.js';
 const LEAF_HOLE_CHANCE = 0.22;
 
 const Palette = Object.freeze({
-  LEAVES: [58, 126, 46],
-  LEAVES_DARK: [34, 86, 30],
-  LEAVES_LIGHT: [88, 156, 62],
-  PINE_NEEDLES: [42, 94, 66],
-  PINE_NEEDLES_DARK: [26, 64, 46],
-  PINE_NEEDLES_LIGHT: [62, 120, 84],
+  OAK_LEAVES: [58, 126, 46],
+  OAK_LEAVES_DARK: [34, 86, 30],
+  OAK_LEAVES_LIGHT: [88, 156, 62],
+  SPRUCE_NEEDLES: [42, 94, 66],
+  SPRUCE_NEEDLES_DARK: [26, 64, 46],
+  SPRUCE_NEEDLES_LIGHT: [62, 120, 84],
   CACTUS: [70, 138, 54],
   CACTUS_DARK: [48, 104, 40],
   CACTUS_SPINE: [214, 222, 176],
@@ -25,12 +25,12 @@ function holedLeavesPainter(colors) {
   };
 }
 
-export const leavesPainter = holedLeavesPainter({ base: Palette.LEAVES, dark: Palette.LEAVES_DARK, light: Palette.LEAVES_LIGHT });
+export const oakLeavesPainter = holedLeavesPainter({ base: Palette.OAK_LEAVES, dark: Palette.OAK_LEAVES_DARK, light: Palette.OAK_LEAVES_LIGHT });
 
-export const pineLeavesPainter = holedLeavesPainter({
-  base: Palette.PINE_NEEDLES,
-  dark: Palette.PINE_NEEDLES_DARK,
-  light: Palette.PINE_NEEDLES_LIGHT,
+export const spruceLeavesPainter = holedLeavesPainter({
+  base: Palette.SPRUCE_NEEDLES,
+  dark: Palette.SPRUCE_NEEDLES_DARK,
+  light: Palette.SPRUCE_NEEDLES_LIGHT,
 });
 
 export function cactusSidePainter(random) {

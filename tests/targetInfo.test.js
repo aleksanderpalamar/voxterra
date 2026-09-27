@@ -37,7 +37,7 @@ test('mostra o nome do bloco sob a mira', () => {
 });
 
 test('não redesenha enquanto o tipo de bloco mirado não muda', () => {
-  const { label, info } = setup({ '0,0,0': BlockType.STONE, '1,0,0': BlockType.STONE, '2,0,0': BlockType.PINE_LEAVES });
+  const { label, info } = setup({ '0,0,0': BlockType.STONE, '1,0,0': BlockType.STONE, '2,0,0': BlockType.SPRUCE_LEAVES });
   info.update(targetAt(0, 0, 0));
   info.update(targetAt(0, 0, 0));
   info.update(targetAt(1, 0, 0));
@@ -45,7 +45,7 @@ test('não redesenha enquanto o tipo de bloco mirado não muda', () => {
   assert.deepEqual(label.calls, [
     ['hide'],
     ['show', BlockType.STONE, 'Stone'],
-    ['show', BlockType.PINE_LEAVES, 'Pine Leaves'],
+    ['show', BlockType.SPRUCE_LEAVES, 'Spruce Leaves'],
   ]);
 });
 

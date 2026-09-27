@@ -55,15 +55,15 @@ test('vértices recebem sombreamento de oclusão ambiente', () => {
 
 test('faces entre folhas vizinhas são mantidas para ver através dos furos', () => {
   const world = createEmptyWorld({ height: 4 });
-  world.setBlock(1, 1, 1, BlockType.LEAVES);
-  world.setBlock(2, 1, 1, BlockType.LEAVES);
+  world.setBlock(1, 1, 1, BlockType.OAK_LEAVES);
+  world.setBlock(2, 1, 1, BlockType.OAK_LEAVES);
   assert.equal(faceCount(meshWorld(world)), 12);
 });
 
 test('bloco opaco encostado em folhas mantém sua face e oculta a da folha', () => {
   const world = createEmptyWorld({ height: 4 });
-  world.setBlock(1, 1, 1, BlockType.WOOD);
-  world.setBlock(2, 1, 1, BlockType.LEAVES);
+  world.setBlock(1, 1, 1, BlockType.OAK_WOOD);
+  world.setBlock(2, 1, 1, BlockType.OAK_LEAVES);
   assert.equal(faceCount(meshWorld(world)), 11);
 });
 

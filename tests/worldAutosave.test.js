@@ -20,7 +20,7 @@ function setup(store = new MemoryWorldStore()) {
 
 test('saveNow grava chunks alterados e os metadados do mundo', async () => {
   const { world, store, autosave } = setup();
-  world.setBlock(1, 1, 1, BlockType.WOOD);
+  world.setBlock(1, 1, 1, BlockType.OAK_WOOD);
   await autosave.saveNow();
   assert.equal(store.hasChunk(0, 0), true);
   assert.equal(store.hasChunk(1, 0), false);
@@ -32,7 +32,7 @@ test('saveNow grava chunks alterados e os metadados do mundo', async () => {
 
 test('update só salva depois do intervalo configurado', async () => {
   const { world, store, autosave } = setup();
-  world.setBlock(1, 1, 1, BlockType.WOOD);
+  world.setBlock(1, 1, 1, BlockType.OAK_WOOD);
   await autosave.update(4.9);
   assert.equal(store.hasChunk(0, 0), false);
   await autosave.update(0.2);
@@ -41,9 +41,9 @@ test('update só salva depois do intervalo configurado', async () => {
 
 test('edições feitas depois de salvar voltam a ficar pendentes', async () => {
   const { world, autosave } = setup();
-  world.setBlock(1, 1, 1, BlockType.WOOD);
+  world.setBlock(1, 1, 1, BlockType.OAK_WOOD);
   await autosave.saveNow();
-  world.setBlock(2, 1, 1, BlockType.WOOD);
+  world.setBlock(2, 1, 1, BlockType.OAK_WOOD);
   assert.equal(world.getChunk(0, 0).dirty, true);
 });
 
@@ -59,7 +59,7 @@ test('chunks alterados são salvos ao serem descarregados', () => {
 test('discard interrompe qualquer gravação futura', async () => {
   const { world, store, autosave } = setup();
   await autosave.discard();
-  world.setBlock(1, 1, 1, BlockType.WOOD);
+  world.setBlock(1, 1, 1, BlockType.OAK_WOOD);
   await autosave.saveNow();
   world.unloadChunk(0, 0);
   assert.equal(store.hasChunk(0, 0), false);
@@ -72,7 +72,7 @@ test('falhas de gravação são reportadas e o chunk continua pendente', async (
     throw new Error('disco cheio');
   };
   const { world, autosave, errors } = setup(failing);
-  world.setBlock(1, 1, 1, BlockType.WOOD);
+  world.setBlock(1, 1, 1, BlockType.OAK_WOOD);
   await autosave.saveNow();
   assert.equal(errors.length, 1);
   assert.equal(world.getChunk(0, 0).dirty, true);
@@ -87,16 +87,16 @@ test('edições sobrevivem ao sair e voltar para a região', async () => {
   const streamer = new ChunkStreamer({ world, generator: asyncGenerator, store, settings });
   new WorldAutosave({ world, store, player, seed: 3 });
   await streamer.loadAround({ x: 0, z: 0 });
-  world.setBlock(3, 62, 3, BlockType.WOOD);
+  world.setBlock(3, 62, 3, BlockType.OAK_WOOD);
   await streamer.loadAround({ x: CHUNK_SIZE * 20, z: 0 });
   assert.equal(world.hasChunk(0, 0), false);
   await streamer.loadAround({ x: 0, z: 0 });
-  assert.equal(world.getBlock(3, 62, 3), BlockType.WOOD);
+  assert.equal(world.getBlock(3, 62, 3), BlockType.OAK_WOOD);
 });
 
 test('erase apaga o mundo salvo e impede novas gravações', async () => {
   const { world, store, autosave } = setup();
-  world.setBlock(1, 1, 1, BlockType.WOOD);
+  world.setBlock(1, 1, 1, BlockType.OAK_WOOD);
   await autosave.saveNow();
   await autosave.erase();
   await autosave.saveNow();

@@ -23,13 +23,13 @@ test('tiles sólidos são opacos e do tamanho esperado', () => {
   assert.equal(tiles.length, TILE_COUNT);
   tiles.forEach((pixels, tile) => {
     assert.equal(pixels.length, TILE_SIZE * TILE_SIZE * 4);
-    if (tile === Tile.LEAVES || tile === Tile.PINE_LEAVES) return;
+    if (tile === Tile.OAK_LEAVES || tile === Tile.SPRUCE_LEAVES) return;
     assert.ok(alphaValues(pixels).every((alpha) => alpha === 255));
   });
 });
 
 test('folhas comuns e de pinheiro possuem furos transparentes e partes opacas', () => {
-  [Tile.LEAVES, Tile.PINE_LEAVES].forEach((tile) => {
+  [Tile.OAK_LEAVES, Tile.SPRUCE_LEAVES].forEach((tile) => {
     const alphas = alphaValues(paintTile(tile));
     const holes = alphas.filter((alpha) => alpha === 0).length;
     assert.ok(alphas.every((alpha) => alpha === 0 || alpha === 255));
@@ -39,13 +39,13 @@ test('folhas comuns e de pinheiro possuem furos transparentes e partes opacas', 
 
 test('folhas de pinheiro são mais escuras que as comuns e o cacto é verde', () => {
   const brightness = (tile) => averageColor(paintTile(tile)).reduce((sum, channel) => sum + channel, 0);
-  assert.ok(brightness(Tile.PINE_LEAVES) < brightness(Tile.LEAVES));
+  assert.ok(brightness(Tile.SPRUCE_LEAVES) < brightness(Tile.OAK_LEAVES));
   const [red, green, blue] = averageColor(paintTile(Tile.CACTUS_SIDE));
   assert.ok(green > red + 40 && green > blue + 40);
 });
 
 test('furos das folhas mantêm cor de folha para não escurecer o filtro', () => {
-  const pixels = paintTile(Tile.LEAVES);
+  const pixels = paintTile(Tile.OAK_LEAVES);
   for (let i = 0; i < pixels.length; i += 4) {
     if (pixels[i + 3] !== 0) continue;
     assert.ok(pixels[i + 1] > pixels[i] && pixels[i + 1] > pixels[i + 2]);
@@ -75,11 +75,11 @@ test('as madeiras têm tons distintos por espécie', () => {
     const color = averageColor(paintTile(tile));
     return Math.max(...color) - Math.min(...color);
   };
-  assert.ok(brightness(Tile.PINE_WOOD_SIDE) < brightness(Tile.WOOD_SIDE) - 60);
+  assert.ok(brightness(Tile.SPRUCE_WOOD_SIDE) < brightness(Tile.OAK_WOOD_SIDE) - 60);
   assert.ok(spread(Tile.ACACIA_WOOD_SIDE) < 25, 'casca de acácia deveria ser acinzentada');
   const [red, green] = averageColor(paintTile(Tile.ACACIA_WOOD_TOP));
   assert.ok(red > green + 50, 'anéis de acácia deveriam ser alaranjados');
-  assert.ok(brightness(Tile.JUNGLE_WOOD_SIDE) > brightness(Tile.WOOD_SIDE) + 30);
+  assert.ok(brightness(Tile.JUNGLE_WOOD_SIDE) > brightness(Tile.OAK_WOOD_SIDE) + 30);
 });
 
 test('tiles são determinísticos e visualmente distintos', () => {

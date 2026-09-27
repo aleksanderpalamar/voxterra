@@ -11,8 +11,8 @@ test('grama usa texturas diferentes para topo, lados e fundo', () => {
 });
 
 test('tronco mostra anéis no topo e casca nos lados', () => {
-  assert.equal(tileFor(BlockType.WOOD, FaceDirection.TOP), Tile.WOOD_TOP);
-  assert.equal(tileFor(BlockType.WOOD, FaceDirection.FRONT), Tile.WOOD_SIDE);
+  assert.equal(tileFor(BlockType.OAK_WOOD, FaceDirection.TOP), Tile.OAK_WOOD_TOP);
+  assert.equal(tileFor(BlockType.OAK_WOOD, FaceDirection.FRONT), Tile.OAK_WOOD_SIDE);
 });
 
 test('lookup reutiliza o mesmo retângulo para o mesmo tile', () => {
@@ -32,12 +32,12 @@ test('água usa o tile de água em todas as faces', () => {
 });
 
 test('folhas persistentes usam a mesma textura das folhas comuns', () => {
-  assert.equal(tileFor(BlockType.PERSISTENT_LEAVES, FaceDirection.TOP), Tile.LEAVES);
+  assert.equal(tileFor(BlockType.PERSISTENT_LEAVES, FaceDirection.TOP), Tile.OAK_LEAVES);
 });
 
 test('cada madeira tem casca na lateral e anéis no topo próprios', () => {
   const logs = [
-    [BlockType.PINE_WOOD, Tile.PINE_WOOD_SIDE, Tile.PINE_WOOD_TOP],
+    [BlockType.SPRUCE_WOOD, Tile.SPRUCE_WOOD_SIDE, Tile.SPRUCE_WOOD_TOP],
     [BlockType.ACACIA_WOOD, Tile.ACACIA_WOOD_SIDE, Tile.ACACIA_WOOD_TOP],
     [BlockType.JUNGLE_WOOD, Tile.JUNGLE_WOOD_SIDE, Tile.JUNGLE_WOOD_TOP],
   ];

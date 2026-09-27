@@ -16,20 +16,20 @@ function traits({ grounds, stem, foliage = null, minHeight, maxHeight, crownReac
 
 export const SPECIES_TRAITS = Object.freeze({
   [Species.OAK]: traits({
-    grounds: [BlockType.GRASS], stem: BlockType.WOOD, foliage: BlockType.LEAVES, minHeight: 4, maxHeight: 6, crownReach: 2,
+    grounds: [BlockType.GRASS], stem: BlockType.OAK_WOOD, foliage: BlockType.OAK_LEAVES, minHeight: 4, maxHeight: 6, crownReach: 2,
   }),
   [Species.CONIFER]: traits({
-    grounds: [BlockType.GRASS, BlockType.SNOW], stem: BlockType.PINE_WOOD, foliage: BlockType.PINE_LEAVES,
+    grounds: [BlockType.GRASS, BlockType.SNOW], stem: BlockType.SPRUCE_WOOD, foliage: BlockType.SPRUCE_LEAVES,
     minHeight: 7, maxHeight: 10, crownReach: 2,
   }),
   [Species.ACACIA]: traits({
-    grounds: [BlockType.GRASS], stem: BlockType.ACACIA_WOOD, foliage: BlockType.LEAVES, minHeight: 5, maxHeight: 6, crownReach: 5,
+    grounds: [BlockType.GRASS], stem: BlockType.ACACIA_WOOD, foliage: BlockType.OAK_LEAVES, minHeight: 5, maxHeight: 6, crownReach: 5,
   }),
   [Species.JUNGLE]: traits({
-    grounds: [BlockType.GRASS], stem: BlockType.JUNGLE_WOOD, foliage: BlockType.LEAVES, minHeight: 10, maxHeight: 14, crownReach: 3,
+    grounds: [BlockType.GRASS], stem: BlockType.JUNGLE_WOOD, foliage: BlockType.OAK_LEAVES, minHeight: 10, maxHeight: 14, crownReach: 3,
   }),
   [Species.BUSH]: traits({
-    grounds: [BlockType.GRASS], stem: BlockType.WOOD, foliage: BlockType.LEAVES, minHeight: 1, maxHeight: 1, crownReach: 1,
+    grounds: [BlockType.GRASS], stem: BlockType.OAK_WOOD, foliage: BlockType.OAK_LEAVES, minHeight: 1, maxHeight: 1, crownReach: 1,
   }),
   [Species.CACTUS]: traits({ grounds: [BlockType.SAND], stem: BlockType.CACTUS, minHeight: 1, maxHeight: 3, crownReach: 0 }),
 });

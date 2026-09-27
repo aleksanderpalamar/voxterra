@@ -35,8 +35,8 @@ test('não é possível quebrar ar nem a camada do fundo', () => {
 test('colocar bloco na face selecionada', () => {
   const world = createFlatWorld({ groundY: 4 });
   const hit = { position: { x: 8, y: 4, z: 8 }, normal: { x: 0, y: 1, z: 0 } };
-  assert.equal(placeBlock(world, hit, BlockType.WOOD, farAwayBox), PlacementResult.PLACED);
-  assert.equal(world.getBlock(8, 5, 8), BlockType.WOOD);
+  assert.equal(placeBlock(world, hit, BlockType.OAK_WOOD, farAwayBox), PlacementResult.PLACED);
+  assert.equal(world.getBlock(8, 5, 8), BlockType.OAK_WOOD);
 });
 
 test('não coloca bloco dentro do jogador', () => {

@@ -8,7 +8,7 @@ function wood({ bark, barkDark, ringLight, ringDark, grainBase = 0.8, grainRange
 
 export const Wood = Object.freeze({
   OAK: wood({ bark: [106, 78, 48], barkDark: [72, 52, 32], ringLight: [188, 150, 98], ringDark: [152, 116, 72] }),
-  PINE: wood({ bark: [62, 44, 28], barkDark: [40, 28, 18], ringLight: [160, 110, 72], ringDark: [128, 84, 54] }),
+  SPRUCE: wood({ bark: [62, 44, 28], barkDark: [40, 28, 18], ringLight: [160, 110, 72], ringDark: [128, 84, 54] }),
   ACACIA: wood({ bark: [106, 102, 96], barkDark: [78, 74, 70], ringLight: [208, 114, 62], ringDark: [174, 90, 48] }),
   JUNGLE: wood({
     bark: [138, 106, 54],

@@ -14,7 +14,7 @@ for (let chunkZ = -1; chunkZ <= 1; chunkZ++) {
 
 const createWorld = () => createEmptyWorld({ height: 32, chunks: NEIGHBORHOOD });
 
-function countLeaves(world, type = BlockType.LEAVES) {
+function countLeaves(world, type = BlockType.OAK_LEAVES) {
   let count = 0;
   for (let y = 0; y < 32; y++) {
     for (let z = -10; z <= 10; z++) {
@@ -39,8 +39,8 @@ const run = (decay, seconds) => {
 
 test('folha encostada em madeira ou ligada a ela por poucas folhas se sustenta', () => {
   const world = createWorld();
-  world.setBlock(0, 5, 0, BlockType.WOOD);
-  for (let x = 1; x <= 8; x++) world.setBlock(x, 5, 0, BlockType.LEAVES);
+  world.setBlock(0, 5, 0, BlockType.OAK_WOOD);
+  for (let x = 1; x <= 8; x++) world.setBlock(x, 5, 0, BlockType.OAK_LEAVES);
   assert.equal(isLeafSupported(world, 1, 5, 0, LEAF_DECAY.supportDistance), true);
   assert.equal(isLeafSupported(world, LEAF_DECAY.supportDistance, 5, 0, LEAF_DECAY.supportDistance), true);
   assert.equal(isLeafSupported(world, LEAF_DECAY.supportDistance + 1, 5, 0, LEAF_DECAY.supportDistance), false);
@@ -48,13 +48,13 @@ test('folha encostada em madeira ou ligada a ela por poucas folhas se sustenta',
 
 test('folha isolada não se sustenta', () => {
   const world = createWorld();
-  world.setBlock(3, 5, 3, BlockType.LEAVES);
+  world.setBlock(3, 5, 3, BlockType.OAK_LEAVES);
   assert.equal(isLeafSupported(world, 3, 5, 3, LEAF_DECAY.supportDistance), false);
 });
 
 test('na dúvida, folhas perto de chunks não carregados são mantidas', () => {
   const world = createEmptyWorld({ height: 32, chunks: [[0, 0]] });
-  world.setBlock(0, 5, 3, BlockType.LEAVES);
+  world.setBlock(0, 5, 3, BlockType.OAK_LEAVES);
   assert.equal(isLeafSupported(world, 0, 5, 3, LEAF_DECAY.supportDistance), true);
 });
 
@@ -97,7 +97,7 @@ test('uma árvore vizinha com tronco não é afetada', () => {
   const decay = new LeafDecay({ world, random: () => 0.5 });
   const neighborLeaves = () => {
     let count = 0;
-    for (let y = 0; y < 32; y++) for (let z = -3; z <= 3; z++) for (let x = 7; x <= 11; x++) if (world.getBlock(x, y, z) === BlockType.LEAVES) count += 1;
+    for (let y = 0; y < 32; y++) for (let z = -3; z <= 3; z++) for (let x = 7; x <= 11; x++) if (world.getBlock(x, y, z) === BlockType.OAK_LEAVES) count += 1;
     return count;
   };
   const before = neighborLeaves();
@@ -112,18 +112,18 @@ test('recolocar madeira antes do prazo salva as folhas', () => {
   const decay = new LeafDecay({ world, random: () => 0.9 });
   const leaves = countLeaves(world);
   breakTrunk(world);
-  world.setBlock(0, 7, 0, BlockType.WOOD);
+  world.setBlock(0, 7, 0, BlockType.OAK_WOOD);
   run(decay, LEAF_DECAY.maxDelay + 1);
   assert.equal(countLeaves(world), leaves);
 });
 
 test('quebrar uma folha de uma copa solta limpa a copa inteira em cascata', () => {
   const world = createWorld();
-  for (let x = -2; x <= 2; x++) for (let z = -2; z <= 2; z++) world.setBlock(x, 10, z, BlockType.PINE_LEAVES);
+  for (let x = -2; x <= 2; x++) for (let z = -2; z <= 2; z++) world.setBlock(x, 10, z, BlockType.SPRUCE_LEAVES);
   const decay = new LeafDecay({ world, random: () => 0.2 });
   world.setBlock(0, 10, 0, BlockType.AIR);
   run(decay, (LEAF_DECAY.maxDelay + 1) * 3);
-  assert.equal(countLeaves(world, BlockType.PINE_LEAVES), 0);
+  assert.equal(countLeaves(world, BlockType.SPRUCE_LEAVES), 0);
 });
 
 test('findUnsupportedLeaves concorda com a verificação folha a folha em florestas geradas', async () => {
@@ -144,7 +144,7 @@ test('findUnsupportedLeaves concorda com a verificação folha a folha em flores
         for (let dx = -radius; dx <= radius; dx++) {
           const [lx, ly, lz] = [x + dx, y + 6 + dy, z + dz];
           const type = world.getBlock(lx, ly, lz);
-          if (type !== BlockType.LEAVES && type !== BlockType.PINE_LEAVES) continue;
+          if (type !== BlockType.OAK_LEAVES && type !== BlockType.SPRUCE_LEAVES) continue;
           checkedLeaves += 1;
           assert.equal(unsupported.has(`${lx},${ly},${lz}`), !isLeafSupported(world, lx, ly, lz, LEAF_DECAY.supportDistance), `${lx},${ly},${lz}`);
         }
@@ -156,7 +156,7 @@ test('findUnsupportedLeaves concorda com a verificação folha a folha em flores
 
 test('quebrar terra ou pedra não dispara verificação de folhas', () => {
   const world = createWorld();
-  world.setBlock(3, 10, 3, BlockType.LEAVES);
+  world.setBlock(3, 10, 3, BlockType.OAK_LEAVES);
   world.setBlock(3, 9, 3, BlockType.STONE);
   const decay = new LeafDecay({ world, random: () => 0.5 });
   world.setBlock(3, 9, 3, BlockType.AIR);
@@ -164,10 +164,10 @@ test('quebrar terra ou pedra não dispara verificação de folhas', () => {
 });
 
 test('qualquer tipo de tronco sustenta as folhas', () => {
-  [BlockType.PINE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD].forEach((log) => {
+  [BlockType.SPRUCE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD].forEach((log) => {
     const world = createWorld();
     world.setBlock(0, 5, 0, log);
-    world.setBlock(1, 5, 0, BlockType.PINE_LEAVES);
+    world.setBlock(1, 5, 0, BlockType.SPRUCE_LEAVES);
     assert.equal(isLeafSupported(world, 1, 5, 0, LEAF_DECAY.supportDistance), true);
     assert.deepEqual(findUnsupportedLeaves(world, 0, 5, 0, LEAF_DECAY), []);
   });
@@ -178,8 +178,8 @@ test('quebrar o tronco de uma conífera faz as folhas de pinheiro decaírem', ()
   world.setBlock(0, 2, 0, BlockType.GRASS);
   placePlant(world, { species: Species.CONIFER, x: 0, z: 0, groundY: 2, height: 8, variant: 0 });
   const decay = new LeafDecay({ world, random: () => 0.5 });
-  assert.ok(countLeaves(world, BlockType.PINE_LEAVES) > 0);
+  assert.ok(countLeaves(world, BlockType.SPRUCE_LEAVES) > 0);
   for (let y = 3; y <= 10; y++) world.setBlock(0, y, 0, BlockType.AIR);
   run(decay, LEAF_DECAY.maxDelay + 1);
-  assert.equal(countLeaves(world, BlockType.PINE_LEAVES), 0);
+  assert.equal(countLeaves(world, BlockType.SPRUCE_LEAVES), 0);
 });

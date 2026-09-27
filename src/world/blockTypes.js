@@ -3,16 +3,16 @@ export const BlockType = Object.freeze({
   GRASS: 1,
   DIRT: 2,
   STONE: 3,
-  WOOD: 4,
-  LEAVES: 5,
+  OAK_WOOD: 4,
+  OAK_LEAVES: 5,
   SAND: 6,
   SNOW: 7,
   WATER: 8,
   ICE: 9,
-  PINE_LEAVES: 10,
+  SPRUCE_LEAVES: 10,
   CACTUS: 11,
   PERSISTENT_LEAVES: 12,
-  PINE_WOOD: 13,
+  SPRUCE_WOOD: 13,
   ACACIA_WOOD: 14,
   JUNGLE_WOOD: 15,
 });
@@ -33,16 +33,16 @@ const BLOCK_NAMES = Object.freeze({
   [BlockType.GRASS]: 'Grass',
   [BlockType.DIRT]: 'Dirt',
   [BlockType.STONE]: 'Stone',
-  [BlockType.WOOD]: 'Wood',
-  [BlockType.LEAVES]: 'Leaves',
+  [BlockType.OAK_WOOD]: 'Oak Wood',
+  [BlockType.OAK_LEAVES]: 'Oak Leaves',
   [BlockType.SAND]: 'Sand',
   [BlockType.SNOW]: 'Snow',
   [BlockType.WATER]: 'Water',
   [BlockType.ICE]: 'Ice',
-  [BlockType.PINE_LEAVES]: 'Pine Leaves',
+  [BlockType.SPRUCE_LEAVES]: 'Spruce Leaves',
   [BlockType.CACTUS]: 'Cactus',
-  [BlockType.PERSISTENT_LEAVES]: 'Leaves',
-  [BlockType.PINE_WOOD]: 'Pine Wood',
+  [BlockType.PERSISTENT_LEAVES]: 'Oak Leaves',
+  [BlockType.SPRUCE_WOOD]: 'Spruce Wood',
   [BlockType.ACACIA_WOOD]: 'Acacia Wood',
   [BlockType.JUNGLE_WOOD]: 'Jungle Wood',
 });
@@ -57,8 +57,8 @@ const SOLID_BLOCK = Object.freeze({
 
 const BLOCK_PROPERTIES = Object.freeze({
   [BlockType.AIR]: Object.freeze({ ...SOLID_BLOCK, solid: false, opaque: false, replaceable: true, layer: RenderLayer.NONE }),
-  [BlockType.LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
-  [BlockType.PINE_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
+  [BlockType.OAK_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
+  [BlockType.SPRUCE_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
   [BlockType.PERSISTENT_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
   [BlockType.WATER]: Object.freeze({
     solid: false,
@@ -73,11 +73,11 @@ export const PLACEABLE_BLOCKS = Object.freeze([
   BlockType.GRASS,
   BlockType.DIRT,
   BlockType.STONE,
-  BlockType.WOOD,
+  BlockType.OAK_WOOD,
   BlockType.PERSISTENT_LEAVES,
 ]);
 
-export const LOG_BLOCKS = new Set([BlockType.WOOD, BlockType.PINE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD]);
+export const LOG_BLOCKS = new Set([BlockType.OAK_WOOD, BlockType.SPRUCE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD]);
 
 function propertiesOf(type) {
   return BLOCK_PROPERTIES[type] ?? SOLID_BLOCK;

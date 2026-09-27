@@ -85,7 +85,7 @@ test('uma região gerada contém todos os tipos de bloco do terreno', () => {
   for (let chunkZ = 0; chunkZ <= 3; chunkZ++) {
     for (let chunkX = 0; chunkX <= 3; chunkX++) world.getChunk(chunkX, chunkZ).blocks.forEach((type) => found.add(type));
   }
-  [BlockType.GRASS, BlockType.DIRT, BlockType.STONE, BlockType.LEAVES].forEach((type) => {
+  [BlockType.GRASS, BlockType.DIRT, BlockType.STONE, BlockType.OAK_LEAVES].forEach((type) => {
     assert.ok(found.has(type), `bloco ${type} ausente`);
   });
   assert.ok([...found].some(isLogBlock), 'nenhum tronco gerado');

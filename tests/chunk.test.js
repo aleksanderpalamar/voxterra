@@ -8,8 +8,8 @@ test('chunk usa coordenadas de mundo a partir da sua origem', () => {
   const chunk = new Chunk(2, -1, 8);
   assert.equal(chunk.originX, 2 * CHUNK_SIZE);
   assert.equal(chunk.originZ, -CHUNK_SIZE);
-  assert.equal(chunk.setBlock(33, 3, -5, BlockType.WOOD), true);
-  assert.equal(chunk.getBlock(33, 3, -5), BlockType.WOOD);
+  assert.equal(chunk.setBlock(33, 3, -5, BlockType.OAK_WOOD), true);
+  assert.equal(chunk.getBlock(33, 3, -5), BlockType.OAK_WOOD);
   assert.equal(chunk.blocks.length, chunkVolume(8));
 });
 

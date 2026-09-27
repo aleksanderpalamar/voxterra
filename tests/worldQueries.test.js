@@ -39,7 +39,7 @@ test('consulta de alvo considera apenas blocos sólidos existentes', () => {
 
 test('consulta de opacidade deixa ver através das folhas', () => {
   const world = createEmptyWorld({ height: 4 });
-  world.setBlock(1, 1, 1, BlockType.LEAVES);
+  world.setBlock(1, 1, 1, BlockType.OAK_LEAVES);
   world.setBlock(2, 1, 1, BlockType.STONE);
   const isOpaque = createOpacityQuery(world);
   assert.equal(isOpaque(1, 1, 1), false);
@@ -49,9 +49,9 @@ test('consulta de opacidade deixa ver através das folhas', () => {
 
 test('createRenderSource agrupa as consultas usadas pelo mesher', () => {
   const world = createEmptyWorld({ height: 4 });
-  world.setBlock(1, 1, 1, BlockType.LEAVES);
+  world.setBlock(1, 1, 1, BlockType.OAK_LEAVES);
   const source = createRenderSource(world);
-  assert.equal(source.getBlock(1, 1, 1), BlockType.LEAVES);
+  assert.equal(source.getBlock(1, 1, 1), BlockType.OAK_LEAVES);
   assert.equal(source.isOpaque(1, 1, 1), false);
   assert.equal(source.isOccluding(1, 1, 1), true);
   assert.equal(source.isChunkMeshable(0, 0), false);
@@ -68,9 +68,9 @@ test('isChunkMeshable exige a vizinhança completa carregada', () => {
 });
 
 test('createMeshSource funciona com qualquer leitor de blocos', () => {
-  const reader = { getBlock: (x, y, z) => (x === 0 && y === 0 && z === 0 ? BlockType.LEAVES : BlockType.AIR) };
+  const reader = { getBlock: (x, y, z) => (x === 0 && y === 0 && z === 0 ? BlockType.OAK_LEAVES : BlockType.AIR) };
   const source = createMeshSource(reader);
-  assert.equal(source.getBlock(0, 0, 0), BlockType.LEAVES);
+  assert.equal(source.getBlock(0, 0, 0), BlockType.OAK_LEAVES);
   assert.equal(source.isOpaque(0, 0, 0), false);
   assert.equal(source.isOccluding(0, 0, 0), true);
   assert.equal(source.isOccluding(0, -1, 0), true);

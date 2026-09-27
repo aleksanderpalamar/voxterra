@@ -15,12 +15,12 @@ import {
 } from '../src/world/blockTypes.js';
 
 test('folhas são sólidas mas não opacas', () => {
-  assert.equal(isSolidBlock(BlockType.LEAVES), true);
-  assert.equal(isOpaqueBlock(BlockType.LEAVES), false);
+  assert.equal(isSolidBlock(BlockType.OAK_LEAVES), true);
+  assert.equal(isOpaqueBlock(BlockType.OAK_LEAVES), false);
 });
 
 test('blocos comuns são opacos e o ar não', () => {
-  [BlockType.GRASS, BlockType.DIRT, BlockType.STONE, BlockType.WOOD].forEach((type) => {
+  [BlockType.GRASS, BlockType.DIRT, BlockType.STONE, BlockType.OAK_WOOD].forEach((type) => {
     assert.equal(isOpaqueBlock(type), true);
   });
   assert.equal(isOpaqueBlock(BlockType.AIR), false);
@@ -48,7 +48,7 @@ test('ar é substituível e blocos comuns não', () => {
   assert.equal(isReplaceableBlock(BlockType.AIR), true);
   assert.equal(isReplaceableBlock(BlockType.STONE), false);
   assert.equal(renderLayerOf(BlockType.AIR), RenderLayer.NONE);
-  assert.equal(renderLayerOf(BlockType.LEAVES), RenderLayer.SOLID);
+  assert.equal(renderLayerOf(BlockType.OAK_LEAVES), RenderLayer.SOLID);
   assert.equal(mediumOf(BlockType.STONE), Medium.AIR);
 });
 
@@ -59,8 +59,8 @@ test('gelo é sólido, opaco e tem nome', () => {
 });
 
 test('folhas de pinheiro são vazadas e cacto é sólido e opaco', () => {
-  assert.equal(isSolidBlock(BlockType.PINE_LEAVES), true);
-  assert.equal(isOpaqueBlock(BlockType.PINE_LEAVES), false);
+  assert.equal(isSolidBlock(BlockType.SPRUCE_LEAVES), true);
+  assert.equal(isOpaqueBlock(BlockType.SPRUCE_LEAVES), false);
   assert.equal(isOpaqueBlock(BlockType.CACTUS), true);
   assert.equal(blockName(BlockType.CACTUS), 'Cactus');
 });
@@ -68,17 +68,17 @@ test('folhas de pinheiro são vazadas e cacto é sólido e opaco', () => {
 test('folhas persistentes se comportam como folhas comuns e são o item da hotbar', () => {
   assert.equal(isSolidBlock(BlockType.PERSISTENT_LEAVES), true);
   assert.equal(isOpaqueBlock(BlockType.PERSISTENT_LEAVES), false);
-  assert.equal(blockName(BlockType.PERSISTENT_LEAVES), 'Leaves');
+  assert.equal(blockName(BlockType.PERSISTENT_LEAVES), 'Oak Leaves');
   assert.ok(PLACEABLE_BLOCKS.includes(BlockType.PERSISTENT_LEAVES));
-  assert.ok(!PLACEABLE_BLOCKS.includes(BlockType.LEAVES));
+  assert.ok(!PLACEABLE_BLOCKS.includes(BlockType.OAK_LEAVES));
 });
 
 test('madeiras de cada espécie são troncos sólidos e opacos', () => {
-  [BlockType.WOOD, BlockType.PINE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD].forEach((type) => {
+  [BlockType.OAK_WOOD, BlockType.SPRUCE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD].forEach((type) => {
     assert.equal(isLogBlock(type), true);
     assert.equal(isSolidBlock(type), true);
     assert.equal(isOpaqueBlock(type), true);
   });
-  [BlockType.LEAVES, BlockType.CACTUS, BlockType.STONE].forEach((type) => assert.equal(isLogBlock(type), false));
-  assert.deepEqual([BlockType.PINE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD].map(blockName), ['Pine Wood', 'Acacia Wood', 'Jungle Wood']);
+  [BlockType.OAK_LEAVES, BlockType.CACTUS, BlockType.STONE].forEach((type) => assert.equal(isLogBlock(type), false));
+  assert.deepEqual([BlockType.SPRUCE_WOOD, BlockType.ACACIA_WOOD, BlockType.JUNGLE_WOOD].map(blockName), ['Spruce Wood', 'Acacia Wood', 'Jungle Wood']);
 });

@@ -1,6 +1,6 @@
 import { BlockType, LOG_BLOCKS, isLogBlock } from './blockTypes.js';
 
-export const DECAYING_LEAVES = new Set([BlockType.LEAVES, BlockType.PINE_LEAVES]);
+export const DECAYING_LEAVES = new Set([BlockType.OAK_LEAVES, BlockType.SPRUCE_LEAVES]);
 export const LEAF_BLOCKS = new Set([...DECAYING_LEAVES, BlockType.PERSISTENT_LEAVES]);
 export const SUPPORT_BLOCKS = new Set([...LEAF_BLOCKS, ...LOG_BLOCKS]);
 

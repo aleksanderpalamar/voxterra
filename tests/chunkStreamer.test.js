@@ -108,14 +108,14 @@ test('chunks além do raio de descarte são removidos quando o jogador se afasta
 test('chunks salvos no store são carregados sem passar pelo gerador', async () => {
   const store = new MemoryWorldStore();
   const saved = new Uint8Array(chunkVolume(HEIGHT));
-  saved[chunkBlockIndex(3, 2, 3)] = BlockType.WOOD;
+  saved[chunkBlockIndex(3, 2, 3)] = BlockType.OAK_WOOD;
   await store.saveChunk(0, 0, saved);
   const context = setup(store);
   const loading = context.streamer.loadAround(at(0, 0));
   await context.generator.resolveAll();
   await loading;
   assert.ok(!context.generator.requests.some((request) => request.chunkX === 0 && request.chunkZ === 0));
-  assert.equal(context.world.getBlock(3, 2, 3), BlockType.WOOD);
+  assert.equal(context.world.getBlock(3, 2, 3), BlockType.OAK_WOOD);
   assert.equal(context.world.getChunk(0, 0).dirty, false);
 });
 

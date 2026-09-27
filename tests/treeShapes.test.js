@@ -32,22 +32,22 @@ const reach = (blocks, plant) => Math.max(...blocks.map((block) => Math.max(Math
 test('carvalho tem tronco reto e copa de folhas comuns', () => {
   const plant = { species: Species.OAK, x: 0, z: 0, groundY: 2, height: 5 };
   const world = grow(plant);
-  for (let y = 3; y <= 7; y++) assert.equal(world.getBlock(0, y, 0), BlockType.WOOD);
+  for (let y = 3; y <= 7; y++) assert.equal(world.getBlock(0, y, 0), BlockType.OAK_WOOD);
   assert.equal(world.getBlock(0, 2, 0), BlockType.DIRT);
-  assert.equal(world.getBlock(0, 8, 0), BlockType.LEAVES);
+  assert.equal(world.getBlock(0, 8, 0), BlockType.OAK_LEAVES);
 });
 
 test('conífera é alta, estreita no topo e usa folhas de pinheiro', () => {
   const plant = { species: Species.CONIFER, x: 0, z: 0, groundY: 2, height: 9 };
   const world = grow(plant);
-  const leaves = blocksOf(world, BlockType.PINE_LEAVES);
+  const leaves = blocksOf(world, BlockType.SPRUCE_LEAVES);
   assert.ok(leaves.length > 20);
-  assert.equal(blocksOf(world, BlockType.LEAVES).length, 0);
+  assert.equal(blocksOf(world, BlockType.OAK_LEAVES).length, 0);
   const topY = Math.max(...leaves.map((leaf) => leaf.y));
   const widthAt = (y) => reach(leaves.filter((leaf) => leaf.y === y), plant);
   assert.equal(widthAt(topY), 0);
   assert.ok(widthAt(topY - 3) > widthAt(topY - 1));
-  assert.equal(world.getBlock(0, 2 + 9, 0), BlockType.PINE_WOOD);
+  assert.equal(world.getBlock(0, 2 + 9, 0), BlockType.SPRUCE_WOOD);
 });
 
 test('acácia inclina o tronco e abre uma copa larga e achatada', () => {
@@ -55,7 +55,7 @@ test('acácia inclina o tronco e abre uma copa larga e achatada', () => {
   const world = grow(plant);
   const wood = blocksOf(world, BlockType.ACACIA_WOOD);
   assert.ok(wood.some((block) => block.x !== 0 || block.z !== 0), 'tronco não inclinou');
-  const leaves = blocksOf(world, BlockType.LEAVES);
+  const leaves = blocksOf(world, BlockType.OAK_LEAVES);
   const layers = new Set(leaves.map((leaf) => leaf.y));
   assert.ok(layers.size <= 2);
   assert.ok(reach(leaves, plant) >= 3);
@@ -65,14 +65,14 @@ test('árvore tropical é muito alta e tem copa ampla', () => {
   const plant = { species: Species.JUNGLE, x: 0, z: 0, groundY: 2, height: 12 };
   const world = grow(plant);
   assert.equal(world.getBlock(0, 14, 0), BlockType.JUNGLE_WOOD);
-  assert.ok(reach(blocksOf(world, BlockType.LEAVES), plant) >= 3);
+  assert.ok(reach(blocksOf(world, BlockType.OAK_LEAVES), plant) >= 3);
 });
 
 test('arbusto é baixo, com um bloco de madeira', () => {
   const plant = { species: Species.BUSH, x: 0, z: 0, groundY: 2, height: 1 };
   const world = grow(plant);
-  assert.equal(blocksOf(world, BlockType.WOOD).length, 1);
-  assert.ok(Math.max(...blocksOf(world, BlockType.LEAVES).map((leaf) => leaf.y)) <= 5);
+  assert.equal(blocksOf(world, BlockType.OAK_WOOD).length, 1);
+  assert.ok(Math.max(...blocksOf(world, BlockType.OAK_LEAVES).map((leaf) => leaf.y)) <= 5);
 });
 
 test('cacto é uma coluna sobre a areia, sem folhas', () => {
@@ -81,7 +81,7 @@ test('cacto é uma coluna sobre a areia, sem folhas', () => {
   [3, 4, 5].forEach((y) => assert.equal(world.getBlock(0, y, 0), BlockType.CACTUS));
   assert.equal(world.getBlock(0, 6, 0), BlockType.AIR);
   assert.equal(world.getBlock(0, 2, 0), BlockType.SAND);
-  assert.equal(blocksOf(world, BlockType.LEAVES).length, 0);
+  assert.equal(blocksOf(world, BlockType.OAK_LEAVES).length, 0);
 });
 
 test('conífera sobre neve não troca o chão por terra', () => {
@@ -111,11 +111,11 @@ test('folhas não sobrescrevem blocos existentes', () => {
 
 test('cada espécie usa o tronco e a folhagem declarados', () => {
   const expected = {
-    [Species.OAK]: [BlockType.WOOD, BlockType.LEAVES],
-    [Species.BUSH]: [BlockType.WOOD, BlockType.LEAVES],
-    [Species.CONIFER]: [BlockType.PINE_WOOD, BlockType.PINE_LEAVES],
-    [Species.ACACIA]: [BlockType.ACACIA_WOOD, BlockType.LEAVES],
-    [Species.JUNGLE]: [BlockType.JUNGLE_WOOD, BlockType.LEAVES],
+    [Species.OAK]: [BlockType.OAK_WOOD, BlockType.OAK_LEAVES],
+    [Species.BUSH]: [BlockType.OAK_WOOD, BlockType.OAK_LEAVES],
+    [Species.CONIFER]: [BlockType.SPRUCE_WOOD, BlockType.SPRUCE_LEAVES],
+    [Species.ACACIA]: [BlockType.ACACIA_WOOD, BlockType.OAK_LEAVES],
+    [Species.JUNGLE]: [BlockType.JUNGLE_WOOD, BlockType.OAK_LEAVES],
     [Species.CACTUS]: [BlockType.CACTUS, null],
   };
   Object.entries(expected).forEach(([species, [stem, foliage]]) => {

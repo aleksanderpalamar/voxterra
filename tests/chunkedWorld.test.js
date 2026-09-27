@@ -10,10 +10,10 @@ test('setBlock e getBlock funcionam através de vários chunks', () => {
   const world = createEmptyWorld({ height: 8, chunks: [[0, 0], [-1, 0], [0, -1]] });
   assert.equal(world.setBlock(3, 2, 3, BlockType.STONE), true);
   assert.equal(world.setBlock(-1, 2, 3, BlockType.DIRT), true);
-  assert.equal(world.setBlock(3, 2, -CHUNK_SIZE, BlockType.WOOD), true);
+  assert.equal(world.setBlock(3, 2, -CHUNK_SIZE, BlockType.OAK_WOOD), true);
   assert.equal(world.getBlock(3, 2, 3), BlockType.STONE);
   assert.equal(world.getBlock(-1, 2, 3), BlockType.DIRT);
-  assert.equal(world.getBlock(3, 2, -CHUNK_SIZE), BlockType.WOOD);
+  assert.equal(world.getBlock(3, 2, -CHUNK_SIZE), BlockType.OAK_WOOD);
 });
 
 test('posições em chunks não carregados ficam fora do mundo', () => {
@@ -29,17 +29,17 @@ test('listeners são notificados apenas quando o bloco muda', () => {
   const world = createEmptyWorld({ height: 8 });
   const changes = [];
   world.onBlockChanged((...args) => changes.push(args));
-  world.setBlock(1, 1, 1, BlockType.WOOD);
-  world.setBlock(1, 1, 1, BlockType.WOOD);
-  world.setBlock(CHUNK_SIZE, 1, 1, BlockType.WOOD);
+  world.setBlock(1, 1, 1, BlockType.OAK_WOOD);
+  world.setBlock(1, 1, 1, BlockType.OAK_WOOD);
+  world.setBlock(CHUNK_SIZE, 1, 1, BlockType.OAK_WOOD);
   world.setBlock(1, 1, 1, BlockType.AIR);
-  assert.deepEqual(changes, [[1, 1, 1, BlockType.WOOD, BlockType.AIR], [1, 1, 1, BlockType.AIR, BlockType.WOOD]]);
+  assert.deepEqual(changes, [[1, 1, 1, BlockType.OAK_WOOD, BlockType.AIR], [1, 1, 1, BlockType.AIR, BlockType.OAK_WOOD]]);
 });
 
 test('findSurfaceY retorna o bloco sólido mais alto ou null', () => {
   const world = createEmptyWorld({ height: 8 });
   world.setBlock(2, 0, 2, BlockType.STONE);
-  world.setBlock(2, 5, 2, BlockType.LEAVES);
+  world.setBlock(2, 5, 2, BlockType.OAK_LEAVES);
   assert.equal(world.findSurfaceY(2, 2), 5);
   assert.equal(world.findSurfaceY(0, 0), null);
   assert.equal(world.findSurfaceY(CHUNK_SIZE * 3, 0), null);
