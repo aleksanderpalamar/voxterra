@@ -6,11 +6,12 @@ import { ChunkRenderer } from './chunkRenderer.js';
 import { MeshPipeline } from './meshPipeline.js';
 import { Atmosphere } from './atmosphere.js';
 import { buildChunkMesh } from './chunkMesher.js';
+import { createChunkTint } from './chunkTint.js';
 import { chunkBounds, chunkCoordinate } from '../world/chunkLayout.js';
 import { mediumAt } from '../world/fluids.js';
 
 export class WorldView {
-  constructor({ context, document, source, height, materials, tileUv, seed, mesher, onError }) {
+  constructor({ context, document, source, height, materials, tileUv, sampleClimate, seed, mesher, onError }) {
     this.context = context;
     this.source = source;
     const { scene, camera } = context;
@@ -23,7 +24,10 @@ export class WorldView {
     this.meshes = new MeshPipeline({
       isMeshable: source.isChunkMeshable,
       mesher,
-      meshNow: (chunkX, chunkZ) => buildChunkMesh(source, chunkBounds(chunkX, chunkZ, height), tileUv),
+      meshNow: (chunkX, chunkZ) => {
+        const bounds = chunkBounds(chunkX, chunkZ, height);
+        return buildChunkMesh(source, bounds, tileUv, createChunkTint(sampleClimate, bounds));
+      },
       sink: this.chunks,
       onError,
     });

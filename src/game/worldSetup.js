@@ -11,11 +11,13 @@ import { TILE_SIZE } from '../render/tilePainters.js';
 import { createAtlasTexture, createBlockMaterial, createWaterMaterial } from '../render/textureAtlas.js';
 import { AsyncChunkGenerator } from '../workers/asyncChunkGenerator.js';
 import { AsyncChunkMesher } from '../workers/asyncChunkMesher.js';
+import { ClimateSampler } from '../world/climate.js';
 
 export const WORLD_ORIGIN = Object.freeze({ x: 0, y: 0, z: 0 });
 
 export function createWorldView({ context, document, world, tiles, seed, executor, onError }) {
   const texture = createAtlasTexture(tiles, TILE_SIZE);
+  const climate = new ClimateSampler(seed);
   const view = new WorldView({
     context,
     document,
@@ -23,8 +25,9 @@ export function createWorldView({ context, document, world, tiles, seed, executo
     height: WORLD_HEIGHT,
     materials: { solid: createBlockMaterial(texture), water: createWaterMaterial(texture) },
     tileUv: createTileUvLookup(),
+    sampleClimate: (x, z) => climate.sample(x, z),
     seed,
-    mesher: new AsyncChunkMesher(executor, world),
+    mesher: new AsyncChunkMesher(executor, world, seed),
     onError,
   });
   world.onBlockChanged((x, _y, z) => view.invalidateBlock(x, z));

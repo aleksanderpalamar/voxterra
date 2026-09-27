@@ -93,3 +93,30 @@ test('água encostada em pedra esconde a própria face e mostra a da pedra', () 
   assert.equal(waterFaces(mesh), 5);
   assert.equal(faceCount(mesh), 6);
 });
+
+const vertexTriples = (array) => Array.from({ length: array.length / 3 }, (_, index) => Array.from(array.slice(index * 3, index * 3 + 3)));
+
+test('grama recebe a tonalidade de cada canto e os demais blocos ficam neutros', () => {
+  const world = createEmptyWorld({ height: 4 });
+  world.setBlock(1, 1, 1, BlockType.GRASS);
+  world.setBlock(5, 1, 5, BlockType.STONE);
+  world.setBlock(9, 1, 9, BlockType.WATER);
+  const tintAt = (type, x, z) => (type === BlockType.GRASS ? [x / 8, 1, z / 8] : [1, 1, 1]);
+  const bounds = { minX: 0, minY: 0, minZ: 0, maxX: CHUNK_SIZE, maxY: world.height, maxZ: CHUNK_SIZE };
+  const mesh = buildChunkMesh(createRenderSource(world), bounds, createTileUvLookup(), tintAt);
+  const positions = vertexTriples(mesh.solid.positions);
+  const tints = vertexTriples(mesh.solid.tints);
+  assert.equal(tints.length, positions.length);
+  positions.forEach(([x, , z], index) => {
+    const expected = x <= 2 ? [x / 8, 1, z / 8] : [1, 1, 1];
+    assert.deepEqual(tints[index], expected.map(Math.fround));
+  });
+  assert.ok(mesh.water.tints.length > 0 && mesh.water.tints.every((channel) => channel === 1));
+});
+
+test('sem tonalidade informada todos os vértices ficam neutros', () => {
+  const world = createEmptyWorld({ height: 4 });
+  world.setBlock(1, 1, 1, BlockType.GRASS);
+  world.setBlock(2, 1, 1, BlockType.OAK_LEAVES);
+  assert.ok(meshWorld(world).solid.tints.every((channel) => channel === 1));
+});

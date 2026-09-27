@@ -3,26 +3,32 @@ import { FACES } from './faceDefinitions.js';
 import { AO_BRIGHTNESS, quadIndices, vertexOcclusion } from './ambientOcclusion.js';
 import { createMeshBuffers, pushVertex, toMeshData } from './meshBuffers.js';
 import { appendWaterFaces } from './waterMesher.js';
+import { NEUTRAL_TINT } from './climateTint.js';
 
-function appendSolidFace(buffers, source, face, x, y, z, uvRect) {
+const withoutTint = () => NEUTRAL_TINT;
+
+function appendSolidFace(buffers, source, face, x, y, z, uvRect, tintAtCorner) {
   const baseIndex = buffers.positions.length / 3;
   const occlusion = face.corners.map((corner) => vertexOcclusion(source.isOccluding, x, y, z, face, corner));
   face.corners.forEach((corner, cornerIndex) => {
     const [cx, cy, cz] = corner.position;
-    pushVertex(buffers, [x + cx, y + cy, z + cz], face.normal, corner.uv, uvRect, AO_BRIGHTNESS[occlusion[cornerIndex]]);
+    const shade = AO_BRIGHTNESS[occlusion[cornerIndex]];
+    pushVertex(buffers, [x + cx, y + cy, z + cz], face.normal, corner.uv, uvRect, shade, tintAtCorner(x + cx, z + cz));
   });
   buffers.indices.push(...quadIndices(baseIndex, occlusion));
 }
 
-function appendSolidFaces(buffers, source, blockType, x, y, z, tileUv) {
+function appendSolidFaces(buffers, source, blockType, x, y, z, appearance) {
+  const tintAtCorner = (cornerX, cornerZ) => appearance.tintAt(blockType, cornerX, cornerZ);
   for (const face of FACES) {
     const [nx, ny, nz] = face.normal;
     if (source.isOpaque(x + nx, y + ny, z + nz)) continue;
-    appendSolidFace(buffers, source, face, x, y, z, tileUv(blockType, face.direction));
+    appendSolidFace(buffers, source, face, x, y, z, appearance.tileUv(blockType, face.direction), tintAtCorner);
   }
 }
 
-export function buildChunkMesh(source, bounds, tileUv) {
+export function buildChunkMesh(source, bounds, tileUv, tintAt = withoutTint) {
+  const appearance = { tileUv, tintAt };
   const solid = createMeshBuffers();
   const water = createMeshBuffers();
   for (let y = bounds.minY; y < bounds.maxY; y++) {
@@ -30,7 +36,7 @@ export function buildChunkMesh(source, bounds, tileUv) {
       for (let x = bounds.minX; x < bounds.maxX; x++) {
         const blockType = source.getBlock(x, y, z);
         const layer = renderLayerOf(blockType);
-        if (layer === RenderLayer.SOLID) appendSolidFaces(solid, source, blockType, x, y, z, tileUv);
+        if (layer === RenderLayer.SOLID) appendSolidFaces(solid, source, blockType, x, y, z, appearance);
         else if (layer === RenderLayer.WATER) appendWaterFaces(water, source, blockType, x, y, z, tileUv);
       }
     }

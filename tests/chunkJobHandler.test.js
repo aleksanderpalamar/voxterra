@@ -8,6 +8,8 @@ import { extractPaddedVolume } from '../src/world/paddedVolume.js';
 import { createMeshSource } from '../src/world/worldQueries.js';
 import { buildChunkMesh } from '../src/render/chunkMesher.js';
 import { createTileUvLookup } from '../src/render/blockTiles.js';
+import { createChunkTint } from '../src/render/chunkTint.js';
+import { ClimateSampler } from '../src/world/climate.js';
 
 const HEIGHT = 64;
 
@@ -23,10 +25,14 @@ test('job de malha reproduz a malha montada a partir do mundo', () => {
   const world = new ChunkedWorld(HEIGHT);
   chunkNeighborhood(0, 0).forEach(({ chunkX, chunkZ }) => world.loadChunk(generator.generate(chunkX, chunkZ)));
   const volume = extractPaddedVolume((x, z) => world.getChunk(x, z), 0, 0, HEIGHT);
-  const { result, transfer } = createChunkJobHandler()({ type: JobType.MESH, height: HEIGHT, chunkX: 0, chunkZ: 0, volume });
-  const expected = buildChunkMesh(createMeshSource(world), chunkBounds(0, 0, HEIGHT), createTileUvLookup());
+  const { result, transfer } = createChunkJobHandler()({ type: JobType.MESH, seed: 3, height: HEIGHT, chunkX: 0, chunkZ: 0, volume });
+  const bounds = chunkBounds(0, 0, HEIGHT);
+  const climate = new ClimateSampler(3);
+  const tintAt = createChunkTint((x, z) => climate.sample(x, z), bounds);
+  const expected = buildChunkMesh(createMeshSource(world), bounds, createTileUvLookup(), tintAt);
   assert.deepEqual(result, expected);
-  assert.equal(transfer.length, 10);
+  assert.ok(result.solid.tints.some((channel) => channel !== 1), 'a malha gerada deveria ter grama ou folhas com tonalidade');
+  assert.equal(transfer.length, 12);
   assert.ok(transfer.includes(result.solid.indices.buffer));
   assert.ok(transfer.includes(result.water.positions.buffer));
 });

@@ -2,6 +2,7 @@ import { RenderLayer, renderLayerOf } from '../world/blockTypes.js';
 import { WATER_SURFACE_HEIGHT } from '../world/fluids.js';
 import { FACES } from './faceDefinitions.js';
 import { pushVertex } from './meshBuffers.js';
+import { NEUTRAL_TINT } from './climateTint.js';
 
 const FULL_BRIGHTNESS = 1;
 const DEFAULT_QUAD = Object.freeze([0, 1, 2, 2, 1, 3]);
@@ -19,7 +20,7 @@ function appendFace(buffers, face, x, y, z, surfaceHeight, uvRect) {
   face.corners.forEach((corner) => {
     const [cx, cy, cz] = corner.position;
     const top = cy === 1 ? surfaceHeight : cy;
-    pushVertex(buffers, [x + cx, y + top, z + cz], face.normal, corner.uv, uvRect, FULL_BRIGHTNESS);
+    pushVertex(buffers, [x + cx, y + top, z + cz], face.normal, corner.uv, uvRect, FULL_BRIGHTNESS, NEUTRAL_TINT);
   });
   buffers.indices.push(...DEFAULT_QUAD.map((offset) => baseIndex + offset));
 }

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { buildAtlasLevels } from './atlasLayout.js';
+import { enableClimateTint } from './tintShader.js';
 
 const ALPHA_CUTOFF = 0.5;
 
@@ -29,5 +30,5 @@ export function createWaterMaterial(texture) {
 }
 
 export function createBlockMaterial(texture) {
-  return new THREE.MeshLambertMaterial({ map: texture, vertexColors: true, alphaTest: ALPHA_CUTOFF });
+  return enableClimateTint(new THREE.MeshLambertMaterial({ map: texture, vertexColors: true, alphaTest: ALPHA_CUTOFF }));
 }

@@ -10,6 +10,8 @@ import { chunkBounds, chunkNeighborhood } from '../src/world/chunkLayout.js';
 import { createMeshSource } from '../src/world/worldQueries.js';
 import { buildChunkMesh } from '../src/render/chunkMesher.js';
 import { createTileUvLookup } from '../src/render/blockTiles.js';
+import { createChunkTint } from '../src/render/chunkTint.js';
+import { ClimateSampler } from '../src/world/climate.js';
 
 const HEIGHT = 64;
 const scheduling = { priority: () => 0, isStale: () => false };
@@ -24,14 +26,17 @@ test('AsyncChunkMesher monta a malha a partir de um retrato do mundo', async () 
   const world = new ChunkedWorld(HEIGHT);
   const generator = new ChunkGenerator(11, HEIGHT);
   chunkNeighborhood(1, 1).forEach(({ chunkX, chunkZ }) => world.loadChunk(generator.generate(chunkX, chunkZ)));
-  const mesher = new AsyncChunkMesher(new InlineExecutor(createChunkJobHandler()), world);
+  const mesher = new AsyncChunkMesher(new InlineExecutor(createChunkJobHandler()), world, 11);
   const mesh = await mesher.mesh(1, 1, scheduling);
-  assert.deepEqual(mesh, buildChunkMesh(createMeshSource(world), chunkBounds(1, 1, HEIGHT), createTileUvLookup()));
+  const bounds = chunkBounds(1, 1, HEIGHT);
+  const climate = new ClimateSampler(11);
+  const tintAt = createChunkTint((x, z) => climate.sample(x, z), bounds);
+  assert.deepEqual(mesh, buildChunkMesh(createMeshSource(world), bounds, createTileUvLookup(), tintAt));
 });
 
 test('clientes devolvem null quando o job fica obsoleto', async () => {
   const executor = new InlineExecutor(createChunkJobHandler());
   const stale = { priority: () => 0, isStale: () => true };
   assert.equal(await new AsyncChunkGenerator(executor, 1, HEIGHT).generate(0, 0, stale), null);
-  assert.equal(await new AsyncChunkMesher(executor, new ChunkedWorld(HEIGHT)).mesh(0, 0, stale), null);
+  assert.equal(await new AsyncChunkMesher(executor, new ChunkedWorld(HEIGHT), 1).mesh(0, 0, stale), null);
 });

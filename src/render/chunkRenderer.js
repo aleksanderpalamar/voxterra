@@ -7,6 +7,7 @@ function createGeometry(meshData) {
   geometry.setAttribute('normal', new THREE.BufferAttribute(meshData.normals, 3));
   geometry.setAttribute('uv', new THREE.BufferAttribute(meshData.uvs, 2));
   geometry.setAttribute('color', new THREE.BufferAttribute(meshData.colors, 3));
+  geometry.setAttribute('tint', new THREE.BufferAttribute(meshData.tints, 3));
   geometry.setIndex(new THREE.BufferAttribute(meshData.indices, 1));
   geometry.computeBoundingSphere();
   return geometry;
