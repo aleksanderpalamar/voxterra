@@ -11,7 +11,14 @@ import {
   stonePainter,
   waterPainter,
 } from './terrainPainters.js';
-import { cactusSidePainter, cactusTopPainter, oakLeavesPainter, spruceLeavesPainter } from './plantPainters.js';
+import {
+  acaciaLeavesPainter,
+  cactusSidePainter,
+  cactusTopPainter,
+  jungleLeavesPainter,
+  oakLeavesPainter,
+  spruceLeavesPainter,
+} from './plantPainters.js';
 import { Wood, barkPainter, ringsPainter } from './woodPainters.js';
 
 export { TILE_SIZE } from './paintKit.js';
@@ -39,6 +46,8 @@ const TILE_PAINTERS = Object.freeze({
   [Tile.ACACIA_WOOD_TOP]: ringsPainter(Wood.ACACIA),
   [Tile.JUNGLE_WOOD_SIDE]: barkPainter(Wood.JUNGLE),
   [Tile.JUNGLE_WOOD_TOP]: ringsPainter(Wood.JUNGLE),
+  [Tile.ACACIA_LEAVES]: acaciaLeavesPainter,
+  [Tile.JUNGLE_LEAVES]: jungleLeavesPainter,
 });
 
 export function paintTile(tile, seed = DEFAULT_TEXTURE_SEED) {

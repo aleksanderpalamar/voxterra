@@ -23,10 +23,10 @@ export const SPECIES_TRAITS = Object.freeze({
     minHeight: 7, maxHeight: 10, crownReach: 2,
   }),
   [Species.ACACIA]: traits({
-    grounds: [BlockType.GRASS], stem: BlockType.ACACIA_WOOD, foliage: BlockType.OAK_LEAVES, minHeight: 5, maxHeight: 6, crownReach: 5,
+    grounds: [BlockType.GRASS], stem: BlockType.ACACIA_WOOD, foliage: BlockType.ACACIA_LEAVES, minHeight: 5, maxHeight: 6, crownReach: 5,
   }),
   [Species.JUNGLE]: traits({
-    grounds: [BlockType.GRASS], stem: BlockType.JUNGLE_WOOD, foliage: BlockType.OAK_LEAVES, minHeight: 10, maxHeight: 14, crownReach: 3,
+    grounds: [BlockType.GRASS], stem: BlockType.JUNGLE_WOOD, foliage: BlockType.JUNGLE_LEAVES, minHeight: 10, maxHeight: 14, crownReach: 3,
   }),
   [Species.BUSH]: traits({
     grounds: [BlockType.GRASS], stem: BlockType.OAK_WOOD, foliage: BlockType.OAK_LEAVES, minHeight: 1, maxHeight: 1, crownReach: 1,

@@ -15,6 +15,8 @@ export const BlockType = Object.freeze({
   SPRUCE_WOOD: 13,
   ACACIA_WOOD: 14,
   JUNGLE_WOOD: 15,
+  ACACIA_LEAVES: 16,
+  JUNGLE_LEAVES: 17,
 });
 
 export const RenderLayer = Object.freeze({
@@ -45,6 +47,8 @@ const BLOCK_NAMES = Object.freeze({
   [BlockType.SPRUCE_WOOD]: 'Spruce Wood',
   [BlockType.ACACIA_WOOD]: 'Acacia Wood',
   [BlockType.JUNGLE_WOOD]: 'Jungle Wood',
+  [BlockType.ACACIA_LEAVES]: 'Acacia Leaves',
+  [BlockType.JUNGLE_LEAVES]: 'Jungle Leaves',
 });
 
 const SOLID_BLOCK = Object.freeze({
@@ -55,11 +59,15 @@ const SOLID_BLOCK = Object.freeze({
   medium: Medium.AIR,
 });
 
+const LEAVES_BLOCK = Object.freeze({ ...SOLID_BLOCK, opaque: false });
+
 const BLOCK_PROPERTIES = Object.freeze({
   [BlockType.AIR]: Object.freeze({ ...SOLID_BLOCK, solid: false, opaque: false, replaceable: true, layer: RenderLayer.NONE }),
-  [BlockType.OAK_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
-  [BlockType.SPRUCE_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
-  [BlockType.PERSISTENT_LEAVES]: Object.freeze({ ...SOLID_BLOCK, opaque: false }),
+  [BlockType.OAK_LEAVES]: LEAVES_BLOCK,
+  [BlockType.SPRUCE_LEAVES]: LEAVES_BLOCK,
+  [BlockType.ACACIA_LEAVES]: LEAVES_BLOCK,
+  [BlockType.JUNGLE_LEAVES]: LEAVES_BLOCK,
+  [BlockType.PERSISTENT_LEAVES]: LEAVES_BLOCK,
   [BlockType.WATER]: Object.freeze({
     solid: false,
     opaque: false,
@@ -74,6 +82,9 @@ export const PLACEABLE_BLOCKS = Object.freeze([
   BlockType.DIRT,
   BlockType.STONE,
   BlockType.OAK_WOOD,
+  BlockType.SPRUCE_WOOD,
+  BlockType.ACACIA_WOOD,
+  BlockType.JUNGLE_WOOD,
   BlockType.PERSISTENT_LEAVES,
 ]);
 

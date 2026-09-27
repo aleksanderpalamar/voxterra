@@ -4,7 +4,7 @@ import { BlockType } from '../src/world/blockTypes.js';
 import { LEAF_DECAY, LeafDecay } from '../src/world/leafDecay.js';
 import { findUnsupportedLeaves, isLeafSupported } from '../src/world/leafSupport.js';
 import { placePlant } from '../src/world/treeShapes.js';
-import { Species } from '../src/world/vegetation.js';
+import { SPECIES_TRAITS, Species } from '../src/world/vegetation.js';
 import { createEmptyWorld } from './helpers.js';
 
 const NEIGHBORHOOD = [];
@@ -182,4 +182,19 @@ test('quebrar o tronco de uma conífera faz as folhas de pinheiro decaírem', ()
   for (let y = 3; y <= 10; y++) world.setBlock(0, y, 0, BlockType.AIR);
   run(decay, LEAF_DECAY.maxDelay + 1);
   assert.equal(countLeaves(world, BlockType.SPRUCE_LEAVES), 0);
+});
+
+test('folhas de acácia e tropicais também decaem sem tronco', () => {
+  [[Species.ACACIA, BlockType.ACACIA_LEAVES, 5], [Species.JUNGLE, BlockType.JUNGLE_LEAVES, 10]].forEach(([species, leaf, height]) => {
+    const world = createWorld();
+    world.setBlock(0, 2, 0, BlockType.GRASS);
+    placePlant(world, { species, x: 0, z: 0, groundY: 2, height, variant: 0 });
+    const decay = new LeafDecay({ world, random: () => 0.5 });
+    assert.ok(countLeaves(world, leaf) > 0, species);
+    for (let y = 3; y <= 2 + height; y++) {
+      for (let z = -3; z <= 3; z++) for (let x = -3; x <= 3; x++) if (world.getBlock(x, y, z) === SPECIES_TRAITS[species].stem) world.setBlock(x, y, z, BlockType.AIR);
+    }
+    run(decay, LEAF_DECAY.maxDelay * 3);
+    assert.equal(countLeaves(world, leaf), 0, species);
+  });
 });

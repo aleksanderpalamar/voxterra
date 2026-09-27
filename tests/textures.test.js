@@ -14,6 +14,8 @@ function averageColor(pixels) {
   return totals.map((total) => total / (pixels.length / 4));
 }
 
+const LEAF_TILES = [Tile.OAK_LEAVES, Tile.SPRUCE_LEAVES, Tile.ACACIA_LEAVES, Tile.JUNGLE_LEAVES];
+
 function alphaValues(pixels) {
   return Array.from({ length: pixels.length / 4 }, (_, index) => pixels[index * 4 + 3]);
 }
@@ -23,13 +25,13 @@ test('tiles sólidos são opacos e do tamanho esperado', () => {
   assert.equal(tiles.length, TILE_COUNT);
   tiles.forEach((pixels, tile) => {
     assert.equal(pixels.length, TILE_SIZE * TILE_SIZE * 4);
-    if (tile === Tile.OAK_LEAVES || tile === Tile.SPRUCE_LEAVES) return;
+    if (LEAF_TILES.includes(tile)) return;
     assert.ok(alphaValues(pixels).every((alpha) => alpha === 255));
   });
 });
 
 test('folhas comuns e de pinheiro possuem furos transparentes e partes opacas', () => {
-  [Tile.OAK_LEAVES, Tile.SPRUCE_LEAVES].forEach((tile) => {
+  LEAF_TILES.forEach((tile) => {
     const alphas = alphaValues(paintTile(tile));
     const holes = alphas.filter((alpha) => alpha === 0).length;
     assert.ok(alphas.every((alpha) => alpha === 0 || alpha === 255));
@@ -45,11 +47,21 @@ test('folhas de pinheiro são mais escuras que as comuns e o cacto é verde', ()
 });
 
 test('furos das folhas mantêm cor de folha para não escurecer o filtro', () => {
-  const pixels = paintTile(Tile.OAK_LEAVES);
-  for (let i = 0; i < pixels.length; i += 4) {
-    if (pixels[i + 3] !== 0) continue;
-    assert.ok(pixels[i + 1] > pixels[i] && pixels[i + 1] > pixels[i + 2]);
-  }
+  LEAF_TILES.forEach((tile) => {
+    const pixels = paintTile(tile);
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i + 3] !== 0) continue;
+      assert.ok(pixels[i + 1] > pixels[i] && pixels[i + 1] > pixels[i + 2], `tile ${tile}`);
+    }
+  });
+});
+
+test('folhas de acácia puxam para o oliva e as tropicais são de um verde mais vivo', () => {
+  const [oakRed, oakGreen] = averageColor(paintTile(Tile.OAK_LEAVES));
+  const [acaciaRed] = averageColor(paintTile(Tile.ACACIA_LEAVES));
+  const [, jungleGreen] = averageColor(paintTile(Tile.JUNGLE_LEAVES));
+  assert.ok(acaciaRed > oakRed + 30);
+  assert.ok(jungleGreen > oakGreen + 15);
 });
 
 test('areia é amarelada e neve é quase branca', () => {

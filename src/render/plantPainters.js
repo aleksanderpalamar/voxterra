@@ -9,6 +9,12 @@ const Palette = Object.freeze({
   SPRUCE_NEEDLES: [42, 94, 66],
   SPRUCE_NEEDLES_DARK: [26, 64, 46],
   SPRUCE_NEEDLES_LIGHT: [62, 120, 84],
+  ACACIA_LEAVES: [112, 130, 46],
+  ACACIA_LEAVES_DARK: [80, 96, 32],
+  ACACIA_LEAVES_LIGHT: [140, 158, 64],
+  JUNGLE_LEAVES: [46, 152, 42],
+  JUNGLE_LEAVES_DARK: [28, 110, 30],
+  JUNGLE_LEAVES_LIGHT: [82, 186, 60],
   CACTUS: [70, 138, 54],
   CACTUS_DARK: [48, 104, 40],
   CACTUS_SPINE: [214, 222, 176],
@@ -31,6 +37,18 @@ export const spruceLeavesPainter = holedLeavesPainter({
   base: Palette.SPRUCE_NEEDLES,
   dark: Palette.SPRUCE_NEEDLES_DARK,
   light: Palette.SPRUCE_NEEDLES_LIGHT,
+});
+
+export const acaciaLeavesPainter = holedLeavesPainter({
+  base: Palette.ACACIA_LEAVES,
+  dark: Palette.ACACIA_LEAVES_DARK,
+  light: Palette.ACACIA_LEAVES_LIGHT,
+});
+
+export const jungleLeavesPainter = holedLeavesPainter({
+  base: Palette.JUNGLE_LEAVES,
+  dark: Palette.JUNGLE_LEAVES_DARK,
+  light: Palette.JUNGLE_LEAVES_LIGHT,
 });
 
 export function cactusSidePainter(random) {

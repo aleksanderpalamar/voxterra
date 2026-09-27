@@ -21,14 +21,14 @@ No build step, no bundler and no runtime dependencies besides [Three.js](https:/
 - **Infinite procedural world**: rolling hills, rocky peaks and trees generated chunk by chunk from a seed (Perlin noise with fractal octaves).
 - **Continents and oceans**: a continentalness map shapes oceans, coasts and inland terrain around a fixed sea level, with lakes wherever the land dips below it. Lakes have dirt and stone beds, and they freeze over in the tundra.
 - **Biomes**: temperature and humidity maps shape eight land biomes (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest and Mountains), plus Ocean and Beach, with sand dunes, snowfields, snowy peaks and irregular borders between them. The snow line rises with temperature, so mountains in cold climates are white from their base while those near deserts stay bare rock.
-- **Flora**: each biome has its own vegetation and density: sparse oaks on plains, dense forests, conifers in taigas, flat-topped acacias in savannas, tall trees in rainforests and cacti in deserts. Each species has its own wood: brown oak, dark conifer, grey acacia with an orange core and golden jungle wood. Near borders, species from both sides mix. Natural leaves decay once no log is left within six blocks, while leaves you place stay put.
+- **Flora**: each biome has its own vegetation and density: sparse oaks on plains, dense forests, conifers in taigas, flat-topped acacias in savannas, tall trees in rainforests and cacti in deserts. Each species has its own wood and leaves: brown oak, dark spruce with blue-green needles, grey acacia with an orange core and olive leaves, and golden jungle wood with vivid green leaves. Near borders, species from both sides mix. Natural leaves decay once no log is left within six blocks, while leaves you place stay put.
 - **Water**: a translucent fluid you can walk into and swim in, with buoyancy, slower movement and a separate underwater atmosphere (short blue fog, tint and no sky).
 - **Chunk streaming**: chunks are generated around the player and unloaded when they fall behind.
 - **Web Workers**: terrain generation and meshing run off the main thread, so new terrain appears without stutters.
 - **Voxel rendering**: face-culled chunk meshes, per-vertex ambient occlusion, see-through leaves and textures painted by code (no image assets).
 - **Atmosphere**: sunlight with stable shadows, sky gradient, drifting clouds and distance fog.
 - **First-person controller**: gravity, jumping and AABB collision against the world.
-- **Building**: voxel raycasting to break and place blocks, with a five-slot hotbar (Grass, Dirt, Stone, Wood, Leaves). The name of the block under the crosshair appears above the hotbar.
+- **Building**: voxel raycasting to break and place blocks, with an eight-slot hotbar (Grass, Dirt, Stone, Oak, Spruce, Acacia and Jungle Wood, and Oak Leaves). The name of the block under the crosshair appears above the hotbar.
 - **Automatic saving**: modified chunks, seed and player position are stored in IndexedDB, with **Continue** and **New world** in the menu.
 
 ### Getting started
@@ -56,7 +56,7 @@ To start a new world from a specific seed, open `http://localhost:8000/?seed=123
 | Mouse | Look around |
 | Left click | Break block |
 | Right click | Place block |
-| `1`–`5` or mouse wheel | Choose block |
+| `1`–`8` or mouse wheel | Choose block |
 | `F3` | Toggle the debug panel (position, chunk, biome and climate) |
 | `Esc` | Pause and open the menu |
 
@@ -121,14 +121,14 @@ Sem etapa de build, sem bundler e sem dependências além do [Three.js](https://
 - **Mundo procedural infinito**: colinas, picos rochosos e árvores gerados chunk a chunk a partir de uma seed (ruído Perlin com oitavas fractais).
 - **Continentes e oceanos**: um mapa de continentalidade molda oceanos, costas e interior em volta de um nível do mar fixo, com lagos onde o terreno fica abaixo dele. Os lagos têm fundo de terra e pedra e congelam na tundra.
 - **Biomas**: mapas de temperatura e umidade formam oito biomas terrestres (Plains, Forest, Taiga, Tundra, Desert, Savanna, Rainforest e Mountains), além de Ocean e Beach, com dunas de areia, campos de neve, picos nevados e fronteiras irregulares entre eles. A linha de neve sobe com a temperatura: montanhas de clima frio ficam brancas desde a base, e as vizinhas do deserto ficam só na rocha.
-- **Flora**: cada bioma tem vegetação e densidade próprias: poucos carvalhos na planície, florestas densas, coníferas na taiga, acácias de copa achatada na savana, árvores altas na floresta tropical e cactos no deserto. Cada espécie tem sua própria madeira: carvalho castanho, conífera escura, acácia cinza com cerne alaranjado e madeira tropical dourada. Perto das fronteiras, as espécies dos dois lados se misturam. Folhas naturais decaem quando não resta tronco a até seis blocos, e as folhas que você coloca ficam.
+- **Flora**: cada bioma tem vegetação e densidade próprias: poucos carvalhos na planície, florestas densas, coníferas na taiga, acácias de copa achatada na savana, árvores altas na floresta tropical e cactos no deserto. Cada espécie tem madeira e folhas próprias: carvalho castanho, spruce escuro com agulhas verde-azuladas, acácia cinza com cerne alaranjado e folhas cor de oliva, e madeira tropical dourada com folhas de um verde vivo. Perto das fronteiras, as espécies dos dois lados se misturam. Folhas naturais decaem quando não resta tronco a até seis blocos, e as folhas que você coloca ficam.
 - **Água**: um fluido translúcido em que você entra e nada, com flutuabilidade, movimento mais lento e uma atmosfera subaquática própria (névoa azul curta, tonalidade e sem céu).
 - **Streaming de chunks**: os chunks são gerados em volta do jogador e descarregados quando ficam para trás.
 - **Web Workers**: a geração do terreno e a montagem das malhas rodam fora da thread principal, então o terreno novo aparece sem engasgos.
 - **Renderização voxel**: malhas por chunk só com as faces visíveis, oclusão ambiente por vértice, folhas vazadas e texturas pintadas por código (sem imagens).
 - **Atmosfera**: luz do sol com sombras estáveis, céu em gradiente, nuvens em movimento e névoa na distância.
 - **Controle em primeira pessoa**: gravidade, pulo e colisão AABB com o mundo.
-- **Construção**: raycasting voxel para quebrar e colocar blocos, com hotbar de cinco espaços (Grass, Dirt, Stone, Wood, Leaves). O nome do bloco sob a mira aparece acima da hotbar.
+- **Construção**: raycasting voxel para quebrar e colocar blocos, com hotbar de oito espaços (Grass, Dirt, Stone, as madeiras Oak, Spruce, Acacia e Jungle, e Oak Leaves). O nome do bloco sob a mira aparece acima da hotbar.
 - **Salvamento automático**: chunks alterados, seed e posição do jogador ficam no IndexedDB, com **Continuar** e **Novo mundo** no menu.
 
 ### Como rodar
@@ -154,7 +154,7 @@ Para começar um mundo novo a partir de uma seed específica, abra `http://local
 | Mouse | Olhar |
 | Clique esquerdo | Quebrar bloco |
 | Clique direito | Colocar bloco |
-| `1`–`5` ou roda do mouse | Escolher bloco |
+| `1`–`8` ou roda do mouse | Escolher bloco |
 | `F3` | Mostrar ou ocultar o painel de depuração (posição, chunk, bioma e clima) |
 | `Esc` | Pausar e abrir o menu |
 

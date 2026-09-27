@@ -47,3 +47,10 @@ test('cada madeira tem casca na lateral e anéis no topo próprios', () => {
     assert.equal(tileFor(block, FaceDirection.BOTTOM), top);
   });
 });
+
+test('folhas de acácia e tropicais têm tiles próprios', () => {
+  assert.equal(tileFor(BlockType.ACACIA_LEAVES, FaceDirection.TOP), Tile.ACACIA_LEAVES);
+  assert.equal(tileFor(BlockType.ACACIA_LEAVES, FaceDirection.LEFT), Tile.ACACIA_LEAVES);
+  assert.equal(tileFor(BlockType.JUNGLE_LEAVES, FaceDirection.BOTTOM), Tile.JUNGLE_LEAVES);
+  assert.equal(tileFor(BlockType.JUNGLE_LEAVES, FaceDirection.FRONT), Tile.JUNGLE_LEAVES);
+});

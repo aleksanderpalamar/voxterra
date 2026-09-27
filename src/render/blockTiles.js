@@ -23,6 +23,8 @@ export const Tile = Object.freeze({
   ACACIA_WOOD_TOP: 17,
   JUNGLE_WOOD_SIDE: 18,
   JUNGLE_WOOD_TOP: 19,
+  ACACIA_LEAVES: 20,
+  JUNGLE_LEAVES: 21,
 });
 
 export const TILE_COUNT = Object.keys(Tile).length;
@@ -51,6 +53,8 @@ const BLOCK_TILES = Object.freeze({
   [BlockType.WATER]: uniformTiles(Tile.WATER),
   [BlockType.ICE]: uniformTiles(Tile.ICE),
   [BlockType.SPRUCE_LEAVES]: uniformTiles(Tile.SPRUCE_LEAVES),
+  [BlockType.ACACIA_LEAVES]: uniformTiles(Tile.ACACIA_LEAVES),
+  [BlockType.JUNGLE_LEAVES]: uniformTiles(Tile.JUNGLE_LEAVES),
   [BlockType.CACTUS]: pillarTiles(Tile.CACTUS_TOP, Tile.CACTUS_SIDE),
 });
 

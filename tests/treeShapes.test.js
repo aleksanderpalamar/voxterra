@@ -55,7 +55,7 @@ test('acácia inclina o tronco e abre uma copa larga e achatada', () => {
   const world = grow(plant);
   const wood = blocksOf(world, BlockType.ACACIA_WOOD);
   assert.ok(wood.some((block) => block.x !== 0 || block.z !== 0), 'tronco não inclinou');
-  const leaves = blocksOf(world, BlockType.OAK_LEAVES);
+  const leaves = blocksOf(world, BlockType.ACACIA_LEAVES);
   const layers = new Set(leaves.map((leaf) => leaf.y));
   assert.ok(layers.size <= 2);
   assert.ok(reach(leaves, plant) >= 3);
@@ -65,7 +65,7 @@ test('árvore tropical é muito alta e tem copa ampla', () => {
   const plant = { species: Species.JUNGLE, x: 0, z: 0, groundY: 2, height: 12 };
   const world = grow(plant);
   assert.equal(world.getBlock(0, 14, 0), BlockType.JUNGLE_WOOD);
-  assert.ok(reach(blocksOf(world, BlockType.OAK_LEAVES), plant) >= 3);
+  assert.ok(reach(blocksOf(world, BlockType.JUNGLE_LEAVES), plant) >= 3);
 });
 
 test('arbusto é baixo, com um bloco de madeira', () => {
@@ -114,8 +114,8 @@ test('cada espécie usa o tronco e a folhagem declarados', () => {
     [Species.OAK]: [BlockType.OAK_WOOD, BlockType.OAK_LEAVES],
     [Species.BUSH]: [BlockType.OAK_WOOD, BlockType.OAK_LEAVES],
     [Species.CONIFER]: [BlockType.SPRUCE_WOOD, BlockType.SPRUCE_LEAVES],
-    [Species.ACACIA]: [BlockType.ACACIA_WOOD, BlockType.OAK_LEAVES],
-    [Species.JUNGLE]: [BlockType.JUNGLE_WOOD, BlockType.OAK_LEAVES],
+    [Species.ACACIA]: [BlockType.ACACIA_WOOD, BlockType.ACACIA_LEAVES],
+    [Species.JUNGLE]: [BlockType.JUNGLE_WOOD, BlockType.JUNGLE_LEAVES],
     [Species.CACTUS]: [BlockType.CACTUS, null],
   };
   Object.entries(expected).forEach(([species, [stem, foliage]]) => {
@@ -124,5 +124,17 @@ test('cada espécie usa o tronco e a folhagem declarados', () => {
     const plant = { species, x: 0, z: 0, groundY: 2, height: SPECIES_TRAITS[species].minHeight, ground: species === Species.CACTUS ? BlockType.SAND : BlockType.GRASS };
     const world = grow(plant);
     assert.ok(blocksOf(world, stem).length > 0, species);
+  });
+});
+
+test('cada árvore só usa o próprio tronco e as próprias folhas', () => {
+  Object.values(Species).forEach((species) => {
+    const { stem, foliage, maxHeight } = SPECIES_TRAITS[species];
+    const ground = species === Species.CACTUS ? BlockType.SAND : BlockType.GRASS;
+    const allowed = new Set([BlockType.AIR, BlockType.DIRT, ground, stem, foliage]);
+    const world = grow({ species, x: 0, z: 0, groundY: 2, height: maxHeight, ground });
+    Object.values(BlockType)
+      .filter((type) => !allowed.has(type))
+      .forEach((type) => assert.equal(blocksOf(world, type).length, 0, `${species} gerou o bloco ${type}`));
   });
 });

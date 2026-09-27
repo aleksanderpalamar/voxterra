@@ -2,11 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Hotbar } from '../src/hotbar/hotbar.js';
 import { BlockType, PLACEABLE_BLOCKS } from '../src/world/blockTypes.js';
+import { hotbarSlotFromKey } from '../src/input/keyBindings.js';
 
 test('hotbar começa com o primeiro bloco selecionado', () => {
   const hotbar = new Hotbar(PLACEABLE_BLOCKS);
   assert.equal(hotbar.selectedBlock, BlockType.GRASS);
-  assert.equal(hotbar.size, 5);
+  assert.equal(hotbar.size, PLACEABLE_BLOCKS.length);
 });
 
 test('select aceita índices válidos e notifica ouvintes', () => {
@@ -31,4 +32,10 @@ test('cycle percorre a hotbar de forma circular', () => {
   assert.equal(hotbar.selectedBlock, BlockType.PERSISTENT_LEAVES);
   hotbar.cycle(1);
   assert.equal(hotbar.selectedBlock, BlockType.GRASS);
+});
+
+test('cada espaço da hotbar é alcançável por uma tecla numérica', () => {
+  const hotbar = new Hotbar(PLACEABLE_BLOCKS);
+  PLACEABLE_BLOCKS.forEach((_, slot) => assert.equal(hotbarSlotFromKey(`Digit${slot + 1}`, hotbar.size), slot));
+  assert.equal(hotbarSlotFromKey(`Digit${hotbar.size + 1}`, hotbar.size), null);
 });
